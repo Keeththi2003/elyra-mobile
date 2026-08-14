@@ -60,6 +60,7 @@ fun RoomDetailsScreen(
     roomId: String,
     onBack: () -> Unit,
     onDeviceClick: (String) -> Unit,
+    onEditRoom: () -> Unit,
     onAddDevice: () -> Unit
 ) {
 
@@ -174,9 +175,7 @@ fun RoomDetailsScreen(
                 )
             }
             IconButton(
-                onClick = {
-                    // Edit room screen will come later.
-                }
+                onClick = onEditRoom
             ) {
 
                 Icon(
