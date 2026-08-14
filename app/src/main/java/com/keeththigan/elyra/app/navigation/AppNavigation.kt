@@ -289,19 +289,7 @@ composable(AppRoutes.ADD_DEVICE) {
         }
     )
 }
-composable(AppRoutes.ADD_DEVICE) {
-
-    AddDeviceScreen(
-
-        onBack = {
-            navController.popBackStack()
-        },
-
-        onDeviceCreated = {
-            navController.popBackStack()
-        }
-    )
-}
+        
 
 composable(AppRoutes.FLOORS) {
 
