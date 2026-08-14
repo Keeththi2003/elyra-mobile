@@ -206,38 +206,44 @@ fun AppNavigation() {
 
             composable(AppRoutes.HOME) {
 
-                HomeScreen(
+    HomeScreen(
 
-                    onFloorClick = { floorId ->
+        onFloorClick = { floorId ->
 
-                        // Floor screen later.
-                    },
+            navController.navigate(
+                "floor_detail/$floorId"
+            )
+        },
 
-                    onDeviceClick = { deviceId ->
+        onDeviceClick = { deviceId ->
 
-                        /*
-                         * For now, clicking a device
-                         * from Home opens Devices.
-                         */
-                        navController.navigate(
-                            AppRoutes.DEVICES
-                        )
-                    },
+            navController.navigate(
+                "device_detail/$deviceId"
+            )
+        },
 
-                    onAddFloor = {
+        onAddFloor = {
 
-                        // Add Floor screen later.
-                    },
+            navController.navigate(
+                AppRoutes.ADD_FLOOR
+            )
+        },
 
-                    onSettingsClick = {
+        onAddDevice = {
 
-                        navController.navigate(
-                            AppRoutes.SETTINGS
-                        )
-                    }
-                )
-            }
+            navController.navigate(
+                AppRoutes.ADD_DEVICE
+            )
+        },
 
+        onProfileClick = {
+
+            navController.navigate(
+                AppRoutes.SETTINGS
+            )
+        }
+    )
+}
 
             // =====================================================
             // DEVICES
