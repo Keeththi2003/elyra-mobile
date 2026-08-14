@@ -38,7 +38,9 @@ import com.keeththigan.elyra.core.designsystem.ElyraTheme
 
 
 @Composable
-fun SettingsScreen() {
+fun SettingsScreen(
+    onAppearanceClick: () -> Unit = {}
+) {
 
     var notificationsEnabled by remember {
         mutableStateOf(true)
@@ -150,7 +152,7 @@ fun SettingsScreen() {
                 icon = Icons.Outlined.DarkMode,
                 title = "Appearance",
                 subtitle = "Light, dark, or system theme",
-                onClick = {}
+                onClick = onAppearanceClick
             )
         }
 
