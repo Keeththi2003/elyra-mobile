@@ -6,6 +6,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.keeththigan.elyra.feature.auth.login.LoginScreen
 import com.keeththigan.elyra.feature.auth.onboarding.OnboardingScreen
+import com.keeththigan.elyra.feature.auth.signup.SignUpScreen       
 
 private object AuthRoutes {
 
@@ -80,7 +81,21 @@ fun AuthNavigation() {
 
         composable(AuthRoutes.SIGN_UP) {
 
-            // SignUpScreen will be added next.
+    SignUpScreen(
+        onBack = {
+            navController.popBackStack()
+        },
+
+        onSignIn = {
+            navController.navigate(
+                AuthRoutes.LOGIN
+            )
+        },
+
+        onCreateAccount = {
+            // Account creation will be implemented later.
         }
+    )
+}
     }
 }
