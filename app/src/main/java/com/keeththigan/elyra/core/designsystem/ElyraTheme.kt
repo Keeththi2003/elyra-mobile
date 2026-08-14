@@ -13,6 +13,7 @@ import com.keeththigan.elyra.core.designsystem.color.ElyraColors
 import com.keeththigan.elyra.core.designsystem.color.ElyraSemanticColors
 import com.keeththigan.elyra.core.designsystem.spacing.ElyraSpacing
 import com.keeththigan.elyra.core.designsystem.shape.ElyraShapes
+import com.keeththigan.elyra.core.designsystem.dimensions.ElyraDimensions
 import com.keeththigan.elyra.core.designsystem.typography.ElyraTypography
 
 /**
@@ -503,4 +504,7 @@ object ElyraTheme {
      */
     val spacing
         get() = ElyraSpacing
+
+    val dimension
+        get() = ElyraDimensions
 }
