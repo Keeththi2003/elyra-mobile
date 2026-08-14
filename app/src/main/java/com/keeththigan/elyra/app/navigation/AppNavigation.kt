@@ -286,7 +286,12 @@ fun AppNavigation() {
             navController.navigate(
                 "edit_device/$deviceId"
             )
-        }
+        },
+         onRemoveDevice = {
+        // Later:
+        // delete device from repository/database
+        navController.popBackStack()
+    }
     )
 }
 

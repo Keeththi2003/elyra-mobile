@@ -24,6 +24,8 @@ import androidx.compose.material.icons.outlined.CameraAlt
 import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material.icons.outlined.Lightbulb
 import androidx.compose.material.icons.outlined.Power
+import androidx.compose.material.icons.outlined.Edit
+import androidx.compose.material.icons.outlined.DeleteOutline
 import androidx.compose.material.icons.outlined.Schedule
 import androidx.compose.material.icons.outlined.Security
 import androidx.compose.material.icons.outlined.Thermostat
@@ -54,6 +56,8 @@ import com.keeththigan.elyra.core.designsystem.ElyraTheme
 @Composable
 fun DeviceDetailScreen(
     deviceId: String,
+    onEditDevice: () -> Unit,
+        onRemoveDevice: () -> Unit,
     onBack: () -> Unit
 ) {
 
@@ -80,52 +84,64 @@ fun DeviceDetailScreen(
     ) {
 
         // ====================================================================
-        // TOP BAR
-        // ====================================================================
+// TOP BAR
+// ====================================================================
 
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(
-                    horizontal = 16.dp,
-                    vertical = 10.dp
-                ),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
+Row(
+    modifier = Modifier
+        .fillMaxWidth()
+        .padding(
+            horizontal = 16.dp,
+            vertical = 10.dp
+        ),
+    verticalAlignment = Alignment.CenterVertically
+) {
 
-            IconButton(
-                onClick = onBack
-            ) {
+    IconButton(
+        onClick = onBack
+    ) {
 
-                Icon(
-                    imageVector = Icons.Outlined.ArrowBack,
-                    contentDescription = "Back",
-                    tint = ElyraTheme.colors.textPrimary
-                )
-            }
+        Icon(
+            imageVector = Icons.Outlined.ArrowBack,
+            contentDescription = "Back",
+            tint = ElyraTheme.colors.textPrimary
+        )
+    }
 
-            Spacer(
-                modifier = Modifier.size(8.dp)
-            )
+    Spacer(
+        modifier = Modifier.size(8.dp)
+    )
 
-            Column(
-                modifier = Modifier.weight(1f)
-            ) {
+    Column(
+        modifier = Modifier.weight(1f)
+    ) {
 
-                Text(
-                    text = device.name,
-                    style = ElyraTheme.typography.titleLarge,
-                    color = ElyraTheme.colors.textPrimary
-                )
+        Text(
+            text = device.name,
+            style = ElyraTheme.typography.titleLarge,
+            color = ElyraTheme.colors.textPrimary
+        )
 
-                Text(
-                    text = "${device.floor} · ${device.room}",
-                    style = ElyraTheme.typography.bodySmall,
-                    color = ElyraTheme.colors.textSecondary
-                )
-            }
-        }
+        Text(
+            text = "${device.floor} · ${device.room}",
+            style = ElyraTheme.typography.bodySmall,
+            color = ElyraTheme.colors.textSecondary
+        )
+    }
 
+    // EDIT DEVICE
+    IconButton(
+        onClick = onEditDevice
+    ) {
+
+        Icon(
+            imageVector = Icons.Outlined.Edit,
+            contentDescription = "Edit device",
+            modifier = Modifier.size(21.dp),
+            tint = ElyraTheme.colors.textSecondary
+        )
+    }
+}
 
         // ====================================================================
         // CONTENT
@@ -243,8 +259,16 @@ fun DeviceDetailScreen(
 
 
             Spacer(
-                modifier = Modifier.height(24.dp)
-            )
+    modifier = Modifier.height(28.dp)
+)
+
+RemoveDeviceButton(
+    onClick = onRemoveDevice
+)
+
+Spacer(
+    modifier = Modifier.height(30.dp)
+)
         }
     }
 }
@@ -1038,5 +1062,81 @@ private fun deviceIcon(
 
         MockDeviceType.AC ->
             Icons.Outlined.AcUnit
+    }
+}
+// ============================================================================
+// REMOVE DEVICE
+// ============================================================================
+
+@Composable
+private fun RemoveDeviceButton(
+    onClick: () -> Unit
+) {
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(
+                RoundedCornerShape(16.dp)
+            )
+            .background(
+                ElyraTheme.colors.surface
+            )
+            .clickable(
+                onClick = onClick
+            )
+            .padding(
+                horizontal = 16.dp,
+                vertical = 16.dp
+            ),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+
+        Box(
+            modifier = Modifier
+                .size(42.dp)
+                .clip(
+                    RoundedCornerShape(12.dp)
+                )
+                .background(
+                    ElyraTheme.colors.error.copy(
+                        alpha = 0.10f
+                    )
+                ),
+            contentAlignment = Alignment.Center
+        ) {
+
+            Icon(
+                imageVector = Icons.Outlined.DeleteOutline,
+                contentDescription = null,
+                modifier = Modifier.size(21.dp),
+                tint = ElyraTheme.colors.error
+            )
+        }
+
+        Spacer(
+            modifier = Modifier.size(12.dp)
+        )
+
+        Column(
+            modifier = Modifier.weight(1f)
+        ) {
+
+            Text(
+                text = "Remove device",
+                style = ElyraTheme.typography.titleSmall,
+                color = ElyraTheme.colors.error
+            )
+
+            Spacer(
+                modifier = Modifier.height(3.dp)
+            )
+
+            Text(
+                text = "Remove this device from your system",
+                style = ElyraTheme.typography.bodySmall,
+                color = ElyraTheme.colors.textSecondary
+            )
+        }
     }
 }
