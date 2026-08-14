@@ -55,7 +55,7 @@ private object AppRoutes {
     const val DEVICES = "devices"
     const val SETTINGS = "settings"
 
-    const val DEVICE_DETAIL = "device_detail/{deviceName}"
+const val DEVICE_DETAIL = "device_detail/{deviceId}"
     const val APPEARANCE = "appearance"
     const val ABOUT = "about"
 }
@@ -219,48 +219,39 @@ fun AppNavigation() {
 
             composable(AppRoutes.DEVICES) {
 
-                DevicesScreen(
+    DevicesScreen(
+       
 
-                    onDeviceClick = { deviceName ->
+        onDeviceClick = { deviceId ->
 
-                        /*
-                         * Open device details.
-                         *
-                         * We will improve the argument handling
-                         * later when the real Device model exists.
-                         */
-                        navController.navigate(
-                            "device_detail/$deviceName"
-                        )
-                    }
-                )
-            }
+            navController.navigate(
+                "device_detail/$deviceId"
+            )
+        }
+    )
+}
 
 
             // =====================================================
             // DEVICE DETAIL
             // =====================================================
 
-            composable(
-                route = AppRoutes.DEVICE_DETAIL
-            ) { backStackEntry ->
+           composable(
+    route = AppRoutes.DEVICE_DETAIL
+) { backStackEntry ->
 
-                val deviceName =
-                    backStackEntry.arguments
-                        ?.getString("deviceName")
-                        ?: "Device"
+    val deviceId =
+        backStackEntry.arguments
+            ?.getString("deviceId")
+            ?: return@composable
 
-                DeviceDetailScreen(
-
-                    deviceName = deviceName,
-
-                    onBack = {
-
-                        navController.popBackStack()
-                    }
-                )
-            }
-
+    DeviceDetailScreen(
+        deviceId = deviceId,
+        onBack = {
+            navController.popBackStack()
+        }
+    )
+}
 
             // =====================================================
             // SETTINGS

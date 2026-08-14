@@ -12,190 +12,426 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Air
+import androidx.compose.material.icons.outlined.AcUnit
+import androidx.compose.material.icons.outlined.Add
+import androidx.compose.material.icons.outlined.ArrowForwardIos
+import androidx.compose.material.icons.outlined.CameraAlt
+import androidx.compose.material.icons.outlined.ElectricalServices
 import androidx.compose.material.icons.outlined.Lightbulb
 import androidx.compose.material.icons.outlined.Power
-import androidx.compose.material.icons.outlined.Tune
-import androidx.compose.material.icons.outlined.WifiOff
+import androidx.compose.material.icons.outlined.Search
+import androidx.compose.material.icons.outlined.Thermostat
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import com.keeththigan.elyra.core.designsystem.ElyraTheme
 
-// ================================================================
-// DEVICE MODEL
-// ================================================================
+// ============================================================================
+// DEVICE TYPE
+// ============================================================================
 
-private data class DeviceUiModel(
+private enum class DeviceType {
+    LIGHT,
+    OUTLET,
+    MULTI_SWITCH,
+    IRON,
+    CAMERA,
+    AC
+}
+
+
+// ============================================================================
+// DEVICE STATUS
+// ============================================================================
+
+private enum class DeviceStatus {
+    ON,
+    OFF,
+    ERROR,
+    DISCONNECTED
+}
+
+
+// ============================================================================
+// DEVICE MODEL
+// ============================================================================
+
+private data class ElyraDevice(
+    val id: String,
     val name: String,
-    val room: String,
-    val type: String,
-    val isOn: Boolean,
-    val isOnline: Boolean,
-    val icon: ImageVector
+    val floorName: String,
+    val roomName: String,
+    val type: DeviceType,
+    val status: DeviceStatus
 )
 
 
-// ================================================================
+// ============================================================================
+// SAMPLE DEVICES
+// ============================================================================
+
+private val sampleDevices = listOf(
+
+    ElyraDevice(
+        id = "living_room_light",
+        name = "Living Room Light",
+        floorName = "Ground Floor",
+        roomName = "Living Room",
+        type = DeviceType.LIGHT,
+        status = DeviceStatus.ON
+    ),
+
+    ElyraDevice(
+        id = "kitchen_outlet",
+        name = "Kitchen Outlet",
+        floorName = "Ground Floor",
+        roomName = "Kitchen",
+        type = DeviceType.OUTLET,
+        status = DeviceStatus.OFF
+    ),
+
+    ElyraDevice(
+        id = "kitchen_switch",
+        name = "Kitchen Switch",
+        floorName = "Ground Floor",
+        roomName = "Kitchen",
+        type = DeviceType.MULTI_SWITCH,
+        status = DeviceStatus.ON
+    ),
+
+    ElyraDevice(
+        id = "entrance_camera",
+        name = "Entrance Camera",
+        floorName = "Ground Floor",
+        roomName = "Entrance",
+        type = DeviceType.CAMERA,
+        status = DeviceStatus.ON
+    ),
+
+    ElyraDevice(
+        id = "living_room_ac",
+        name = "Living Room AC",
+        floorName = "Ground Floor",
+        roomName = "Living Room",
+        type = DeviceType.AC,
+        status = DeviceStatus.OFF
+    ),
+
+    ElyraDevice(
+        id = "bedroom_light",
+        name = "Bedroom Light",
+        floorName = "First Floor",
+        roomName = "Bedroom",
+        type = DeviceType.LIGHT,
+        status = DeviceStatus.DISCONNECTED
+    ),
+
+    ElyraDevice(
+        id = "bedroom_ac",
+        name = "Bedroom AC",
+        floorName = "First Floor",
+        roomName = "Bedroom",
+        type = DeviceType.AC,
+        status = DeviceStatus.OFF
+    ),
+
+    ElyraDevice(
+        id = "bedroom_iron",
+        name = "Bedroom Iron",
+        floorName = "First Floor",
+        roomName = "Bedroom",
+        type = DeviceType.IRON,
+        status = DeviceStatus.OFF
+    ),
+
+    ElyraDevice(
+        id = "office_light",
+        name = "Office Light",
+        floorName = "First Floor",
+        roomName = "Office",
+        type = DeviceType.LIGHT,
+        status = DeviceStatus.ERROR
+    )
+)
+
+
+// ============================================================================
 // DEVICES SCREEN
-// ================================================================
+// ============================================================================
 
 @Composable
 fun DevicesScreen(
-    onBack: () -> Unit = {},
-    onDeviceClick: (String) -> Unit = {}
+    onDeviceClick: (String) -> Unit,
+    onAddDevice: () -> Unit = {}
 ) {
 
-    val devices = listOf(
+    var searchQuery by remember {
+        mutableStateOf("")
+    }
 
-        DeviceUiModel(
-            name = "Living Room Light",
-            room = "Living Room",
-            type = "Smart Light",
-            isOn = true,
-            isOnline = true,
-            icon = Icons.Outlined.Lightbulb
-        ),
+    var selectedFilter by remember {
+        mutableStateOf(DeviceFilter.ALL)
+    }
 
-        DeviceUiModel(
-            name = "Kitchen Outlet",
-            room = "Kitchen",
-            type = "Smart Outlet",
-            isOn = false,
-            isOnline = true,
-            icon = Icons.Outlined.Power
-        ),
+    val filteredDevices = sampleDevices.filter { device ->
 
-        DeviceUiModel(
-            name = "Bedroom Fan",
-            room = "Bedroom",
-            type = "Smart Fan",
-            isOn = true,
-            isOnline = true,
-            icon = Icons.Outlined.Air
-        ),
+        val matchesSearch =
+            searchQuery.isBlank() ||
+                    device.name.contains(
+                        searchQuery,
+                        ignoreCase = true
+                    ) ||
+                    device.roomName.contains(
+                        searchQuery,
+                        ignoreCase = true
+                    ) ||
+                    device.floorName.contains(
+                        searchQuery,
+                        ignoreCase = true
+                    )
 
-        DeviceUiModel(
-            name = "Office Light",
-            room = "Office",
-            type = "Smart Light",
-            isOn = false,
-            isOnline = false,
-            icon = Icons.Outlined.Lightbulb
-        )
-    )
+        val matchesFilter =
+            when (selectedFilter) {
+
+                DeviceFilter.ALL ->
+                    true
+
+                DeviceFilter.ON ->
+                    device.status == DeviceStatus.ON
+
+                DeviceFilter.OFF ->
+                    device.status == DeviceStatus.OFF
+
+                DeviceFilter.ISSUES ->
+                    device.status == DeviceStatus.ERROR ||
+                            device.status == DeviceStatus.DISCONNECTED
+            }
+
+        matchesSearch && matchesFilter
+    }
+
+    val onlineCount =
+        sampleDevices.count {
+            it.status == DeviceStatus.ON
+        }
+
+    val issueCount =
+        sampleDevices.count {
+            it.status == DeviceStatus.ERROR ||
+                    it.status == DeviceStatus.DISCONNECTED
+        }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(ElyraTheme.colors.background)
+            .background(
+                ElyraTheme.colors.background
+            )
+            .padding(
+                horizontal = 20.dp
+            )
     ) {
 
-        // ========================================================
+        // ====================================================================
         // HEADER
-        // ========================================================
+        // ====================================================================
 
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .statusBarsPadding()
-                .padding(
-                    horizontal = 24.dp,
-                    vertical = 20.dp
-                )
+        Spacer(
+            modifier = Modifier.height(18.dp)
+        )
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
         ) {
 
-            Text(
-                text = "Devices",
-                style = ElyraTheme.typography.displaySmall,
-                color = ElyraTheme.colors.textPrimary,
-                fontWeight = FontWeight.Bold
-            )
+            Column(
+                modifier = Modifier.weight(1f)
+            ) {
 
-            Spacer(
-                modifier = Modifier.height(6.dp)
-            )
+                Text(
+                    text = "Devices",
+                    style = ElyraTheme.typography.displaySmall,
+                    color = ElyraTheme.colors.textPrimary
+                )
 
-            Text(
-                text = "Control everything in your home.",
-                style = ElyraTheme.typography.bodyLarge,
-                color = ElyraTheme.colors.textSecondary
-            )
+                Spacer(
+                    modifier = Modifier.height(5.dp)
+                )
+
+                Text(
+                    text = "${sampleDevices.size} devices · $onlineCount active",
+                    style = ElyraTheme.typography.bodyMedium,
+                    color = ElyraTheme.colors.textSecondary
+                )
+            }
+
+            // ================================================================
+            // ADD DEVICE
+            // ================================================================
+
+            IconButton(
+                onClick = onAddDevice,
+                modifier = Modifier
+                    .size(48.dp)
+                    .clip(CircleShape)
+                    .background(
+                        ElyraTheme.colors.primary
+                    )
+            ) {
+
+                Icon(
+                    imageVector = Icons.Outlined.Add,
+                    contentDescription = "Add device",
+                    tint = ElyraTheme.colors.onPrimary
+                )
+            }
         }
 
-        // ========================================================
-        // SUMMARY
-        // ========================================================
+        Spacer(
+            modifier = Modifier.height(20.dp)
+        )
 
-        DeviceSummary(
-            devices = devices
+
+        // ====================================================================
+        // SEARCH
+        // ====================================================================
+
+        DeviceSearchField(
+            value = searchQuery,
+            onValueChange = {
+                searchQuery = it
+            }
         )
 
         Spacer(
-            modifier = Modifier.height(24.dp)
+            modifier = Modifier.height(16.dp)
         )
 
-        // ========================================================
+
+        // ====================================================================
+        // FILTERS
+        // ====================================================================
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+
+            DeviceFilterChip(
+                title = "All",
+                count = sampleDevices.size,
+                selected = selectedFilter == DeviceFilter.ALL,
+                onClick = {
+                    selectedFilter = DeviceFilter.ALL
+                }
+            )
+
+            DeviceFilterChip(
+                title = "On",
+                count = onlineCount,
+                selected = selectedFilter == DeviceFilter.ON,
+                onClick = {
+                    selectedFilter = DeviceFilter.ON
+                }
+            )
+
+            DeviceFilterChip(
+                title = "Off",
+                count = sampleDevices.count {
+                    it.status == DeviceStatus.OFF
+                },
+                selected = selectedFilter == DeviceFilter.OFF,
+                onClick = {
+                    selectedFilter = DeviceFilter.OFF
+                }
+            )
+
+            DeviceFilterChip(
+                title = "Issues",
+                count = issueCount,
+                selected = selectedFilter == DeviceFilter.ISSUES,
+                onClick = {
+                    selectedFilter = DeviceFilter.ISSUES
+                }
+            )
+        }
+
+        Spacer(
+            modifier = Modifier.height(20.dp)
+        )
+
+
+        // ====================================================================
         // DEVICE LIST
-        // ========================================================
+        // ====================================================================
 
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
-            contentPadding = androidx.compose.foundation.layout.PaddingValues(
-                start = 24.dp,
-                end = 24.dp,
-                bottom = 32.dp
-            ),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
 
             item {
 
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 4.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-
-                    Text(
-                        text = "All devices",
-                        style = ElyraTheme.typography.titleLarge,
-                        color = ElyraTheme.colors.textPrimary
+                Text(
+                    text = "All devices",
+                    style = ElyraTheme.typography.titleMedium,
+                    color = ElyraTheme.colors.textPrimary,
+                    modifier = Modifier.padding(
+                        horizontal = 2.dp
                     )
+                )
 
-                    Text(
-                        text = "${devices.size}",
-                        style = ElyraTheme.typography.labelLarge,
-                        color = ElyraTheme.colors.textSecondary
-                    )
-                }
+                Spacer(
+                    modifier = Modifier.height(10.dp)
+                )
             }
 
             items(
-                items = devices,
-                key = { it.name }
+                items = filteredDevices,
+                key = {
+                    it.id
+                }
             ) { device ->
 
-                DeviceListItem(
+                DeviceCard(
                     device = device,
                     onClick = {
-                        onDeviceClick(device.name)
+                        onDeviceClick(device.id)
                     }
+                )
+            }
+
+            if (filteredDevices.isEmpty()) {
+
+                item {
+
+                    EmptyDevicesState()
+                }
+            }
+
+            item {
+
+                Spacer(
+                    modifier = Modifier.height(24.dp)
                 )
             }
         }
@@ -203,162 +439,214 @@ fun DevicesScreen(
 }
 
 
-// ================================================================
-// SUMMARY
-// ================================================================
+// ============================================================================
+// SEARCH FIELD
+// ============================================================================
 
 @Composable
-private fun DeviceSummary(
-    devices: List<DeviceUiModel>
-) {
-
-    val activeCount =
-        devices.count {
-            it.isOn && it.isOnline
-        }
-
-    val offlineCount =
-        devices.count {
-            !it.isOnline
-        }
-
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 24.dp),
-        horizontalArrangement = Arrangement.spacedBy(10.dp)
-    ) {
-
-        SummaryItem(
-            modifier = Modifier.weight(1f),
-            value = devices.size.toString(),
-            label = "Devices"
-        )
-
-        SummaryItem(
-            modifier = Modifier.weight(1f),
-            value = activeCount.toString(),
-            label = "Active",
-            valueColor = ElyraTheme.colors.success
-        )
-
-        SummaryItem(
-            modifier = Modifier.weight(1f),
-            value = offlineCount.toString(),
-            label = "Offline",
-            valueColor =
-                if (offlineCount > 0) {
-                    ElyraTheme.colors.error
-                } else {
-                    ElyraTheme.colors.textPrimary
-                }
-        )
-    }
-}
-
-
-// ================================================================
-// SUMMARY ITEM
-// ================================================================
-
-@Composable
-private fun SummaryItem(
-    modifier: Modifier = Modifier,
+private fun DeviceSearchField(
     value: String,
-    label: String,
-    valueColor :Color = ElyraTheme.colors.textPrimary
+    onValueChange: (String) -> Unit
 ) {
-
-    Column(
-        modifier = modifier
-            .clip(RoundedCornerShape(18.dp))
-            .background(ElyraTheme.colors.surfaceSecondary)
-            .padding(16.dp)
-    ) {
-
-        Text(
-            text = value,
-            style = ElyraTheme.typography.headlineMedium,
-            color = valueColor,
-            fontWeight = FontWeight.Bold
-        )
-
-        Spacer(
-            modifier = Modifier.height(3.dp)
-        )
-
-        Text(
-            text = label,
-            style = ElyraTheme.typography.bodySmall,
-            color = ElyraTheme.colors.textSecondary
-        )
-    }
-}
-
-
-// ================================================================
-// DEVICE LIST ITEM
-// ================================================================
-
-@Composable
-private fun DeviceListItem(
-    device: DeviceUiModel,
-    onClick: () -> Unit
-) {
-
-    val iconBackground =
-        when {
-            !device.isOnline ->
-                ElyraTheme.colors.errorContainer
-
-            device.isOn ->
-                ElyraTheme.colors.successContainer
-
-            else ->
-                ElyraTheme.colors.surfaceInteractive
-        }
-
-    val iconColor =
-        when {
-            !device.isOnline ->
-                ElyraTheme.colors.error
-
-            device.isOn ->
-                ElyraTheme.colors.success
-
-            else ->
-                ElyraTheme.colors.textSecondary
-        }
 
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(22.dp))
-            .background(ElyraTheme.colors.surfaceSecondary)
-            .clickable {
-                onClick()
-            }
-            .padding(16.dp),
+            .height(52.dp)
+            .clip(
+                RoundedCornerShape(16.dp)
+            )
+            .background(
+                ElyraTheme.colors.surface
+            )
+            .padding(
+                horizontal = 15.dp
+            ),
         verticalAlignment = Alignment.CenterVertically
     ) {
 
-        // ========================================================
+        Icon(
+            imageVector = Icons.Outlined.Search,
+            contentDescription = "Search",
+            modifier = Modifier.size(21.dp),
+            tint = ElyraTheme.colors.textSecondary
+        )
+
+        Spacer(
+            modifier = Modifier.size(10.dp)
+        )
+
+        Box(
+            modifier = Modifier.weight(1f)
+        ) {
+
+            if (value.isEmpty()) {
+
+                Text(
+                    text = "Search devices",
+                    style = ElyraTheme.typography.bodyMedium,
+                    color = ElyraTheme.colors.textTertiary
+                )
+            }
+
+            BasicTextField(
+                value = value,
+                onValueChange = onValueChange,
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth(),
+                textStyle = ElyraTheme.typography.bodyMedium.copy(
+                    color = ElyraTheme.colors.textPrimary
+                ),
+                keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(
+                    imeAction = ImeAction.Search
+                )
+            )
+        }
+    }
+}
+
+
+// ============================================================================
+// FILTER
+// ============================================================================
+
+private enum class DeviceFilter {
+    ALL,
+    ON,
+    OFF,
+    ISSUES
+}
+
+
+// ============================================================================
+// FILTER CHIP
+// ============================================================================
+
+@Composable
+private fun DeviceFilterChip(
+    title: String,
+    count: Int,
+    selected: Boolean,
+    onClick: () -> Unit
+) {
+
+    val background =
+        if (selected) {
+            ElyraTheme.colors.primary
+        } else {
+            ElyraTheme.colors.surface
+        }
+
+    val textColor =
+        if (selected) {
+            ElyraTheme.colors.onPrimary
+        } else {
+            ElyraTheme.colors.textSecondary
+        }
+
+    Row(
+        modifier = Modifier
+            .clip(
+                RoundedCornerShape(50.dp)
+            )
+            .background(background)
+            .clickable(
+                onClick = onClick
+            )
+            .padding(
+                horizontal = 13.dp,
+                vertical = 9.dp
+            ),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+
+        Text(
+            text = title,
+            style = ElyraTheme.typography.labelMedium,
+            color = textColor
+        )
+
+        Spacer(
+            modifier = Modifier.size(5.dp)
+        )
+
+        Text(
+            text = count.toString(),
+            style = ElyraTheme.typography.labelMedium,
+            color = textColor
+        )
+    }
+}
+
+
+// ============================================================================
+// DEVICE CARD
+// ============================================================================
+
+@Composable
+private fun DeviceCard(
+    device: ElyraDevice,
+    onClick: () -> Unit
+) {
+
+    val statusColor =
+        when (device.status) {
+
+            DeviceStatus.ON ->
+                Color(0xFF22C55E)
+
+            DeviceStatus.OFF ->
+                ElyraTheme.colors.textTertiary
+
+            DeviceStatus.ERROR ->
+                Color(0xFFEF4444)
+
+            DeviceStatus.DISCONNECTED ->
+                Color(0xFFF59E0B)
+        }
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(
+                RoundedCornerShape(20.dp)
+            )
+            .background(
+                ElyraTheme.colors.surface
+            )
+            .clickable(
+                onClick = onClick
+            )
+            .padding(
+                horizontal = 16.dp,
+                vertical = 15.dp
+            ),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+
+        // ====================================================================
         // DEVICE ICON
-        // ========================================================
+        // ====================================================================
 
         Box(
             modifier = Modifier
-                .size(56.dp)
-                .clip(RoundedCornerShape(17.dp))
-                .background(iconBackground),
+                .size(50.dp)
+                .clip(
+                    RoundedCornerShape(15.dp)
+                )
+                .background(
+                    statusColor.copy(
+                        alpha = 0.10f
+                    )
+                ),
             contentAlignment = Alignment.Center
         ) {
 
             Icon(
-                imageVector = device.icon,
+                imageVector = getDeviceIcon(device.type),
                 contentDescription = null,
-                tint = iconColor,
-                modifier = Modifier.size(27.dp)
+                modifier = Modifier.size(24.dp),
+                tint = statusColor
             )
         }
 
@@ -366,9 +654,10 @@ private fun DeviceListItem(
             modifier = Modifier.size(14.dp)
         )
 
-        // ========================================================
+
+        // ====================================================================
         // INFORMATION
-        // ========================================================
+        // ====================================================================
 
         Column(
             modifier = Modifier.weight(1f)
@@ -376,16 +665,16 @@ private fun DeviceListItem(
 
             Text(
                 text = device.name,
-                style = ElyraTheme.typography.titleMedium,
+                style = ElyraTheme.typography.titleSmall,
                 color = ElyraTheme.colors.textPrimary
             )
 
             Spacer(
-                modifier = Modifier.height(3.dp)
+                modifier = Modifier.height(4.dp)
             )
 
             Text(
-                text = "${device.room} • ${device.type}",
+                text = "${device.floorName} · ${device.roomName}",
                 style = ElyraTheme.typography.bodySmall,
                 color = ElyraTheme.colors.textSecondary
             )
@@ -402,18 +691,7 @@ private fun DeviceListItem(
                     modifier = Modifier
                         .size(7.dp)
                         .clip(CircleShape)
-                        .background(
-                            when {
-                                !device.isOnline ->
-                                    ElyraTheme.colors.error
-
-                                device.isOn ->
-                                    ElyraTheme.colors.success
-
-                                else ->
-                                    ElyraTheme.colors.textTertiary
-                            }
-                        )
+                        .background(statusColor)
                 )
 
                 Spacer(
@@ -421,64 +699,136 @@ private fun DeviceListItem(
                 )
 
                 Text(
-                    text = when {
-                        !device.isOnline -> "Offline"
-                        device.isOn -> "On"
-                        else -> "Off"
-                    },
+                    text = getStatusText(device.status),
                     style = ElyraTheme.typography.labelMedium,
-                    color = when {
-                        !device.isOnline ->
-                            ElyraTheme.colors.error
-
-                        device.isOn ->
-                            ElyraTheme.colors.success
-
-                        else ->
-                            ElyraTheme.colors.textSecondary
-                    }
+                    color = statusColor
                 )
             }
         }
 
-        Spacer(
-            modifier = Modifier.size(12.dp)
-        )
 
-        // ========================================================
-        // STATUS CONTROL
-        // ========================================================
+        // ====================================================================
+        // ARROW
+        // ====================================================================
+
+        Icon(
+            imageVector = Icons.Outlined.ArrowForwardIos,
+            contentDescription = "Open ${device.name}",
+            modifier = Modifier.size(16.dp),
+            tint = ElyraTheme.colors.textTertiary
+        )
+    }
+}
+
+
+// ============================================================================
+// EMPTY STATE
+// ============================================================================
+
+@Composable
+private fun EmptyDevicesState() {
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(
+                vertical = 60.dp
+            ),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
 
         Box(
             modifier = Modifier
-                .size(42.dp)
+                .size(58.dp)
                 .clip(CircleShape)
                 .background(
-                    if (device.isOn && device.isOnline) {
-                        ElyraTheme.colors.primary
-                    } else {
-                        ElyraTheme.colors.background
-                    }
+                    ElyraTheme.colors.surface
                 ),
             contentAlignment = Alignment.Center
         ) {
 
             Icon(
-                imageVector =
-                    if (!device.isOnline) {
-                        Icons.Outlined.WifiOff
-                    } else {
-                        Icons.Outlined.Tune
-                    },
+                imageVector = Icons.Outlined.Search,
                 contentDescription = null,
-                tint =
-                    if (device.isOn && device.isOnline) {
-                        ElyraTheme.colors.onPrimary
-                    } else {
-                        ElyraTheme.colors.textSecondary
-                    },
-                modifier = Modifier.size(20.dp)
+                modifier = Modifier.size(25.dp),
+                tint = ElyraTheme.colors.textSecondary
             )
         }
+
+        Spacer(
+            modifier = Modifier.height(14.dp)
+        )
+
+        Text(
+            text = "No devices found",
+            style = ElyraTheme.typography.titleMedium,
+            color = ElyraTheme.colors.textPrimary
+        )
+
+        Spacer(
+            modifier = Modifier.height(5.dp)
+        )
+
+        Text(
+            text = "Try a different search or filter.",
+            style = ElyraTheme.typography.bodySmall,
+            color = ElyraTheme.colors.textSecondary
+        )
+    }
+}
+
+
+// ============================================================================
+// DEVICE ICON
+// ============================================================================
+
+private fun getDeviceIcon(
+    type: DeviceType
+): ImageVector {
+
+    return when (type) {
+
+        DeviceType.LIGHT ->
+            Icons.Outlined.Lightbulb
+
+        DeviceType.OUTLET ->
+            Icons.Outlined.Power
+
+        DeviceType.MULTI_SWITCH ->
+            Icons.Outlined.ElectricalServices
+
+        DeviceType.IRON ->
+            Icons.Outlined.Thermostat
+
+        DeviceType.CAMERA ->
+            Icons.Outlined.CameraAlt
+
+        DeviceType.AC ->
+            Icons.Outlined.AcUnit
+    }
+}
+
+
+// ============================================================================
+// STATUS TEXT
+// ============================================================================
+
+private fun getStatusText(
+    status: DeviceStatus
+): String {
+
+    return when (status) {
+
+        DeviceStatus.ON ->
+            "On"
+
+        DeviceStatus.OFF ->
+            "Off"
+
+        DeviceStatus.ERROR ->
+            "Error"
+
+        DeviceStatus.DISCONNECTED ->
+            "Disconnected"
     }
 }
