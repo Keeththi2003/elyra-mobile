@@ -49,6 +49,7 @@ import com.keeththigan.elyra.feature.settings.SettingsScreen
 import com.keeththigan.elyra.feature.settings.appearance.AppearanceScreen
 import com.keeththigan.elyra.feature.settings.about.AboutScreen
 import com.keeththigan.elyra.feature.floors.FloorsScreen
+import com.keeththigan.elyra.feature.floors.FloorDetailScreen
 import com.keeththigan.elyra.core.designsystem.ElyraTheme
 
 private object AppRoutes {
@@ -59,6 +60,7 @@ private object AppRoutes {
     const val SETTINGS = "settings"
 
 const val DEVICE_DETAIL = "device_detail/{deviceId}"
+const val FLOOR_DETAIL = "floor_detail/{floorId}"
     const val APPEARANCE = "appearance"
     const val ABOUT = "about"
 }
@@ -292,6 +294,37 @@ composable(AppRoutes.FLOORS) {
     )
 }
 
+
+composable(
+    route = AppRoutes.FLOOR_DETAIL
+) { backStackEntry ->
+
+    val floorId =
+        backStackEntry.arguments?.getString("floorId")
+            ?: "ground"
+
+    FloorDetailScreen(
+        floorId = floorId,
+
+        onBack = {
+            navController.popBackStack()
+        },
+
+        onRoomClick = { roomId ->
+
+            // RoomDetailScreen will come next.
+            // We will navigate here later.
+        },
+
+        onAddRoom = {
+            // AddRoomScreen will come later.
+        },
+
+        onEditFloor = {
+            // EditFloorScreen will come later.
+        }
+    )
+}
             // =====================================================
             // SETTINGS
             // =====================================================
