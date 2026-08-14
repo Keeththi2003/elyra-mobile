@@ -8,6 +8,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import com.keeththigan.elyra.core.designsystem.ElyraTheme
 import com.keeththigan.elyra.feature.auth.navigation.AuthNavigation
+import com.keeththigan.elyra.feature.home.presentation.HomeScreen
+import com.keeththigan.elyra.app.navigation.AppNavigation
 
 
 @Composable
@@ -23,6 +25,7 @@ fun ElyraApp() {
         //         style = ElyraTheme.typography.headlineLarge
         //     )
         // }
-        AuthNavigation()
+//        AuthNavigation()
+           AppNavigation()
     }
 }
