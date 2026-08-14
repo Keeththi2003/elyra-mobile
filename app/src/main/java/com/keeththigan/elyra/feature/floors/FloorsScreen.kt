@@ -22,7 +22,6 @@ import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.ArrowForwardIos
 import androidx.compose.material.icons.outlined.Apartment
 import androidx.compose.material.icons.outlined.DeleteOutline
-import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -87,7 +86,6 @@ private val sampleFloors = listOf(
 fun FloorsScreen(
     onFloorClick: (String) -> Unit,
     onAddFloor: () -> Unit,
-    onEditFloor: (String) -> Unit = {},
     onDeleteFloor: (String) -> Unit = {}
 ) {
 
@@ -230,9 +228,6 @@ fun FloorsScreen(
                     onClick = {
                         onFloorClick(floor.id)
                     },
-                    onEdit = {
-                        onEditFloor(floor.id)
-                    },
                     onDelete = {
                         onDeleteFloor(floor.id)
                     }
@@ -340,7 +335,6 @@ private fun FloorSearchField(
 private fun FloorCard(
     floor: ElyraFloor,
     onClick: () -> Unit,
-    onEdit: () -> Unit,
     onDelete: () -> Unit
 ) {
 
@@ -453,21 +447,7 @@ private fun FloorCard(
         }
 
 
-        // ====================================================================
-        // EDIT
-        // ====================================================================
-
-        IconButton(
-            onClick = onEdit
-        ) {
-
-            Icon(
-                imageVector = Icons.Outlined.Edit,
-                contentDescription = "Edit ${floor.name}",
-                modifier = Modifier.size(19.dp),
-                tint = ElyraTheme.colors.textSecondary
-            )
-        }
+        
 
 
         // ====================================================================
