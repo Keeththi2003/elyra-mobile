@@ -44,6 +44,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.keeththigan.elyra.feature.devices.DeviceDetailScreen
 import com.keeththigan.elyra.feature.devices.DevicesScreen
+import com.keeththigan.elyra.feature.devices.AddDeviceScreen
 import com.keeththigan.elyra.feature.home.presentation.HomeScreen
 import com.keeththigan.elyra.feature.settings.SettingsScreen
 import com.keeththigan.elyra.feature.settings.appearance.AppearanceScreen
@@ -63,6 +64,8 @@ private object AppRoutes {
 const val DEVICE_DETAIL = "device_detail/{deviceId}"
 const val FLOOR_DETAIL = "floor_detail/{floorId}"
 const val ADD_FLOOR = "add_floor"
+const val ADD_DEVICE = "add_device"
+
     const val APPEARANCE = "appearance"
     const val ABOUT = "about"
 }
@@ -241,7 +244,13 @@ fun AppNavigation() {
             navController.navigate(
                 "device_detail/$deviceId"
             )
-        }
+        },
+        onAddDevice = {
+    navController.navigate(
+        AppRoutes.ADD_DEVICE
+    )
+},
+        onSettingsClick = {}
     )
 }
 
@@ -262,6 +271,33 @@ fun AppNavigation() {
     DeviceDetailScreen(
         deviceId = deviceId,
         onBack = {
+            navController.popBackStack()
+        }
+    )
+}
+
+composable(AppRoutes.ADD_DEVICE) {
+
+    AddDeviceScreen(
+
+        onBack = {
+            navController.popBackStack()
+        },
+
+        onDeviceCreated = {
+            navController.popBackStack()
+        }
+    )
+}
+composable(AppRoutes.ADD_DEVICE) {
+
+    AddDeviceScreen(
+
+        onBack = {
+            navController.popBackStack()
+        },
+
+        onDeviceCreated = {
             navController.popBackStack()
         }
     )
@@ -338,9 +374,11 @@ composable(AppRoutes.ADD_FLOOR) {
             navController.popBackStack()
         },
 
-         onAddDevice = {
-
-        },
+        onAddDevice = {
+    navController.navigate(
+        AppRoutes.ADD_DEVICE
+    )
+},
 
         onCreateFloor = { 
             // Later:
