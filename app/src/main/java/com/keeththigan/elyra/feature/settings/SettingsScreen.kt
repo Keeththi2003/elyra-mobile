@@ -39,7 +39,8 @@ import com.keeththigan.elyra.core.designsystem.ElyraTheme
 
 @Composable
 fun SettingsScreen(
-    onAppearanceClick: () -> Unit = {}
+    onAppearanceClick: () -> Unit = {},
+    onAboutClick: () -> Unit = {}
 ) {
 
     var notificationsEnabled by remember {
@@ -178,7 +179,7 @@ fun SettingsScreen(
                 icon = Icons.Outlined.Info,
                 title = "About Elyra",
                 subtitle = "Version 1.0.0",
-                onClick = {}
+    onClick = onAboutClick
             )
         }
 

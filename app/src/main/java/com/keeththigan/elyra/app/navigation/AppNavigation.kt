@@ -46,6 +46,7 @@ import com.keeththigan.elyra.feature.devices.DevicesScreen
 import com.keeththigan.elyra.feature.home.presentation.HomeScreen
 import com.keeththigan.elyra.feature.settings.SettingsScreen
 import com.keeththigan.elyra.feature.settings.appearance.AppearanceScreen
+import com.keeththigan.elyra.feature.settings.about.AboutScreen
 import com.keeththigan.elyra.core.designsystem.ElyraTheme
 
 private object AppRoutes {
@@ -56,6 +57,7 @@ private object AppRoutes {
 
     const val DEVICE_DETAIL = "device_detail/{deviceName}"
     const val APPEARANCE = "appearance"
+    const val ABOUT = "about"
 }
 
 private data class BottomNavItem(
@@ -269,8 +271,11 @@ fun AppNavigation() {
 SettingsScreen(
     onAppearanceClick = {
         navController.navigate(AppRoutes.APPEARANCE)
+    },
+    onAboutClick = {
+        navController.navigate(AppRoutes.ABOUT)
     }
-)            }
+)          }
 
 
             composable(AppRoutes.APPEARANCE) {
@@ -281,6 +286,17 @@ SettingsScreen(
         }
     )
 }
+
+           composable(AppRoutes.ABOUT) {
+
+    AboutScreen(
+        onBack = {
+            navController.popBackStack()
+        }
+    )
+}
+
+
         }
     }
 }
