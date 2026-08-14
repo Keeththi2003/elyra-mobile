@@ -3,175 +3,153 @@ package com.keeththigan.elyra.core.designsystem.color
 import androidx.compose.ui.graphics.Color
 
 /**
- * Elyra Design System
+ * Elyra primitive color tokens.
  *
- * Primitive color tokens.
+ * These are the raw building blocks of the Elyra design system.
  *
- * These colors should NOT be used directly inside feature screens.
- * Features should consume semantic colors provided by the Elyra theme.
- *
- * Architecture:
- *
- * Primitive → Semantic → Component → UI
+ * Feature screens should normally use ElyraSemanticColors
+ * instead of accessing these values directly.
  */
 object ElyraColors {
 
     // ============================================================
-    // NEUTRAL PALETTE
+    // NEUTRALS
     // ============================================================
 
-    /**
-     * Light surfaces
-     */
     val Neutral0 = Color(0xFFFFFFFF)
-    val Neutral50 = Color(0xFFF8F8FA)
-    val Neutral100 = Color(0xFFF2F2F5)
-    val Neutral150 = Color(0xFFEAEAEE)
-    val Neutral200 = Color(0xFFE2E2E7)
 
-    /**
-     * Mid neutrals
-     */
-    val Neutral300 = Color(0xFFD1D1D6)
-    val Neutral400 = Color(0xFFAEAEB2)
-    val Neutral500 = Color(0xFF8E8E93)
-    val Neutral600 = Color(0xFF6E6E73)
+    val Neutral50 = Color(0xFFFAFAFA)
 
-    /**
-     * Dark neutrals
-     */
-    val Neutral700 = Color(0xFF48484A)
-    val Neutral800 = Color(0xFF2C2C2E)
-    val Neutral850 = Color(0xFF1F2024)
-    val Neutral900 = Color(0xFF15161A)
-    val Neutral950 = Color(0xFF0D0E11)
-    val Neutral1000 = Color(0xFF08090B)
+    val Neutral100 = Color(0xFFF5F5F5)
 
+    val Neutral150 = Color(0xFFF0F0F0)
 
-    // ============================================================
-    // ELYRA BRAND PALETTE
-    // ============================================================
+    val Neutral200 = Color(0xFFE5E5E5)
 
-    /**
-     * Primary Elyra brand color.
-     *
-     * Used for important actions, selected states,
-     * navigation emphasis and brand moments.
-     */
-    val Indigo50 = Color(0xFFF3F1FF)
-    val Indigo100 = Color(0xFFE8E5FF)
-    val Indigo200 = Color(0xFFD4CFFF)
-    val Indigo300 = Color(0xFFB9B0FF)
-    val Indigo400 = Color(0xFF9789FF)
-    val Indigo500 = Color(0xFF7868F2)
-    val Indigo600 = Color(0xFF6958E8)
-    val Indigo700 = Color(0xFF5848D0)
-    val Indigo800 = Color(0xFF473BA8)
-    val Indigo900 = Color(0xFF382F82)
+    val Neutral300 = Color(0xFFD4D4D4)
+
+    val Neutral400 = Color(0xFFA3A3A3)
+
+    val Neutral500 = Color(0xFF737373)
+
+    val Neutral600 = Color(0xFF525252)
+
+    val Neutral700 = Color(0xFF404040)
+
+    val Neutral800 = Color(0xFF262626)
+
+    val Neutral850 = Color(0xFF1F1F1F)
+
+    val Neutral900 = Color(0xFF171717)
+
+    val Neutral950 = Color(0xFF0F0F0F)
+
+    val Neutral1000 = Color(0xFF080808)
 
 
     // ============================================================
-    // SECONDARY ACCENT
+    // ELYRA ACCENT
+    //
+    // Restrained blue-violet accent.
+    //
+    // This should NOT dominate the interface.
+    // It is primarily used for actions, focus and emphasis.
     // ============================================================
 
-    /**
-     * A subtle cyan accent.
-     *
-     * Used sparingly for technology-oriented states,
-     * energy information and selected visual highlights.
-     */
-    val Cyan50 = Color(0xFFECFCFF)
-    val Cyan100 = Color(0xFFD4F7FC)
-    val Cyan200 = Color(0xFFAAEDF5)
-    val Cyan300 = Color(0xFF78DFEB)
-    val Cyan400 = Color(0xFF4BCEDC)
-    val Cyan500 = Color(0xFF28B8C8)
-    val Cyan600 = Color(0xFF1C9AAA)
-    val Cyan700 = Color(0xFF197C89)
-    val Cyan800 = Color(0xFF1A6370)
-    val Cyan900 = Color(0xFF1A525D)
+    val Accent50 = Color(0xFFF5F3FF)
+
+    val Accent100 = Color(0xFFEDE9FE)
+
+    val Accent200 = Color(0xFFDDD6FE)
+
+    val Accent300 = Color(0xFFC4B5FD)
+
+    val Accent400 = Color(0xFFA78BFA)
+
+    val Accent500 = Color(0xFF8B5CF6)
+
+    val Accent600 = Color(0xFF7C3AED)
+
+    val Accent700 = Color(0xFF6D28D9)
+
+    val Accent800 = Color(0xFF5B21B6)
+
+    val Accent900 = Color(0xFF4C1D95)
 
 
     // ============================================================
-    // SEMANTIC STATUS COLORS
+    // BLUE
     // ============================================================
 
-    /**
-     * Success
-     *
-     * Device online
-     * Device active
-     * Operation successful
-     */
-    val Green50 = Color(0xFFF0FDF4)
-    val Green100 = Color(0xFFDCFCE7)
-    val Green500 = Color(0xFF22C55E)
-    val Green600 = Color(0xFF16A34A)
-    val Green700 = Color(0xFF15803D)
-    val Green900 = Color(0xFF14532D)
-
-
-    /**
-     * Warning
-     *
-     * Attention required
-     * Device warning
-     * Scheduled event approaching
-     */
-    val Amber50 = Color(0xFFFFFBEB)
-    val Amber100 = Color(0xFFFEF3C7)
-    val Amber500 = Color(0xFFF59E0B)
-    val Amber600 = Color(0xFFD97706)
-    val Amber700 = Color(0xFFB45309)
-    val Amber900 = Color(0xFF78350F)
-
-
-    /**
-     * Error
-     *
-     * Device failure
-     * Connection failure
-     * Destructive action
-     */
-    val Red50 = Color(0xFFFEF2F2)
-    val Red100 = Color(0xFFFEE2E2)
-    val Red500 = Color(0xFFEF4444)
-    val Red600 = Color(0xFFDC2626)
-    val Red700 = Color(0xFFB91C1C)
-    val Red900 = Color(0xFF7F1D1D)
-
-
-    /**
-     * Information
-     */
-    val Blue50 = Color(0xFFEFF6FF)
     val Blue100 = Color(0xFFDBEAFE)
+
     val Blue500 = Color(0xFF3B82F6)
+
     val Blue600 = Color(0xFF2563EB)
-    val Blue700 = Color(0xFF1D4ED8)
+
     val Blue900 = Color(0xFF1E3A8A)
 
 
     // ============================================================
-    // OVERLAY / SCRIM
+    // CYAN
+    // ============================================================
+
+    val Cyan100 = Color(0xFFCFFAFE)
+
+    val Cyan400 = Color(0xFF22D3EE)
+
+    val Cyan600 = Color(0xFF0891B2)
+
+    val Cyan800 = Color(0xFF155E75)
+
+    val Cyan900 = Color(0xFF164E63)
+
+
+    // ============================================================
+    // GREEN
+    // ============================================================
+
+    val Green100 = Color(0xFFDCFCE7)
+
+    val Green500 = Color(0xFF22C55E)
+
+    val Green600 = Color(0xFF16A34A)
+
+    val Green900 = Color(0xFF14532D)
+
+
+    // ============================================================
+    // AMBER
+    // ============================================================
+
+    val Amber100 = Color(0xFFFEF3C7)
+
+    val Amber500 = Color(0xFFF59E0B)
+
+    val Amber600 = Color(0xFFD97706)
+
+    val Amber900 = Color(0xFF78350F)
+
+
+    // ============================================================
+    // RED
+    // ============================================================
+
+    val Red100 = Color(0xFFFEE2E2)
+
+    val Red500 = Color(0xFFEF4444)
+
+    val Red600 = Color(0xFFDC2626)
+
+    val Red900 = Color(0xFF7F1D1D)
+
+
+    // ============================================================
+    // SPECIAL
     // ============================================================
 
     /**
-     * Used for modal surfaces, bottom sheets and dialogs.
+     * Used behind modal overlays.
      */
     val Scrim = Color(0x99000000)
-
-    /**
-     * Subtle white overlay for dark-mode interaction states.
-     */
-    val WhiteOverlay8 = Color(0x14FFFFFF)
-    val WhiteOverlay12 = Color(0x1FFFFFFF)
-    val WhiteOverlay16 = Color(0x29FFFFFF)
-
-    /**
-     * Subtle black overlay for light-mode interaction states.
-     */
-    val BlackOverlay4 = Color(0x0A000000)
-    val BlackOverlay8 = Color(0x14000000)
-    val BlackOverlay12 = Color(0x1F000000)
 }
