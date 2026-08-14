@@ -52,6 +52,8 @@ import com.keeththigan.elyra.feature.settings.about.AboutScreen
 import com.keeththigan.elyra.feature.floors.FloorsScreen
 import com.keeththigan.elyra.feature.floors.FloorDetailScreen
 import com.keeththigan.elyra.feature.floors.EditFloorScreen
+import com.keeththigan.elyra.feature.floors.EditRoomScreen
+import com.keeththigan.elyra.feature.devices.EditDeviceScreen
 import com.keeththigan.elyra.feature.floors.RoomDetailsScreen
 import com.keeththigan.elyra.feature.floors.AddRoomScreen
 import com.keeththigan.elyra.feature.floors.AddFloorScreen
@@ -71,6 +73,8 @@ const val ADD_DEVICE = "add_device"
 const val ADD_ROOM = "add_room"
 const val ROOM_DETAILS = "room_details/{roomId}"
 const val EDIT_FLOOR = "edit_floor/{floorId}"
+const val EDIT_ROOM = "edit_room/{roomId}"
+const val EDIT_DEVICE = "edit_device/{deviceId}"
     const val APPEARANCE = "appearance"
     const val ABOUT = "about"
 }
@@ -277,6 +281,11 @@ fun AppNavigation() {
         deviceId = deviceId,
         onBack = {
             navController.popBackStack()
+        },
+        onEditDevice = {
+            navController.navigate(
+                "edit_device/$deviceId"
+            )
         }
     )
 }
@@ -317,14 +326,66 @@ composable(AppRoutes.FLOORS) {
 
         
 
-        onEditFloor = { floorId ->
-
-            // Edit floor later.
-        },
-
+       
         onDeleteFloor = { floorId ->
 
             // Delete confirmation later.
+        }
+    )
+}
+
+composable(
+    route = AppRoutes.EDIT_ROOM
+) { backStackEntry ->
+
+    val roomId =
+        backStackEntry.arguments
+            ?.getString("roomId")
+            ?: return@composable
+
+    EditRoomScreen(
+        roomId = roomId,
+
+        onBack = {
+            navController.popBackStack()
+        },
+
+        onSave = {
+            // Later save through ViewModel/Repository.
+            navController.popBackStack()
+        },
+
+        onDelete = {
+            // Later delete through ViewModel/Repository.
+            navController.popBackStack()
+        }
+    )
+}
+
+composable(
+    route = AppRoutes.EDIT_DEVICE
+) { backStackEntry ->
+
+    val deviceId =
+        backStackEntry.arguments
+            ?.getString("deviceId")
+            ?: return@composable
+
+    EditDeviceScreen(
+        deviceId = deviceId,
+
+        onBack = {
+            navController.popBackStack()
+        },
+
+        onSave = {
+            // Later save through ViewModel/Repository.
+            navController.popBackStack()
+        },
+
+        onDelete = {
+            // Later delete through ViewModel/Repository.
+            navController.popBackStack()
         }
     )
 }
@@ -362,6 +423,11 @@ composable(
 
             navController.navigate(
                 "device_detail/$deviceId"
+            )
+        },
+          onEditRoom = {
+            navController.navigate(
+                "edit_room/$roomId"
             )
         },
 
