@@ -51,6 +51,7 @@ import com.keeththigan.elyra.feature.settings.appearance.AppearanceScreen
 import com.keeththigan.elyra.feature.settings.about.AboutScreen
 import com.keeththigan.elyra.feature.floors.FloorsScreen
 import com.keeththigan.elyra.feature.floors.FloorDetailScreen
+import com.keeththigan.elyra.feature.floors.EditFloorScreen
 import com.keeththigan.elyra.feature.floors.RoomDetailsScreen
 import com.keeththigan.elyra.feature.floors.AddRoomScreen
 import com.keeththigan.elyra.feature.floors.AddFloorScreen
@@ -69,6 +70,7 @@ const val ADD_FLOOR = "add_floor"
 const val ADD_DEVICE = "add_device"
 const val ADD_ROOM = "add_room"
 const val ROOM_DETAILS = "room_details/{roomId}"
+const val EDIT_FLOOR = "edit_floor/{floorId}"
     const val APPEARANCE = "appearance"
     const val ABOUT = "about"
 }
@@ -399,8 +401,46 @@ composable(
     navController.navigate(AppRoutes.ADD_ROOM)
 },
 
-        onEditFloor = {
-            // EditFloorScreen will come later.
+       onEditFloor = {
+
+    navController.navigate(
+        "edit_floor/$floorId"
+    )
+}
+    )
+}
+
+composable(
+    route = AppRoutes.EDIT_FLOOR
+) { backStackEntry ->
+
+    val floorId =
+        backStackEntry.arguments
+            ?.getString("floorId")
+            ?: return@composable
+
+    EditFloorScreen(
+        floorId = floorId,
+
+        onBack = {
+            navController.popBackStack()
+        },
+
+        onAddRoom = {
+            navController.navigate(
+                AppRoutes.ADD_ROOM
+            )
+        },
+
+        onRoomClick = { roomId ->
+
+            navController.navigate(
+                "room_details/$roomId"
+            )
+        },
+
+        onSave = {
+            navController.popBackStack()
         }
     )
 }

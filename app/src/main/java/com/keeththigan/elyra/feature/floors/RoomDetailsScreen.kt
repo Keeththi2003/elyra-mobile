@@ -23,6 +23,7 @@ import androidx.compose.material.icons.outlined.Apartment
 import androidx.compose.material.icons.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.ChevronRight
 import androidx.compose.material.icons.outlined.Lightbulb
+import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.Power
 import androidx.compose.material.icons.outlined.Tune
 import androidx.compose.material3.Icon
@@ -170,6 +171,19 @@ fun RoomDetailsScreen(
                     text = floorName,
                     style = ElyraTheme.typography.bodySmall,
                     color = ElyraTheme.colors.textSecondary
+                )
+            }
+            IconButton(
+                onClick = {
+                    // Edit room screen will come later.
+                }
+            ) {
+
+                Icon(
+                    imageVector = Icons.Outlined.Edit,
+                    contentDescription = "Edit room",
+                    modifier = Modifier.size(21.dp),
+                    tint = ElyraTheme.colors.textSecondary
                 )
             }
         }
