@@ -14,165 +14,334 @@ import com.keeththigan.elyra.core.designsystem.shape.ElyraShapes
 import com.keeththigan.elyra.core.designsystem.spacing.ElyraSpacing
 import com.keeththigan.elyra.core.designsystem.typography.ElyraTypography
 
-// ================================================================
-// LIGHT COLORS
-// ================================================================
+
+// ============================================================================
+// LIGHT THEME
+// ============================================================================
 
 private val ElyraLightColors = ElyraSemanticColors(
 
-    // Background
-    background = ElyraColors.Neutral50,
-    backgroundSecondary = ElyraColors.Neutral100,
-    backgroundTertiary = ElyraColors.Neutral150,
+    // ------------------------------------------------------------------------
+    // BACKGROUND
+    // ------------------------------------------------------------------------
 
-    // Surfaces
-    surface = ElyraColors.Neutral0,
-    surfaceElevated = ElyraColors.Neutral0,
-    surfaceSecondary = ElyraColors.Neutral100,
-    surfaceInteractive = ElyraColors.Neutral150,
-    surfaceDisabled = ElyraColors.Neutral100,
+    background = ElyraColors.White,
 
-    // Text
-    textPrimary = ElyraColors.Neutral900,
+    backgroundSecondary = ElyraColors.Neutral50,
+
+    backgroundTertiary = ElyraColors.Neutral100,
+
+
+    // ------------------------------------------------------------------------
+    // SURFACES
+    // ------------------------------------------------------------------------
+
+    surface = ElyraColors.White,
+
+    surfaceElevated = ElyraColors.White,
+
+    surfaceSecondary = ElyraColors.Neutral50,
+
+    surfaceInteractive = ElyraColors.Neutral100,
+
+    surfaceDisabled = ElyraColors.Neutral150,
+
+
+    // ------------------------------------------------------------------------
+    // TEXT
+    // ------------------------------------------------------------------------
+
+    textPrimary = ElyraColors.Black,
+
     textSecondary = ElyraColors.Neutral600,
-    textTertiary = ElyraColors.Neutral500,
-    textDisabled = ElyraColors.Neutral400,
-    textOnPrimary = ElyraColors.Neutral0,
 
-    // Borders
+    textTertiary = ElyraColors.Neutral500,
+
+    textDisabled = ElyraColors.Neutral400,
+
+    textOnPrimary = ElyraColors.White,
+
+
+    // ------------------------------------------------------------------------
+    // BORDERS
+    // ------------------------------------------------------------------------
+
     border = ElyraColors.Neutral200,
+
     borderSubtle = ElyraColors.Neutral150,
+
     borderStrong = ElyraColors.Neutral300,
 
-    // Primary / Brand
-    primary = ElyraColors.Accent600,
-    primaryContainer = ElyraColors.Accent100,
-    onPrimary = ElyraColors.Neutral0,
-    onPrimaryContainer = ElyraColors.Accent900,
 
-    // Secondary
-    secondary = ElyraColors.Neutral700,
-    secondaryContainer = ElyraColors.Neutral150,
-    onSecondary = ElyraColors.Neutral0,
-    onSecondaryContainer = ElyraColors.Neutral900,
+    // ------------------------------------------------------------------------
+    // PRIMARY
+    //
+    // BLACK
+    // ------------------------------------------------------------------------
 
-    // Success
+    primary = ElyraColors.Black,
+
+    primaryContainer = ElyraColors.Neutral100,
+
+    onPrimary = ElyraColors.White,
+
+    onPrimaryContainer = ElyraColors.Black,
+
+
+    // ------------------------------------------------------------------------
+    // SECONDARY
+    //
+    // Neutral gray.
+    // ------------------------------------------------------------------------
+
+    secondary = ElyraColors.Neutral600,
+
+    secondaryContainer = ElyraColors.Neutral100,
+
+    onSecondary = ElyraColors.White,
+
+    onSecondaryContainer = ElyraColors.Black,
+
+
+    // ------------------------------------------------------------------------
+    // SUCCESS
+    // ------------------------------------------------------------------------
+
     success = ElyraColors.Green600,
+
     successContainer = ElyraColors.Green100,
-    onSuccess = ElyraColors.Neutral0,
+
+    onSuccess = ElyraColors.White,
+
     onSuccessContainer = ElyraColors.Green900,
 
-    // Warning
+
+    // ------------------------------------------------------------------------
+    // WARNING
+    // ------------------------------------------------------------------------
+
     warning = ElyraColors.Amber600,
+
     warningContainer = ElyraColors.Amber100,
-    onWarning = ElyraColors.Neutral0,
+
+    onWarning = ElyraColors.White,
+
     onWarningContainer = ElyraColors.Amber900,
 
-    // Error
+
+    // ------------------------------------------------------------------------
+    // ERROR
+    // ------------------------------------------------------------------------
+
     error = ElyraColors.Red600,
+
     errorContainer = ElyraColors.Red100,
-    onError = ElyraColors.Neutral0,
+
+    onError = ElyraColors.White,
+
     onErrorContainer = ElyraColors.Red900,
 
-    // Information
+
+    // ------------------------------------------------------------------------
+    // INFORMATION
+    // ------------------------------------------------------------------------
+
     info = ElyraColors.Blue600,
+
     infoContainer = ElyraColors.Blue100,
-    onInfo = ElyraColors.Neutral0,
+
+    onInfo = ElyraColors.White,
+
     onInfoContainer = ElyraColors.Blue900,
 
-    // Device states
+
+    // ------------------------------------------------------------------------
+    // DEVICE STATES
+    // ------------------------------------------------------------------------
+
     deviceActive = ElyraColors.Green600,
+
     deviceInactive = ElyraColors.Neutral500,
+
     deviceOffline = ElyraColors.Red600,
+
     devicePending = ElyraColors.Amber600,
 
-    // Special
+
+    // ------------------------------------------------------------------------
+    // SPECIAL
+    // ------------------------------------------------------------------------
+
     scrim = ElyraColors.Scrim,
-    selection = ElyraColors.Accent100
+
+    selection = ElyraColors.Neutral200
 )
 
 
-// ================================================================
-// DARK COLORS
-// ================================================================
+// ============================================================================
+// DARK THEME
+// ============================================================================
 
 private val ElyraDarkColors = ElyraSemanticColors(
 
-    // Background
-    background = ElyraColors.Neutral1000,
+    // ------------------------------------------------------------------------
+    // BACKGROUND
+    // ------------------------------------------------------------------------
+
+    background = ElyraColors.Black,
+
     backgroundSecondary = ElyraColors.Neutral950,
+
     backgroundTertiary = ElyraColors.Neutral900,
 
-    // Surfaces
-    surface = ElyraColors.Neutral900,
-    surfaceElevated = ElyraColors.Neutral850,
-    surfaceSecondary = ElyraColors.Neutral850,
+
+    // ------------------------------------------------------------------------
+    // SURFACES
+    // ------------------------------------------------------------------------
+
+    surface = ElyraColors.Neutral950,
+
+    surfaceElevated = ElyraColors.Neutral900,
+
+    surfaceSecondary = ElyraColors.Neutral900,
+
     surfaceInteractive = ElyraColors.Neutral800,
-    surfaceDisabled = ElyraColors.Neutral850,
 
-    // Text
-    textPrimary = ElyraColors.Neutral50,
-    textSecondary = ElyraColors.Neutral300,
-    textTertiary = ElyraColors.Neutral400,
-    textDisabled = ElyraColors.Neutral600,
-    textOnPrimary = ElyraColors.Neutral950,
+    surfaceDisabled = ElyraColors.Neutral900,
 
-    // Borders
-    border = ElyraColors.Neutral700,
-    borderSubtle = ElyraColors.Neutral800,
-    borderStrong = ElyraColors.Neutral600,
 
-    // Primary / Brand
-    primary = ElyraColors.Accent400,
-    primaryContainer = ElyraColors.Accent800,
-    onPrimary = ElyraColors.Neutral950,
-    onPrimaryContainer = ElyraColors.Accent100,
+    // ------------------------------------------------------------------------
+    // TEXT
+    // ------------------------------------------------------------------------
 
-    // Secondary
-    secondary = ElyraColors.Neutral300,
-    secondaryContainer = ElyraColors.Neutral800,
-    onSecondary = ElyraColors.Neutral950,
-    onSecondaryContainer = ElyraColors.Neutral100,
+    textPrimary = ElyraColors.White,
 
-    // Success
+    textSecondary = ElyraColors.Neutral400,
+
+    textTertiary = ElyraColors.Neutral500,
+
+    textDisabled = ElyraColors.Neutral700,
+
+    textOnPrimary = ElyraColors.Black,
+
+
+    // ------------------------------------------------------------------------
+    // BORDERS
+    // ------------------------------------------------------------------------
+
+    border = ElyraColors.Neutral800,
+
+    borderSubtle = ElyraColors.Neutral900,
+
+    borderStrong = ElyraColors.Neutral700,
+
+
+    // ------------------------------------------------------------------------
+    // PRIMARY
+    //
+    // WHITE
+    // ------------------------------------------------------------------------
+
+    primary = ElyraColors.White,
+
+    primaryContainer = ElyraColors.Neutral800,
+
+    onPrimary = ElyraColors.Black,
+
+    onPrimaryContainer = ElyraColors.White,
+
+
+    // ------------------------------------------------------------------------
+    // SECONDARY
+    // ------------------------------------------------------------------------
+
+    secondary = ElyraColors.Neutral400,
+
+    secondaryContainer = ElyraColors.Neutral900,
+
+    onSecondary = ElyraColors.Black,
+
+    onSecondaryContainer = ElyraColors.White,
+
+
+    // ------------------------------------------------------------------------
+    // SUCCESS
+    // ------------------------------------------------------------------------
+
     success = ElyraColors.Green500,
+
     successContainer = ElyraColors.Green900,
-    onSuccess = ElyraColors.Neutral950,
+
+    onSuccess = ElyraColors.Black,
+
     onSuccessContainer = ElyraColors.Green100,
 
-    // Warning
+
+    // ------------------------------------------------------------------------
+    // WARNING
+    // ------------------------------------------------------------------------
+
     warning = ElyraColors.Amber500,
+
     warningContainer = ElyraColors.Amber900,
-    onWarning = ElyraColors.Neutral950,
+
+    onWarning = ElyraColors.Black,
+
     onWarningContainer = ElyraColors.Amber100,
 
-    // Error
+
+    // ------------------------------------------------------------------------
+    // ERROR
+    // ------------------------------------------------------------------------
+
     error = ElyraColors.Red500,
+
     errorContainer = ElyraColors.Red900,
-    onError = ElyraColors.Neutral0,
+
+    onError = ElyraColors.White,
+
     onErrorContainer = ElyraColors.Red100,
 
-    // Information
+
+    // ------------------------------------------------------------------------
+    // INFORMATION
+    // ------------------------------------------------------------------------
+
     info = ElyraColors.Blue500,
+
     infoContainer = ElyraColors.Blue900,
-    onInfo = ElyraColors.Neutral0,
+
+    onInfo = ElyraColors.White,
+
     onInfoContainer = ElyraColors.Blue100,
 
-    // Device states
+
+    // ------------------------------------------------------------------------
+    // DEVICE STATES
+    // ------------------------------------------------------------------------
+
     deviceActive = ElyraColors.Green500,
+
     deviceInactive = ElyraColors.Neutral500,
+
     deviceOffline = ElyraColors.Red500,
+
     devicePending = ElyraColors.Amber500,
 
-    // Special
+
+    // ------------------------------------------------------------------------
+    // SPECIAL
+    // ------------------------------------------------------------------------
+
     scrim = ElyraColors.Scrim,
-    selection = ElyraColors.Accent800
+
+    selection = ElyraColors.Neutral800
 )
 
 
-// ================================================================
+// ============================================================================
 // COMPOSITION LOCAL
-// ================================================================
+// ============================================================================
 
 private val LocalElyraColors =
     staticCompositionLocalOf<ElyraSemanticColors> {
@@ -180,31 +349,40 @@ private val LocalElyraColors =
     }
 
 
-// ================================================================
-// THEME
-// ================================================================
+// ============================================================================
+// ELYRA THEME
+// ============================================================================
 
 @Composable
 fun ElyraTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     content: @Composable () -> Unit
 ) {
+
     val colors = if (darkTheme) {
         ElyraDarkColors
     } else {
         ElyraLightColors
     }
 
+
+    // ========================================================================
+    // MATERIAL 3 COLOR SCHEME
+    // ========================================================================
+
     val materialColorScheme = if (darkTheme) {
 
         darkColorScheme(
+
             primary = colors.primary,
             onPrimary = colors.onPrimary,
+
             primaryContainer = colors.primaryContainer,
             onPrimaryContainer = colors.onPrimaryContainer,
 
             secondary = colors.secondary,
             onSecondary = colors.onSecondary,
+
             secondaryContainer = colors.secondaryContainer,
             onSecondaryContainer = colors.onSecondaryContainer,
 
@@ -219,6 +397,7 @@ fun ElyraTheme(
 
             error = colors.error,
             onError = colors.onError,
+
             errorContainer = colors.errorContainer,
             onErrorContainer = colors.onErrorContainer
         )
@@ -226,13 +405,16 @@ fun ElyraTheme(
     } else {
 
         lightColorScheme(
+
             primary = colors.primary,
             onPrimary = colors.onPrimary,
+
             primaryContainer = colors.primaryContainer,
             onPrimaryContainer = colors.onPrimaryContainer,
 
             secondary = colors.secondary,
             onSecondary = colors.onSecondary,
+
             secondaryContainer = colors.secondaryContainer,
             onSecondaryContainer = colors.onSecondaryContainer,
 
@@ -247,48 +429,82 @@ fun ElyraTheme(
 
             error = colors.error,
             onError = colors.onError,
+
             errorContainer = colors.errorContainer,
             onErrorContainer = colors.onErrorContainer
         )
     }
 
+
+    // ========================================================================
+    // PROVIDE ELYRA DESIGN TOKENS
+    // ========================================================================
+
     androidx.compose.runtime.CompositionLocalProvider(
         LocalElyraColors provides colors
     ) {
+
         MaterialTheme(
+
             colorScheme = materialColorScheme,
+
             typography = ElyraTypography,
+
             shapes = ElyraShapes.material,
+
             content = content
         )
     }
 }
 
 
-// ================================================================
-// THEME ACCESS
-// ================================================================
+// ============================================================================
+// ELYRA THEME ACCESS
+// ============================================================================
 
 object ElyraTheme {
 
+    /**
+     * Semantic Elyra colors.
+     *
+     * Example:
+     *
+     * ElyraTheme.colors.primary
+     */
     val colors: ElyraSemanticColors
         @Composable
         @ReadOnlyComposable
         get() = LocalElyraColors.current
 
+
+    /**
+     * Elyra typography.
+     */
     val typography
         @Composable
         @ReadOnlyComposable
         get() = MaterialTheme.typography
 
+
+    /**
+     * Elyra shapes.
+     */
     val shapes
         @Composable
         @ReadOnlyComposable
         get() = MaterialTheme.shapes
 
+
+    /**
+     * Elyra spacing.
+     */
     val spacing
         get() = ElyraSpacing
 
+
+    /**
+     * Elyra dimensions.
+     */
     val dimension
         get() = ElyraDimensions
 }

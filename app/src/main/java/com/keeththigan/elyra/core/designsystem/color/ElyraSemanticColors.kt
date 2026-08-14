@@ -4,22 +4,21 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.Color
 
 /**
- * Elyra Design System
+ * Elyra Semantic Color System
  *
- * Semantic colors describe the PURPOSE of a color in the UI.
+ * Semantic colors describe WHAT a color means,
+ * not what the raw color is.
  *
- * Architecture:
+ * Screens and components should use these tokens.
  *
- * Primitive Colors
- *       ↓
- * Semantic Colors
- *       ↓
- * Components
- *       ↓
- * Screens
+ * Example:
  *
- * Feature screens should use semantic colors instead of
- * directly accessing primitive color tokens.
+ * ElyraTheme.colors.background
+ * ElyraTheme.colors.textPrimary
+ * ElyraTheme.colors.primary
+ *
+ * Never use primitive colors directly inside
+ * feature screens.
  */
 @Immutable
 data class ElyraSemanticColors(
@@ -77,7 +76,10 @@ data class ElyraSemanticColors(
 
 
     // ============================================================
-    // BRAND / PRIMARY
+    // PRIMARY
+    //
+    // Light  → Black
+    // Dark   → White
     // ============================================================
 
     val primary: Color,
@@ -90,7 +92,9 @@ data class ElyraSemanticColors(
 
 
     // ============================================================
-    // SECONDARY / TECHNOLOGY ACCENT
+    // SECONDARY
+    //
+    // Secondary is neutral rather than colorful.
     // ============================================================
 
     val secondary: Color,
@@ -159,7 +163,7 @@ data class ElyraSemanticColors(
     // ============================================================
 
     /**
-     * Device is currently active.
+     * Device currently active.
      *
      * Example:
      * Light ON
@@ -169,17 +173,17 @@ data class ElyraSemanticColors(
     val deviceActive: Color,
 
     /**
-     * Device is currently inactive.
+     * Device currently inactive.
      */
     val deviceInactive: Color,
 
     /**
-     * Device is unavailable/offline.
+     * Device unavailable / offline.
      */
     val deviceOffline: Color,
 
     /**
-     * Device is connecting or processing.
+     * Device connecting / processing.
      */
     val devicePending: Color,
 
