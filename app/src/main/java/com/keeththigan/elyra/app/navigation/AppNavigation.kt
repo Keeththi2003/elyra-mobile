@@ -26,6 +26,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Devices
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material.icons.outlined.Layers
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -47,12 +48,14 @@ import com.keeththigan.elyra.feature.home.presentation.HomeScreen
 import com.keeththigan.elyra.feature.settings.SettingsScreen
 import com.keeththigan.elyra.feature.settings.appearance.AppearanceScreen
 import com.keeththigan.elyra.feature.settings.about.AboutScreen
+import com.keeththigan.elyra.feature.floors.FloorsScreen
 import com.keeththigan.elyra.core.designsystem.ElyraTheme
 
 private object AppRoutes {
 
     const val HOME = "home"
     const val DEVICES = "devices"
+    const val FLOORS = "floors"
     const val SETTINGS = "settings"
 
 const val DEVICE_DETAIL = "device_detail/{deviceId}"
@@ -78,6 +81,12 @@ private val bottomNavItems = listOf(
         route = AppRoutes.DEVICES,
         label = "Devices",
         icon = Icons.Outlined.Devices
+    ),
+
+    BottomNavItem(
+        route = AppRoutes.FLOORS,
+        label = "Floors",
+        icon = Icons.Outlined.Layers
     ),
 
     BottomNavItem(
@@ -111,6 +120,7 @@ fun AppNavigation() {
     val showBottomBar =
         currentRoute == AppRoutes.HOME ||
         currentRoute == AppRoutes.DEVICES ||
+        currentRoute == AppRoutes.FLOORS ||
         currentRoute == AppRoutes.SETTINGS
 
     Scaffold(
@@ -249,6 +259,35 @@ fun AppNavigation() {
         deviceId = deviceId,
         onBack = {
             navController.popBackStack()
+        }
+    )
+}
+
+composable(AppRoutes.FLOORS) {
+
+    FloorsScreen(
+
+        onFloorClick = { floorId ->
+
+            // We will create FloorDetailScreen next.
+            navController.navigate(
+                "floor_detail/$floorId"
+            )
+        },
+
+        onAddFloor = {
+
+            // AddFloorScreen will come next.
+        },
+
+        onEditFloor = { floorId ->
+
+            // Edit floor later.
+        },
+
+        onDeleteFloor = { floorId ->
+
+            // Delete confirmation later.
         }
     )
 }
