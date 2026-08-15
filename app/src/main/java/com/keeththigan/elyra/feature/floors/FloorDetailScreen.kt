@@ -184,6 +184,19 @@ fun FloorDetailScreen(
             modifier = Modifier.height(24.dp)
         )
 
+        if (floorState.error != null || roomState.error != null || deviceState.error != null) {
+
+            Text(
+                text = floorState.error ?: roomState.error ?: deviceState.error ?: "",
+                style = ElyraTheme.typography.bodySmall,
+                color = ElyraTheme.colors.error
+            )
+
+            Spacer(
+                modifier = Modifier.height(12.dp)
+            )
+        }
+
 
         // ====================================================================
         // FLOOR SUMMARY

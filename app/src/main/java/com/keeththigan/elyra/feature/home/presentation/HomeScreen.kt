@@ -133,7 +133,7 @@ fun HomeScreen(
             ) {
 
                 Text(
-                    text = "Good evening",
+                    text = "Good ",
                     style = ElyraTheme.typography.bodyMedium,
                     color = ElyraTheme.colors.textSecondary
                 )
@@ -186,6 +186,18 @@ fun HomeScreen(
             ),
             verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
+
+            if (deviceState.error != null || floorState.error != null || roomState.error != null) {
+
+                item {
+
+                    Text(
+                        text = deviceState.error ?: floorState.error ?: roomState.error ?: "",
+                        style = ElyraTheme.typography.bodyMedium,
+                        color = ElyraTheme.colors.error
+                    )
+                }
+            }
 
             // =================================================================
             // DEVICES SECTION

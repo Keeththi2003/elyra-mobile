@@ -184,6 +184,11 @@ class FloorViewModel(
 
         viewModelScope.launch {
 
+            android.util.Log.d(
+                "ElyraDebug",
+                "FloorViewModel: createFloorWithRooms launched, name='$floorName'"
+            )
+
             _state.value =
                 _state.value.copy(
                     isLoading = true,
@@ -193,8 +198,19 @@ class FloorViewModel(
             val floorResult =
                 floorRepository.createFloor(Floor(name = floorName))
 
+            android.util.Log.d(
+                "ElyraDebug",
+                "FloorViewModel: createFloor result = $floorResult"
+            )
+
             val floor =
                 floorResult.getOrElse { exception ->
+
+                    android.util.Log.e(
+                        "ElyraDebug",
+                        "FloorViewModel: createFloor FAILED",
+                        exception
+                    )
 
                     _state.value =
                         _state.value.copy(

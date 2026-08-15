@@ -33,9 +33,20 @@ class FloorRepository {
 
         val uid =
             auth.currentUser?.uid
-                ?: return Result.failure(
-                    Exception("You must be signed in.")
-                )
+                ?: run {
+                    android.util.Log.e(
+                        "ElyraDebug",
+                        "FloorRepository: createFloor aborted, auth.currentUser is null"
+                    )
+                    return Result.failure(
+                        Exception("You must be signed in.")
+                    )
+                }
+
+        android.util.Log.d(
+            "ElyraDebug",
+            "FloorRepository: createFloor uid=$uid, name='${floor.name}'"
+        )
 
         return try {
 
@@ -50,11 +61,27 @@ class FloorRepository {
                     updatedAt = null
                 )
 
+            android.util.Log.d(
+                "ElyraDebug",
+                "FloorRepository: writing doc id=${docRef.id} to 'floors' collection"
+            )
+
             docRef.set(newFloor).await()
+
+            android.util.Log.d(
+                "ElyraDebug",
+                "FloorRepository: write SUCCEEDED for doc id=${docRef.id}"
+            )
 
             Result.success(newFloor)
 
         } catch (e: Exception) {
+
+            android.util.Log.e(
+                "ElyraDebug",
+                "FloorRepository: write FAILED",
+                e
+            )
 
             Result.failure(e)
         }

@@ -234,6 +234,22 @@ fun FloorsScreen(
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
 
+            if (floorState.error != null) {
+
+                item {
+
+                    Text(
+                        text = floorState.error ?: "",
+                        style = ElyraTheme.typography.bodyMedium,
+                        color = ElyraTheme.colors.error
+                    )
+
+                    Spacer(
+                        modifier = Modifier.height(12.dp)
+                    )
+                }
+            }
+
             items(
                 items = filteredFloors,
                 key = {

@@ -61,30 +61,30 @@ fun ElyraApp() {
 
             // Keyed by uid so signing out and back in as a different user
             // never reuses another account's cached devices/floors/rooms.
-            val viewModelKey = authState.value.user?.id
+           val uid = authState.value.user?.id ?: return@ElyraTheme
 
-            val deviceViewModel: DeviceViewModel = viewModel(
-                key = viewModelKey,
-                factory = DeviceViewModelFactory(
-                    repository = deviceRepository
-                )
-            )
+val deviceViewModel: DeviceViewModel = viewModel(
+    key = "device_$uid",
+    factory = DeviceViewModelFactory(
+        repository = deviceRepository
+    )
+)
 
-            val floorViewModel: FloorViewModel = viewModel(
-                key = viewModelKey,
-                factory = FloorViewModelFactory(
-                    floorRepository = floorRepository,
-                    roomRepository = roomRepository,
-                    deviceRepository = deviceRepository
-                )
-            )
+val floorViewModel: FloorViewModel = viewModel(
+    key = "floor_$uid",
+    factory = FloorViewModelFactory(
+        floorRepository = floorRepository,
+        roomRepository = roomRepository,
+        deviceRepository = deviceRepository
+    )
+)
 
-            val roomViewModel: RoomViewModel = viewModel(
-                key = viewModelKey,
-                factory = RoomViewModelFactory(
-                    repository = roomRepository
-                )
-            )
+val roomViewModel: RoomViewModel = viewModel(
+    key = "room_$uid",
+    factory = RoomViewModelFactory(
+        repository = roomRepository
+    )
+)
 
             AppNavigation(
                 authViewModel = authViewModel,

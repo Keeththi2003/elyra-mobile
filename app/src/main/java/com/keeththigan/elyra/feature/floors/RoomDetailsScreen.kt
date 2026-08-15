@@ -170,6 +170,18 @@ fun RoomDetailsScreen(
             // ROOM HEADER
             // =================================================================
 
+            if (roomState.error != null || deviceState.error != null) {
+
+                item {
+
+                    Text(
+                        text = roomState.error ?: deviceState.error ?: "",
+                        style = ElyraTheme.typography.bodySmall,
+                        color = ElyraTheme.colors.error
+                    )
+                }
+            }
+
             item {
 
                 RoomSummaryCard(

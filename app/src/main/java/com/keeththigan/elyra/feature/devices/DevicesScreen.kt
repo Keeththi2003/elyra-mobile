@@ -145,6 +145,18 @@ fun DevicesScreen(
                 )
             }
 
+            if (state.error != null) {
+
+                item {
+
+                    Text(
+                        text = state.error ?: "",
+                        style = ElyraTheme.typography.bodyMedium,
+                        color = ElyraTheme.colors.error
+                    )
+                }
+            }
+
             if (state.isLoading && devices.isEmpty()) {
 
                 item {

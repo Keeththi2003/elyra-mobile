@@ -108,8 +108,7 @@ fun AddFloorScreen(
         }
 
     val canCreate =
-        floorName.trim().isNotEmpty() &&
-                rooms.isNotEmpty()
+        floorName.trim().isNotEmpty()
 
     Column(
         modifier = Modifier
@@ -387,6 +386,10 @@ fun AddFloorScreen(
                     .clickable(
                         enabled = canCreate && !floorState.isLoading
                     ) {
+                        android.util.Log.d(
+                            "ElyraDebug",
+                            "AddFloorScreen: Create Floor tapped, name='${floorName.trim()}', rooms=${rooms.size}"
+                        )
                         floorViewModel.createFloorWithRooms(
                             floorName = floorName.trim(),
                             rooms = rooms.map { room ->
