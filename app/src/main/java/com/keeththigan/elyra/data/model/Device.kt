@@ -5,6 +5,7 @@ import com.google.firebase.Timestamp
 data class Device(
     val id: String = "",
     val name: String = "",
+    val userId: String = "",
 
     val type: DeviceType = DeviceType.LIGHT,
     val status: DeviceStatus = DeviceStatus.OFF,
