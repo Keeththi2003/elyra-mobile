@@ -1,5 +1,9 @@
 package com.keeththigan.elyra.data.repository
 
+import com.google.firebase.auth.FirebaseAuthException
+import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
+import com.google.firebase.auth.FirebaseAuthInvalidUserException
+import com.google.firebase.auth.FirebaseAuthUserCollisionException
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.FirebaseFirestore
@@ -78,6 +82,14 @@ class AuthRepository {
 
         } catch (e: Exception) {
 
+            // Roll back the auth account so the user isn't left in a
+            // half-created state (auth account exists, no Firestore profile).
+            // Best-effort: don't let a rollback failure mask the original error.
+            try {
+                auth.currentUser?.delete()?.await()
+            } catch (_: Exception) {
+            }
+
             Result.failure(e)
         }
     }
@@ -122,11 +134,49 @@ class AuthRepository {
 
             val user =
                 snapshot.toObject(User::class.java)
-                    ?: return Result.failure(
-                        Exception("User profile not found.")
-                    )
+
+            if (user == null) {
+
+                val repairedUser = User(
+                    id = firebaseUser.uid,
+                    name = firebaseUser.displayName
+                        ?.takeIf { it.isNotBlank() }
+                        ?: email.substringBefore("@"),
+                    email = firebaseUser.email ?: email.trim()
+                )
+
+                usersCollection
+                    .document(firebaseUser.uid)
+                    .set(repairedUser)
+                    .await()
+
+                return Result.success(repairedUser)
+            }
 
             Result.success(user)
+
+        } catch (e: Exception) {
+
+            Result.failure(e)
+        }
+    }
+
+
+    // ========================================================================
+    // PASSWORD RESET
+    // ========================================================================
+
+    suspend fun sendPasswordResetEmail(
+        email: String
+    ): Result<Unit> {
+
+        return try {
+
+            auth.sendPasswordResetEmail(
+                email.trim()
+            ).await()
+
+            Result.success(Unit)
 
         } catch (e: Exception) {
 
