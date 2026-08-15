@@ -31,6 +31,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -41,13 +42,26 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.keeththigan.elyra.core.designsystem.ElyraTheme
+import com.keeththigan.elyra.data.model.DeviceStatus
+import com.keeththigan.elyra.data.model.DeviceType
 
 @Composable
 fun AddDeviceScreen(
+    deviceViewModel: DeviceViewModel,
     onBack: () -> Unit,
     onDeviceCreated: () -> Unit
 ) {
+
+    val state by deviceViewModel.state.collectAsStateWithLifecycle()
+
+    LaunchedEffect(state.isSaved) {
+        if (state.isSaved) {
+            onDeviceCreated()
+            deviceViewModel.consumeSaved()
+        }
+    }
 
     var deviceName by remember {
         mutableStateOf("")
@@ -531,6 +545,19 @@ fun AddDeviceScreen(
                 )
         ) {
 
+            if (state.error != null) {
+
+                Text(
+                    text = state.error ?: "",
+                    style = ElyraTheme.typography.bodySmall,
+                    color = ElyraTheme.colors.error
+                )
+
+                Spacer(
+                    modifier = Modifier.height(10.dp)
+                )
+            }
+
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -539,25 +566,37 @@ fun AddDeviceScreen(
                         RoundedCornerShape(16.dp)
                     )
                     .background(
-                        if (canCreate) {
+                        if (canCreate && !state.isLoading) {
                             ElyraTheme.colors.primary
                         } else {
                             ElyraTheme.colors.surfaceInteractive
                         }
                     )
                     .clickable(
-                        enabled = canCreate
+                        enabled = canCreate && !state.isLoading
                     ) {
-                        onDeviceCreated()
+                        deviceViewModel.createDevice(
+                            name = deviceName.trim(),
+                            type = selectedType!!,
+                            status = selectedStatus,
+                            brightness = brightness.toIntOrNull(),
+                            switchCount = switchCount.toIntOrNull(),
+                            maxOnDurationMinutes = maxOnDuration.toIntOrNull(),
+                            cameraUri = cameraUri.ifBlank { null }
+                        )
                     },
                 contentAlignment = Alignment.Center
             ) {
 
                 Text(
-                    text = "Add device",
+                    text = if (state.isLoading) {
+                        "Adding device…"
+                    } else {
+                        "Add device"
+                    },
                     style = ElyraTheme.typography.labelLarge,
                     color =
-                        if (canCreate) {
+                        if (canCreate && !state.isLoading) {
                             ElyraTheme.colors.onPrimary
                         } else {
                             ElyraTheme.colors.textDisabled
