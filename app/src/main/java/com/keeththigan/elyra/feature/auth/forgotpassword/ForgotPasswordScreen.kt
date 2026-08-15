@@ -38,12 +38,15 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.keeththigan.elyra.core.designsystem.ElyraTheme
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.keeththigan.elyra.feature.auth.AuthViewModel
 
 @Composable
 fun ForgotPasswordScreen(
     onBack: () -> Unit,
     onSendResetLink: (String) -> Unit,
-    onSignIn: () -> Unit
+    onSignIn: () -> Unit,
+    authViewModel: AuthViewModel
 ) {
 
     var email by remember {
@@ -53,6 +56,8 @@ fun ForgotPasswordScreen(
     var focused by remember {
         mutableStateOf(false)
     }
+
+    val authState by authViewModel.authState.collectAsStateWithLifecycle()
 
     val canContinue = email.isNotBlank()
 
@@ -268,6 +273,32 @@ fun ForgotPasswordScreen(
             contentAlignment = Alignment.Center
         ) {
 
+
+        authState.error?.let { error ->
+
+            Spacer(
+                modifier = Modifier.height(12.dp)
+            )
+
+            Text(
+                text = error,
+                style = ElyraTheme.typography.bodySmall,
+                color = ElyraTheme.colors.error
+            )
+        }
+
+        authState.message?.let { message ->
+
+            Spacer(
+                modifier = Modifier.height(12.dp)
+            )
+
+            Text(
+                text = message,
+                style = ElyraTheme.typography.bodySmall,
+                color = ElyraTheme.colors.textPrimary
+            )
+        }
             Text(
                 text = "Send reset link",
                 style = ElyraTheme.typography.labelLarge,

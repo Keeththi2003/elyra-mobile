@@ -124,36 +124,43 @@ class AuthRepository {
 
             // ------------------------------------------------------------
             // Get application user from Firestore
+            //
+            // Auth already succeeded at this point, so a Firestore read
+            // failure (offline, rules, etc.) must not fail the whole sign-in
+            // and leave the app out of sync with FirebaseAuth's own state.
             // ------------------------------------------------------------
 
-            val snapshot =
+            val user = try {
                 usersCollection
                     .document(firebaseUser.uid)
                     .get()
                     .await()
+                    .toObject(User::class.java)
+            } catch (e: Exception) {
+                null
+            }
 
-            val user =
-                snapshot.toObject(User::class.java)
+            if (user != null) {
+                return Result.success(user)
+            }
 
-            if (user == null) {
+            val repairedUser = User(
+                id = firebaseUser.uid,
+                name = firebaseUser.displayName
+                    ?.takeIf { it.isNotBlank() }
+                    ?: email.substringBefore("@"),
+                email = firebaseUser.email ?: email.trim()
+            )
 
-                val repairedUser = User(
-                    id = firebaseUser.uid,
-                    name = firebaseUser.displayName
-                        ?.takeIf { it.isNotBlank() }
-                        ?: email.substringBefore("@"),
-                    email = firebaseUser.email ?: email.trim()
-                )
-
+            try {
                 usersCollection
                     .document(firebaseUser.uid)
                     .set(repairedUser)
                     .await()
-
-                return Result.success(repairedUser)
+            } catch (_: Exception) {
             }
 
-            Result.success(user)
+            Result.success(repairedUser)
 
         } catch (e: Exception) {
 
