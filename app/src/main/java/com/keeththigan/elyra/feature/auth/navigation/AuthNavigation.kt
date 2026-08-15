@@ -1,123 +1,80 @@
 package com.keeththigan.elyra.feature.auth.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
 import com.keeththigan.elyra.feature.auth.login.LoginScreen
-import com.keeththigan.elyra.feature.auth.onboarding.OnboardingScreen
-import com.keeththigan.elyra.feature.auth.signup.SignUpScreen   
-import com.keeththigan.elyra.feature.auth.forgotpassword.ForgotPasswordScreen    
-
-private object AuthRoutes {
-
-    const val ONBOARDING = "onboarding"
-    const val LOGIN = "login"
-    const val SIGN_UP = "sign_up"
-        const val FORGOT_PASSWORD = "forgot_password"
-
-}
+import com.keeththigan.elyra.feature.auth.signup.SignUpScreen
+import com.keeththigan.elyra.feature.auth.AuthViewModel
 
 @Composable
-fun AuthNavigation() {
+fun AuthNavigation(
+    authViewModel: AuthViewModel 
+) {
 
-    val navController = rememberNavController()
+        val navController = androidx.navigation.compose.rememberNavController()
+
 
     NavHost(
         navController = navController,
-        startDestination = AuthRoutes.ONBOARDING
+        startDestination = "signup"
     ) {
 
-        // ========================================================
-        // ONBOARDING
-        // ========================================================
+        // ============================================================
+        // SIGN UP
+        // ============================================================
 
-        composable(AuthRoutes.ONBOARDING) {
+        composable("signup") {
 
-            OnboardingScreen(
-
-                onGetStarted = {
-                    navController.navigate(
-                        AuthRoutes.SIGN_UP
-                    )
-                },
-
-                onSignIn = {
-                    navController.navigate(
-                        AuthRoutes.LOGIN
-                    )
-                }
-            )
-        }
-
-        // ========================================================
-        // LOGIN
-        // ========================================================
-
-        composable(AuthRoutes.LOGIN) {
-
-            LoginScreen(
-
+            SignUpScreen(
                 onBack = {
                     navController.popBackStack()
                 },
 
-                onSignUp = {
-                    navController.navigate(
-                        AuthRoutes.SIGN_UP
-                    )
+                onSignIn = {
+                    navController.navigate("signin")
                 },
 
-                 onForgotPassword = {
-            navController.navigate(
-                AuthRoutes.FORGOT_PASSWORD
-            )
-        },
+                onCreateAccount = {
+                    // Authentication succeeded.
+                    // Return this to your main/home navigation later.
+                    navController.navigate("home") {
+                        popUpTo("signup") {
+                            inclusive = true
+                        }
+                    }
+                },
 
-                onLogin = {
-                    // Later
-                }
+                authViewModel = authViewModel
             )
         }
 
-        // ========================================================
-        // SIGN UP
-        // ========================================================
+        // ============================================================
+        // SIGN IN
+        // ============================================================
 
-        composable(AuthRoutes.SIGN_UP) {
+        composable("signin") {
 
-    SignUpScreen(
+    LoginScreen(
         onBack = {
             navController.popBackStack()
         },
 
-        onSignIn = {
-            navController.navigate(
-                AuthRoutes.LOGIN
-            )
+        onSignUp = {
+            navController.navigate("signup")
         },
 
-        onCreateAccount = {
-            // Account creation will be implemented later.
-        }
-    )
-}
-
-composable(AuthRoutes.FORGOT_PASSWORD) {
-
-    ForgotPasswordScreen(
-
-        onBack = {
-            navController.popBackStack()
+        onLogin = {
+            // We will connect Firebase login here
         },
 
-        onSendResetLink = { email ->
-            // Password reset implementation later
+        onForgotPassword = {
+            navController.navigate("forgot_password")
         },
 
-        onSignIn = {
-            navController.popBackStack()
-        }
+        authViewModel = authViewModel
     )
 }
     }
