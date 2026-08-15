@@ -18,6 +18,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ChevronRight
 import androidx.compose.material.icons.outlined.DarkMode
 import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material.icons.outlined.Logout
 import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.Security
@@ -35,10 +36,12 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import com.keeththigan.elyra.core.designsystem.ElyraTheme
+import com.keeththigan.elyra.feature.auth.AuthViewModel
 
 
 @Composable
 fun SettingsScreen(
+    authViewModel: AuthViewModel,
     onAppearanceClick: () -> Unit = {},
     onAboutClick: () -> Unit = {}
 ) {
@@ -117,6 +120,21 @@ fun SettingsScreen(
                 subtitle = "Password and account security",
                 onClick = {}
             )
+
+            Divider()
+
+            // =====================================================
+            // LOGOUT
+            // =====================================================
+
+            SettingsItem(
+                icon = Icons.Outlined.Logout,
+                title = "Log out",
+                subtitle = "Sign out of your account",
+                onClick = {
+                    authViewModel.signOut()
+                }
+            )
         }
 
 
@@ -179,7 +197,7 @@ fun SettingsScreen(
                 icon = Icons.Outlined.Info,
                 title = "About Elyra",
                 subtitle = "Version 1.0.0",
-    onClick = onAboutClick
+                onClick = onAboutClick
             )
         }
 

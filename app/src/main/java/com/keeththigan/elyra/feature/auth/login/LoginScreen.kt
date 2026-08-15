@@ -79,12 +79,13 @@ fun LoginScreen(
 
     val authState by authViewModel.authState.collectAsState()
 
-    // ========================================================
-    // LOGIN SUCCESS
-    // ========================================================
+    LaunchedEffect(authState.isAuthenticated) {
+        if (authState.isAuthenticated) {
+            onLogin()
+        }
+    }
 
-  
-
+    // ========================================================
     // ========================================================
     // CAN LOGIN
     // ========================================================
