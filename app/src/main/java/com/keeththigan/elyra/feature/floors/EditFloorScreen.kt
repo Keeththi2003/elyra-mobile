@@ -94,7 +94,7 @@ fun EditFloorScreen(
     }
 
     val rooms =
-        roomState.rooms.map { room ->
+        roomState.rooms.filter { it.floorId == floorId }.map { room ->
 
             EditRoomUi(
                 id = room.id,

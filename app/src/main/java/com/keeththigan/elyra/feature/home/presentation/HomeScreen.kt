@@ -71,6 +71,7 @@ fun HomeScreen(
     deviceViewModel: DeviceViewModel,
     floorViewModel: FloorViewModel,
     roomViewModel: RoomViewModel,
+    userName: String = "",
     onFloorClick: (String) -> Unit,
     onDeviceClick: (String) -> Unit,
     onAddFloor: () -> Unit,
@@ -133,7 +134,7 @@ fun HomeScreen(
             ) {
 
                 Text(
-                    text = "Good ",
+                    text = greeting(),
                     style = ElyraTheme.typography.bodyMedium,
                     color = ElyraTheme.colors.textSecondary
                 )
@@ -143,7 +144,8 @@ fun HomeScreen(
                 )
 
                 Text(
-                    text = "Welcome to Elyra",
+                    text = userName.takeIf { it.isNotBlank() }
+                        ?: "Welcome to Elyra",
                     style = ElyraTheme.typography.titleLarge,
                     color = ElyraTheme.colors.textPrimary
                 )
@@ -543,6 +545,21 @@ private fun FloorCard(
 // ============================================================================
 // DEVICE ICON
 // ============================================================================
+
+private fun greeting(): String {
+
+    val hour =
+        java.util.Calendar.getInstance()
+            .get(java.util.Calendar.HOUR_OF_DAY)
+
+    return when (hour) {
+        in 5..11 -> "Good morning"
+        in 12..16 -> "Good afternoon"
+        in 17..21 -> "Good evening"
+        else -> "Good night"
+    }
+}
+
 
 private fun homeDeviceIcon(
     type: DeviceType

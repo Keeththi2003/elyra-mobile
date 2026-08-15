@@ -53,7 +53,7 @@ fun RoomDetailsScreen(
     onBack: () -> Unit,
     onDeviceClick: (String) -> Unit,
     onEditRoom: () -> Unit,
-    onAddDevice: () -> Unit
+    onAddDevice: (floorId: String, roomId: String) -> Unit
 ) {
 
     val roomState by roomViewModel.state.collectAsStateWithLifecycle()
@@ -226,7 +226,12 @@ fun RoomDetailsScreen(
                 item {
 
                     EmptyRoomDevices(
-                        onAddDevice = onAddDevice
+                        onAddDevice = {
+                            onAddDevice(
+                                roomState.selectedRoom?.floorId.orEmpty(),
+                                roomId
+                            )
+                        }
                     )
                 }
 
@@ -249,13 +254,25 @@ fun RoomDetailsScreen(
 
             // =================================================================
             // ADD DEVICE
+            //
+            // Only shown when the room already has devices — the empty state
+            // above carries its own "Add device" action, and rendering both
+            // put two identical cards on screen.
             // =================================================================
 
             item {
 
-                AddDeviceCard(
-                    onClick = onAddDevice
-                )
+                if (devices.isNotEmpty()) {
+
+                    AddDeviceCard(
+                        onClick = {
+                            onAddDevice(
+                                roomState.selectedRoom?.floorId.orEmpty(),
+                                roomId
+                            )
+                        }
+                    )
+                }
 
                 Spacer(
                     modifier = Modifier.height(24.dp)

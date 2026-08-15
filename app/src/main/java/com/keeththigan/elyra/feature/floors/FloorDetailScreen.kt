@@ -81,7 +81,7 @@ fun FloorDetailScreen(
     val floorName = floorState.selectedFloor?.name ?: ""
 
     val rooms =
-        roomState.rooms.map { room ->
+        roomState.rooms.filter { it.floorId == floorId }.map { room ->
 
             ElyraRoom(
                 id = room.id,

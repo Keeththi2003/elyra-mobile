@@ -50,6 +50,8 @@ import com.keeththigan.elyra.data.model.DeviceType
 @Composable
 fun AddDeviceScreen(
     deviceViewModel: DeviceViewModel,
+    floorId: String = "",
+    roomId: String = "",
     onBack: () -> Unit,
     onDeviceCreated: () -> Unit
 ) {
@@ -578,6 +580,8 @@ fun AddDeviceScreen(
                         deviceViewModel.createDevice(
                             name = deviceName.trim(),
                             type = selectedType!!,
+                            floorId = floorId,
+                            roomId = roomId,
                             status = selectedStatus,
                             brightness = brightness.toIntOrNull(),
                             switchCount = switchCount.toIntOrNull(),
