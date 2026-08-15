@@ -29,6 +29,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -42,14 +43,21 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.keeththigan.elyra.core.designsystem.ElyraTheme
+import com.keeththigan.elyra.feature.auth.AuthViewModel
 
 @Composable
 fun SignUpScreen(
     onBack: () -> Unit,
     onSignIn: () -> Unit,
-    onCreateAccount: () -> Unit
+    onCreateAccount: () -> Unit,
+    authViewModel: AuthViewModel
 ) {
+
+    // ========================================================
+    // FORM STATE
+    // ========================================================
 
     var name by remember {
         mutableStateOf("")
@@ -75,6 +83,16 @@ fun SignUpScreen(
         mutableStateOf(false)
     }
 
+    // ========================================================
+    // AUTH STATE
+    // ========================================================
+
+    val authState by authViewModel.authState.collectAsStateWithLifecycle()
+
+    // ========================================================
+    // PASSWORD VALIDATION
+    // ========================================================
+
     val passwordsMatch =
         password == confirmPassword
 
@@ -84,6 +102,17 @@ fun SignUpScreen(
         password.isNotBlank() &&
         confirmPassword.isNotBlank() &&
         passwordsMatch
+
+    // ========================================================
+    // AUTH SUCCESS
+    // ========================================================
+
+    LaunchedEffect(authState.isAuthenticated) {
+
+        if (authState.isAuthenticated) {
+            onCreateAccount()
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -238,6 +267,23 @@ fun SignUpScreen(
             )
         }
 
+        // ========================================================
+        // FIREBASE ERROR
+        // ========================================================
+
+        authState.error?.let { error ->
+
+            Spacer(
+                modifier = Modifier.height(8.dp)
+            )
+
+            Text(
+                text = error,
+                style = ElyraTheme.typography.bodySmall,
+                color = ElyraTheme.colors.error
+            )
+        }
+
         Spacer(
             modifier = Modifier.height(28.dp)
         )
@@ -247,8 +293,16 @@ fun SignUpScreen(
         // ========================================================
 
         ElyraCreateAccountButton(
-            enabled = canCreateAccount,
-            onClick = onCreateAccount
+            enabled = canCreateAccount && !authState.isLoading,
+            isLoading = authState.isLoading,
+            onClick = {
+
+                authViewModel.signUp(
+                    name = name.trim(),
+                    email = email.trim(),
+                    password = password
+                )
+            }
         )
 
         Spacer(
@@ -445,6 +499,7 @@ private fun ElyraSignUpField(
 @Composable
 private fun ElyraCreateAccountButton(
     enabled: Boolean,
+    isLoading: Boolean,
     onClick: () -> Unit
 ) {
 
@@ -478,7 +533,11 @@ private fun ElyraCreateAccountButton(
     ) {
 
         Text(
-            text = "Create account",
+            text = if (isLoading) {
+                "Creating account..."
+            } else {
+                "Create account"
+            },
             style = ElyraTheme.typography.labelLarge,
             color = content
         )
