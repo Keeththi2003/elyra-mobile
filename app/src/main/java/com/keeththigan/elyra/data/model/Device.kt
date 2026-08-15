@@ -1,30 +1,31 @@
 package com.keeththigan.elyra.data.model
 
 import com.google.firebase.Timestamp
+import com.google.firebase.firestore.ServerTimestamp
 
 data class Device(
     val id: String = "",
     val name: String = "",
     val userId: String = "",
-
     val type: DeviceType = DeviceType.LIGHT,
     val status: DeviceStatus = DeviceStatus.OFF,
-
-    val isOn: Boolean = false,
-
-    val floorId: String = "",
     val roomId: String = "",
+    val floorId: String = "",
 
-    val lightConfig: LightConfig? = null,
+    // Light
+    val brightness: Int? = null,
 
-    val multiSwitchConfig: MultiSwitchConfig? = null,
+    // Multi-switch
+    val switchCount: Int? = null,
 
-    val ironConfig: IronConfig? = null,
+    // Safety appliance
+    val maxOnDurationMinutes: Int? = null,
 
-    val cameraConfig: CameraConfig? = null,
+    // Security camera
+    val cameraUri: String? = null,
 
-    val acConfig: AcConfig? = null,
-
+    @ServerTimestamp
     val createdAt: Timestamp? = null,
+    @ServerTimestamp
     val updatedAt: Timestamp? = null
 )
