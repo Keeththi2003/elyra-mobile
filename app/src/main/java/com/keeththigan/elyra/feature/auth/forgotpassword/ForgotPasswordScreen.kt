@@ -59,7 +59,7 @@ fun ForgotPasswordScreen(
 
     val authState by authViewModel.authState.collectAsStateWithLifecycle()
 
-    val canContinue = email.isNotBlank()
+    val canContinue = email.isNotBlank() && !authState.isLoading
 
     Column(
         modifier = Modifier
@@ -173,6 +173,10 @@ fun ForgotPasswordScreen(
             value = email,
             onValueChange = {
                 email = it
+
+                if (authState.error != null) {
+                    authViewModel.clearError()
+                }
             },
             modifier = Modifier
                 .fillMaxWidth()
@@ -243,6 +247,36 @@ fun ForgotPasswordScreen(
             }
         )
 
+        // ========================================================
+        // ERROR / SUCCESS MESSAGE
+        // ========================================================
+
+        authState.error?.let { error ->
+
+            Spacer(
+                modifier = Modifier.height(16.dp)
+            )
+
+            Text(
+                text = error,
+                style = ElyraTheme.typography.bodySmall,
+                color = ElyraTheme.colors.error
+            )
+        }
+
+        authState.message?.let { message ->
+
+            Spacer(
+                modifier = Modifier.height(16.dp)
+            )
+
+            Text(
+                text = message,
+                style = ElyraTheme.typography.bodySmall,
+                color = ElyraTheme.colors.textPrimary
+            )
+        }
+
         Spacer(
             modifier = Modifier.height(24.dp)
         )
@@ -268,39 +302,17 @@ fun ForgotPasswordScreen(
                 .clickable(
                     enabled = canContinue
                 ) {
-                    onSendResetLink(email)
+                    onSendResetLink(email.trim())
                 },
             contentAlignment = Alignment.Center
         ) {
 
-
-        authState.error?.let { error ->
-
-            Spacer(
-                modifier = Modifier.height(12.dp)
-            )
-
             Text(
-                text = error,
-                style = ElyraTheme.typography.bodySmall,
-                color = ElyraTheme.colors.error
-            )
-        }
-
-        authState.message?.let { message ->
-
-            Spacer(
-                modifier = Modifier.height(12.dp)
-            )
-
-            Text(
-                text = message,
-                style = ElyraTheme.typography.bodySmall,
-                color = ElyraTheme.colors.textPrimary
-            )
-        }
-            Text(
-                text = "Send reset link",
+                text = if (authState.isLoading) {
+                    "Sending..."
+                } else {
+                    "Send reset link"
+                },
                 style = ElyraTheme.typography.labelLarge,
                 color =
                     if (canContinue) {

@@ -1,8 +1,10 @@
 package com.keeththigan.elyra.feature.auth.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import com.keeththigan.elyra.feature.auth.login.LoginScreen
 import com.keeththigan.elyra.feature.auth.signup.SignUpScreen
 import com.keeththigan.elyra.feature.auth.AuthViewModel
@@ -16,11 +18,21 @@ private object AuthRoutes {
 
 @Composable
 fun AuthNavigation(
-    authViewModel: AuthViewModel 
+    authViewModel: AuthViewModel
 ) {
 
     val navController = androidx.navigation.compose.rememberNavController()
 
+    // Re-evaluated on every navigation change so the back button is only
+    // shown when there is actually somewhere to go back to. On the start
+    // destination, navController.popBackStack() is a silent no-op, which
+    // otherwise makes the back arrow look broken.
+    val currentBackStackEntry by navController.currentBackStackEntryAsState()
+
+    val canNavigateBack =
+        currentBackStackEntry?.let {
+            navController.previousBackStackEntry != null
+        } ?: false
 
     NavHost(
         navController = navController,
@@ -34,6 +46,7 @@ fun AuthNavigation(
         composable(AuthRoutes.SIGN_UP) {
 
             SignUpScreen(
+                showBackButton = canNavigateBack,
                 onBack = {
                     navController.popBackStack()
                 },
@@ -57,6 +70,7 @@ fun AuthNavigation(
         composable(AuthRoutes.SIGN_IN) {
 
             LoginScreen(
+                showBackButton = canNavigateBack,
                 onBack = {
                     navController.popBackStack()
                 },

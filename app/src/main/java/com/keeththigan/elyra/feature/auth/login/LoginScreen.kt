@@ -54,7 +54,8 @@ fun LoginScreen(
     onSignUp: () -> Unit,
     onForgotPassword: () -> Unit,
     onLogin: () -> Unit,
-    authViewModel: AuthViewModel
+    authViewModel: AuthViewModel,
+    showBackButton: Boolean = true
 )  {
 
     // ========================================================
@@ -116,22 +117,25 @@ fun LoginScreen(
                 .height(48.dp)
         ) {
 
-            IconButton(
-                onClick = onBack,
-                modifier = Modifier
-                    .size(44.dp)
-                    .align(Alignment.CenterStart)
-                    .clip(CircleShape)
-                    .background(
-                        ElyraTheme.colors.surfaceSecondary
-                    )
-            ) {
+            if (showBackButton) {
 
-                Icon(
-                    imageVector = Icons.Outlined.ArrowBack,
-                    contentDescription = "Back",
-                    tint = ElyraTheme.colors.textPrimary
-                )
+                IconButton(
+                    onClick = onBack,
+                    modifier = Modifier
+                        .size(44.dp)
+                        .align(Alignment.CenterStart)
+                        .clip(CircleShape)
+                        .background(
+                            ElyraTheme.colors.surfaceSecondary
+                        )
+                ) {
+
+                    Icon(
+                        imageVector = Icons.Outlined.ArrowBack,
+                        contentDescription = "Back",
+                        tint = ElyraTheme.colors.textPrimary
+                    )
+                }
             }
         }
 
@@ -256,7 +260,7 @@ fun LoginScreen(
             Text(
                 text = authState.error ?: "",
                 style = ElyraTheme.typography.bodyMedium,
-                color = ElyraTheme.colors.textPrimary
+                color = ElyraTheme.colors.error
             )
         }
 
