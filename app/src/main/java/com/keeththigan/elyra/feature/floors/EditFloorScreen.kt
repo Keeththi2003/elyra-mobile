@@ -26,8 +26,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -35,7 +35,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.keeththigan.elyra.core.designsystem.ElyraTheme
+import com.keeththigan.elyra.feature.devices.DeviceViewModel
 
 // ============================================================================
 // TEMPORARY ROOM MODEL
@@ -55,53 +57,53 @@ private data class EditRoomUi(
 @Composable
 fun EditFloorScreen(
     floorId: String,
+    floorViewModel: FloorViewModel,
+    roomViewModel: RoomViewModel,
+    deviceViewModel: DeviceViewModel,
     onBack: () -> Unit,
     onAddRoom: () -> Unit,
     onRoomClick: (String) -> Unit,
     onSave: () -> Unit
 ) {
 
-    /*
-     * Temporary values.
-     *
-     * Later:
-     *
-     * floorId
-     *    ↓
-     * ViewModel
-     *    ↓
-     * Repository
-     *    ↓
-     * Database
-     */
+    val floorState by floorViewModel.state.collectAsStateWithLifecycle()
+    val roomState by roomViewModel.state.collectAsStateWithLifecycle()
+    val deviceState by deviceViewModel.state.collectAsStateWithLifecycle()
+
+    LaunchedEffect(floorId) {
+        floorViewModel.loadFloor(floorId)
+        roomViewModel.loadRoomsForFloor(floorId)
+        deviceViewModel.loadDevices()
+    }
 
     var floorName by remember {
-        mutableStateOf("Ground Floor")
+        mutableStateOf("")
     }
 
-    val rooms = remember {
+    LaunchedEffect(floorState.selectedFloor) {
+        floorState.selectedFloor?.let {
+            floorName = it.name
+        }
+    }
 
-        mutableStateListOf(
+    LaunchedEffect(floorState.isSaved) {
+        if (floorState.isSaved) {
+            onSave()
+            floorViewModel.consumeSaved()
+        }
+    }
+
+    val rooms =
+        roomState.rooms.map { room ->
 
             EditRoomUi(
-                id = "room_001",
-                name = "Living Room",
-                deviceCount = 3
-            ),
-
-            EditRoomUi(
-                id = "room_002",
-                name = "Bedroom",
-                deviceCount = 2
-            ),
-
-            EditRoomUi(
-                id = "room_003",
-                name = "Kitchen",
-                deviceCount = 4
+                id = room.id,
+                name = room.name,
+                deviceCount = deviceState.devices.count {
+                    it.roomId == room.id
+                }
             )
-        )
-    }
+        }
 
     Column(
         modifier = Modifier
@@ -231,7 +233,7 @@ fun EditFloorScreen(
                             },
 
                             onDelete = {
-                                rooms.remove(room)
+                                roomViewModel.deleteRoom(room.id)
                             }
                         )
                     }
@@ -251,6 +253,18 @@ fun EditFloorScreen(
             // SAVE
             // =================================================================
 
+            if (floorState.error != null) {
+
+                item {
+
+                    Text(
+                        text = floorState.error ?: "",
+                        style = ElyraTheme.typography.bodySmall,
+                        color = ElyraTheme.colors.error
+                    )
+                }
+            }
+
             item {
 
                 Spacer(
@@ -258,7 +272,7 @@ fun EditFloorScreen(
                 )
 
                 val canSave =
-                    floorName.isNotBlank()
+                    floorName.isNotBlank() && !floorState.isLoading
 
                 Box(
                     modifier = Modifier
@@ -277,13 +291,13 @@ fun EditFloorScreen(
                         .clickable(
                             enabled = canSave
                         ) {
-                            onSave()
+                            floorViewModel.updateFloor(floorId, floorName.trim())
                         },
                     contentAlignment = Alignment.Center
                 ) {
 
                     Text(
-                        text = "Save Changes",
+                        text = if (floorState.isLoading) "Saving…" else "Save Changes",
                         style = ElyraTheme.typography.labelLarge,
                         color =
                             if (canSave) {
