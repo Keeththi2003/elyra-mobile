@@ -1,6 +1,5 @@
 package com.keeththigan.elyra.data.repository
 
-import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.FirebaseFirestore
@@ -19,11 +18,20 @@ class AuthRepository {
         firestore.collection("users")
 
 
-    // ============================================================
-    // REGISTER
-    // ============================================================
+    // ========================================================================
+    // CURRENT USER
+    // ========================================================================
 
-    suspend fun register(
+    fun getCurrentUser(): FirebaseUser? {
+        return auth.currentUser
+    }
+
+
+    // ========================================================================
+    // SIGN UP
+    // ========================================================================
+
+    suspend fun signUp(
         name: String,
         email: String,
         password: String
@@ -31,30 +39,36 @@ class AuthRepository {
 
         return try {
 
-            // Firebase Authentication creates the account
-            val result =
+            // ------------------------------------------------------------
+            // Create Firebase Authentication account
+            // ------------------------------------------------------------
+
+            val authResult =
                 auth.createUserWithEmailAndPassword(
                     email.trim(),
                     password
                 ).await()
 
             val firebaseUser =
-                result.user
+                authResult.user
                     ?: return Result.failure(
-                        Exception("User registration failed")
+                        Exception("Failed to create user account.")
                     )
 
-            val now = Timestamp.now()
+            // ------------------------------------------------------------
+            // Create application user
+            // ------------------------------------------------------------
 
             val user = User(
                 id = firebaseUser.uid,
                 name = name.trim(),
-                email = email.trim(),
-                createdAt = now,
-                updatedAt = now
+                email = email.trim()
             )
 
-            // Store profile information in Firestore
+            // ------------------------------------------------------------
+            // Save user profile in Firestore
+            // ------------------------------------------------------------
+
             usersCollection
                 .document(firebaseUser.uid)
                 .set(user)
@@ -69,42 +83,50 @@ class AuthRepository {
     }
 
 
-    // ============================================================
-    // LOGIN
-    // ============================================================
+    // ========================================================================
+    // SIGN IN
+    // ========================================================================
 
-    suspend fun login(
+    suspend fun signIn(
         email: String,
         password: String
     ): Result<User> {
 
         return try {
 
-            val result =
+            // ------------------------------------------------------------
+            // Firebase Authentication
+            // ------------------------------------------------------------
+
+            val authResult =
                 auth.signInWithEmailAndPassword(
                     email.trim(),
                     password
                 ).await()
 
             val firebaseUser =
-                result.user
+                authResult.user
                     ?: return Result.failure(
-                        Exception("Login failed")
+                        Exception("Failed to sign in.")
                     )
 
+            // ------------------------------------------------------------
+            // Get application user from Firestore
+            // ------------------------------------------------------------
+
+            val snapshot =
+                usersCollection
+                    .document(firebaseUser.uid)
+                    .get()
+                    .await()
+
             val user =
-                getUser(firebaseUser.uid)
+                snapshot.toObject(User::class.java)
+                    ?: return Result.failure(
+                        Exception("User profile not found.")
+                    )
 
-            if (user != null) {
-
-                Result.success(user)
-
-            } else {
-
-                Result.failure(
-                    Exception("User profile not found")
-                )
-            }
+            Result.success(user)
 
         } catch (e: Exception) {
 
@@ -113,139 +135,38 @@ class AuthRepository {
     }
 
 
-    // ============================================================
-    // GET CURRENT USER
-    // ============================================================
+    // ========================================================================
+    // SIGN OUT
+    // ========================================================================
 
-    suspend fun getCurrentUser(): User? {
-
-        val firebaseUser =
-            auth.currentUser
-                ?: return null
-
-        return getUser(firebaseUser.uid)
+    fun signOut() {
+        auth.signOut()
     }
 
 
-    // ============================================================
-    // GET USER BY ID
-    // ============================================================
+    // ========================================================================
+    // GET USER PROFILE
+    // ========================================================================
 
-    suspend fun getUser(
-        userId: String
-    ): User? {
+    suspend fun getUserProfile(
+        uid: String
+    ): Result<User> {
 
         return try {
 
             val snapshot =
                 usersCollection
-                    .document(userId)
+                    .document(uid)
                     .get()
                     .await()
 
-            snapshot.toObject(User::class.java)
-
-        } catch (e: Exception) {
-
-            null
-        }
-    }
-
-
-    // ============================================================
-    // CURRENT FIREBASE USER
-    // ============================================================
-
-    fun getFirebaseUser(): FirebaseUser? {
-
-        return auth.currentUser
-    }
-
-
-    // ============================================================
-    // CHECK LOGIN STATE
-    // ============================================================
-
-    fun isLoggedIn(): Boolean {
-
-        return auth.currentUser != null
-    }
-
-
-    // ============================================================
-    // LOGOUT
-    // ============================================================
-
-    fun logout() {
-
-        auth.signOut()
-    }
-
-
-    // ============================================================
-    // UPDATE USER PROFILE
-    // ============================================================
-
-    suspend fun updateProfile(
-        name: String
-    ): Result<Unit> {
-
-        return try {
-
-            val firebaseUser =
-                auth.currentUser
+            val user =
+                snapshot.toObject(User::class.java)
                     ?: return Result.failure(
-                        Exception("User is not logged in")
+                        Exception("User profile not found.")
                     )
 
-            val updates = mapOf(
-                "name" to name.trim(),
-                "updatedAt" to Timestamp.now()
-            )
-
-            usersCollection
-                .document(firebaseUser.uid)
-                .update(updates)
-                .await()
-
-            Result.success(Unit)
-
-        } catch (e: Exception) {
-
-            Result.failure(e)
-        }
-    }
-
-
-    // ============================================================
-    // DELETE ACCOUNT
-    // ============================================================
-
-    suspend fun deleteAccount(): Result<Unit> {
-
-        return try {
-
-            val firebaseUser =
-                auth.currentUser
-                    ?: return Result.failure(
-                        Exception("User is not logged in")
-                    )
-
-            val userId =
-                firebaseUser.uid
-
-            // Delete Firestore profile
-            usersCollection
-                .document(userId)
-                .delete()
-                .await()
-
-            // Delete Firebase Authentication account
-            firebaseUser
-                .delete()
-                .await()
-
-            Result.success(Unit)
+            Result.success(user)
 
         } catch (e: Exception) {
 
