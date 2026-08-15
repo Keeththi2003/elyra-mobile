@@ -52,7 +52,8 @@ fun SignUpScreen(
     onBack: () -> Unit,
     onSignIn: () -> Unit,
     onCreateAccount: () -> Unit,
-    authViewModel: AuthViewModel
+    authViewModel: AuthViewModel,
+    showBackButton: Boolean = true
 ) {
 
     // ========================================================
@@ -135,23 +136,26 @@ fun SignUpScreen(
                 .height(48.dp)
         ) {
 
-            IconButton(
-                onClick = onBack,
-                modifier = Modifier
-                    .size(44.dp)
-                    .align(Alignment.CenterStart)
-                    .clip(CircleShape)
-                    .background(
-                        ElyraTheme.colors.surfaceSecondary
-                    )
-            ) {
+            if (showBackButton) {
 
-                Icon(
-                    imageVector = Icons.Outlined.ArrowBack,
-                    contentDescription = "Back",
-                    tint = ElyraTheme.colors.textPrimary,
-                    modifier = Modifier.size(21.dp)
-                )
+                IconButton(
+                    onClick = onBack,
+                    modifier = Modifier
+                        .size(44.dp)
+                        .align(Alignment.CenterStart)
+                        .clip(CircleShape)
+                        .background(
+                            ElyraTheme.colors.surfaceSecondary
+                        )
+                ) {
+
+                    Icon(
+                        imageVector = Icons.Outlined.ArrowBack,
+                        contentDescription = "Back",
+                        tint = ElyraTheme.colors.textPrimary,
+                        modifier = Modifier.size(21.dp)
+                    )
+                }
             }
         }
 
@@ -197,6 +201,10 @@ fun SignUpScreen(
                 value = name,
                 onValueChange = {
                     name = it
+
+                    if (authState.error != null) {
+                        authViewModel.clearError()
+                    }
                 },
                 placeholder = "Your name",
                 keyboardType = KeyboardType.Text,
@@ -208,6 +216,10 @@ fun SignUpScreen(
                 value = email,
                 onValueChange = {
                     email = it
+
+                    if (authState.error != null) {
+                        authViewModel.clearError()
+                    }
                 },
                 placeholder = "you@example.com",
                 keyboardType = KeyboardType.Email,
@@ -219,6 +231,10 @@ fun SignUpScreen(
                 value = password,
                 onValueChange = {
                     password = it
+
+                    if (authState.error != null) {
+                        authViewModel.clearError()
+                    }
                 },
                 placeholder = "Create a password",
                 keyboardType = KeyboardType.Password,
@@ -235,6 +251,10 @@ fun SignUpScreen(
                 value = confirmPassword,
                 onValueChange = {
                     confirmPassword = it
+
+                    if (authState.error != null) {
+                        authViewModel.clearError()
+                    }
                 },
                 placeholder = "Repeat your password",
                 keyboardType = KeyboardType.Password,
