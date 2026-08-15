@@ -3,6 +3,9 @@ package com.keeththigan.elyra.data.repository
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.keeththigan.elyra.data.model.Room
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
 
 class RoomRepository {
@@ -55,6 +58,44 @@ class RoomRepository {
 
             Result.failure(e)
         }
+    }
+
+
+    // ========================================================================
+    // OBSERVE (realtime)
+    // ========================================================================
+
+    fun observeRooms(): Flow<Result<List<Room>>> = callbackFlow {
+
+        val uid = auth.currentUser?.uid
+
+        if (uid == null) {
+            trySend(
+                Result.failure(Exception("You must be signed in."))
+            )
+            close()
+            return@callbackFlow
+        }
+
+        val registration =
+            roomsCollection
+                .whereEqualTo("userId", uid)
+                .addSnapshotListener { snapshot, error ->
+
+                    if (error != null) {
+                        trySend(Result.failure(error))
+                        return@addSnapshotListener
+                    }
+
+                    val rooms =
+                        snapshot?.documents?.mapNotNull {
+                            it.toObject(Room::class.java)
+                        } ?: emptyList()
+
+                    trySend(Result.success(rooms))
+                }
+
+        awaitClose { registration.remove() }
     }
 
 

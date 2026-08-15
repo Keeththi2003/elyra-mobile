@@ -3,6 +3,9 @@ package com.keeththigan.elyra.data.repository
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.keeththigan.elyra.data.model.Floor
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
 
 class FloorRepository {
@@ -33,20 +36,9 @@ class FloorRepository {
 
         val uid =
             auth.currentUser?.uid
-                ?: run {
-                    android.util.Log.e(
-                        "ElyraDebug",
-                        "FloorRepository: createFloor aborted, auth.currentUser is null"
-                    )
-                    return Result.failure(
-                        Exception("You must be signed in.")
-                    )
-                }
-
-        android.util.Log.d(
-            "ElyraDebug",
-            "FloorRepository: createFloor uid=$uid, name='${floor.name}'"
-        )
+                ?: return Result.failure(
+                    Exception("You must be signed in.")
+                )
 
         return try {
 
@@ -61,30 +53,52 @@ class FloorRepository {
                     updatedAt = null
                 )
 
-            android.util.Log.d(
-                "ElyraDebug",
-                "FloorRepository: writing doc id=${docRef.id} to 'floors' collection"
-            )
-
             docRef.set(newFloor).await()
-
-            android.util.Log.d(
-                "ElyraDebug",
-                "FloorRepository: write SUCCEEDED for doc id=${docRef.id}"
-            )
 
             Result.success(newFloor)
 
         } catch (e: Exception) {
 
-            android.util.Log.e(
-                "ElyraDebug",
-                "FloorRepository: write FAILED",
-                e
-            )
-
             Result.failure(e)
         }
+    }
+
+
+    // ========================================================================
+    // OBSERVE (realtime)
+    // ========================================================================
+
+    fun observeFloors(): Flow<Result<List<Floor>>> = callbackFlow {
+
+        val uid = auth.currentUser?.uid
+
+        if (uid == null) {
+            trySend(
+                Result.failure(Exception("You must be signed in."))
+            )
+            close()
+            return@callbackFlow
+        }
+
+        val registration =
+            floorsCollection
+                .whereEqualTo("userId", uid)
+                .addSnapshotListener { snapshot, error ->
+
+                    if (error != null) {
+                        trySend(Result.failure(error))
+                        return@addSnapshotListener
+                    }
+
+                    val floors =
+                        snapshot?.documents?.mapNotNull {
+                            it.toObject(Floor::class.java)
+                        } ?: emptyList()
+
+                    trySend(Result.success(floors))
+                }
+
+        awaitClose { registration.remove() }
     }
 
 

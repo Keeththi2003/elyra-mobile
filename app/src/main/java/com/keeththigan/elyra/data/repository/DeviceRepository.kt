@@ -3,6 +3,9 @@ package com.keeththigan.elyra.data.repository
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.keeththigan.elyra.data.model.Device
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
 
 class DeviceRepository {
@@ -52,6 +55,48 @@ class DeviceRepository {
 
             Result.failure(e)
         }
+    }
+
+
+    // ========================================================================
+    // OBSERVE (realtime)
+    //
+    // Emits on every change to this user's devices, whether the write came
+    // from this app or from anywhere else (console, simulator, another
+    // device), so the UI stays in sync without manual refreshes.
+    // ========================================================================
+
+    fun observeDevices(): Flow<Result<List<Device>>> = callbackFlow {
+
+        val uid = auth.currentUser?.uid
+
+        if (uid == null) {
+            trySend(
+                Result.failure(Exception("You must be signed in."))
+            )
+            close()
+            return@callbackFlow
+        }
+
+        val registration =
+            devicesCollection
+                .whereEqualTo("userId", uid)
+                .addSnapshotListener { snapshot, error ->
+
+                    if (error != null) {
+                        trySend(Result.failure(error))
+                        return@addSnapshotListener
+                    }
+
+                    val devices =
+                        snapshot?.documents?.mapNotNull {
+                            it.toObject(Device::class.java)
+                        } ?: emptyList()
+
+                    trySend(Result.success(devices))
+                }
+
+        awaitClose { registration.remove() }
     }
 
 
