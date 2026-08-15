@@ -37,73 +37,66 @@ class RoomViewModel(
     val state: StateFlow<RoomUiState> =
         _state.asStateFlow()
 
+    private var observeJob: kotlinx.coroutines.Job? = null
+
+    init {
+        observeRooms()
+    }
+
 
     // ========================================================================
-    // LOAD
+    // LOAD (realtime)
+    //
+    // The stream carries every room the user owns; per-floor screens filter
+    // it locally so switching floors never needs another round trip.
     // ========================================================================
 
-    fun loadRooms() {
+    private fun observeRooms() {
 
-        viewModelScope.launch {
+        if (observeJob != null) return
 
-            _state.value =
-                _state.value.copy(
-                    isLoading = true,
-                    error = null
-                )
+        _state.value = _state.value.copy(isLoading = true)
 
-            repository.getRooms()
-                .onSuccess { rooms ->
+        observeJob = viewModelScope.launch {
 
-                    _state.value =
-                        _state.value.copy(
-                            isLoading = false,
-                            rooms = rooms
-                        )
-                }
-                .onFailure { exception ->
+            repository.observeRooms().collect { result ->
 
-                    _state.value =
-                        _state.value.copy(
-                            isLoading = false,
-                            error = exception.message
-                                ?: "Failed to load rooms."
-                        )
-                }
+                result
+                    .onSuccess { rooms ->
+
+                        _state.value =
+                            _state.value.copy(
+                                isLoading = false,
+                                rooms = rooms,
+                                selectedRoom = _state.value.selectedRoom
+                                    ?.let { selected ->
+                                        rooms.find { it.id == selected.id }
+                                            ?: selected
+                                    }
+                            )
+                    }
+                    .onFailure { exception ->
+
+                        _state.value =
+                            _state.value.copy(
+                                isLoading = false,
+                                error = exception.message
+                                    ?: "Failed to load rooms."
+                            )
+                    }
+            }
         }
+    }
+
+    /** Kept for screens that call it on entry; the stream is already live. */
+    fun loadRooms() {
+        observeRooms()
     }
 
     fun loadRoomsForFloor(
         floorId: String
     ) {
-
-        viewModelScope.launch {
-
-            _state.value =
-                _state.value.copy(
-                    isLoading = true,
-                    error = null
-                )
-
-            repository.getRoomsForFloor(floorId)
-                .onSuccess { rooms ->
-
-                    _state.value =
-                        _state.value.copy(
-                            isLoading = false,
-                            rooms = rooms
-                        )
-                }
-                .onFailure { exception ->
-
-                    _state.value =
-                        _state.value.copy(
-                            isLoading = false,
-                            error = exception.message
-                                ?: "Failed to load rooms."
-                        )
-                }
-        }
+        observeRooms()
     }
 
     fun loadRoom(

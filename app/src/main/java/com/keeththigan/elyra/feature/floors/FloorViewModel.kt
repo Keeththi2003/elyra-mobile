@@ -42,40 +42,57 @@ class FloorViewModel(
     val state: StateFlow<FloorUiState> =
         _state.asStateFlow()
 
+    private var observeJob: kotlinx.coroutines.Job? = null
+
+    init {
+        observeFloors()
+    }
+
 
     // ========================================================================
-    // LOAD
+    // LOAD (realtime)
     // ========================================================================
 
-    fun loadFloors() {
+    private fun observeFloors() {
 
-        viewModelScope.launch {
+        if (observeJob != null) return
 
-            _state.value =
-                _state.value.copy(
-                    isLoading = true,
-                    error = null
-                )
+        _state.value = _state.value.copy(isLoading = true)
 
-            floorRepository.getFloors()
-                .onSuccess { floors ->
+        observeJob = viewModelScope.launch {
 
-                    _state.value =
-                        _state.value.copy(
-                            isLoading = false,
-                            floors = floors
-                        )
-                }
-                .onFailure { exception ->
+            floorRepository.observeFloors().collect { result ->
 
-                    _state.value =
-                        _state.value.copy(
-                            isLoading = false,
-                            error = exception.message
-                                ?: "Failed to load floors."
-                        )
-                }
+                result
+                    .onSuccess { floors ->
+
+                        _state.value =
+                            _state.value.copy(
+                                isLoading = false,
+                                floors = floors,
+                                selectedFloor = _state.value.selectedFloor
+                                    ?.let { selected ->
+                                        floors.find { it.id == selected.id }
+                                            ?: selected
+                                    }
+                            )
+                    }
+                    .onFailure { exception ->
+
+                        _state.value =
+                            _state.value.copy(
+                                isLoading = false,
+                                error = exception.message
+                                    ?: "Failed to load floors."
+                            )
+                    }
+            }
         }
+    }
+
+    /** Kept for screens that call it on entry; the stream is already live. */
+    fun loadFloors() {
+        observeFloors()
     }
 
     fun loadFloor(
@@ -184,11 +201,6 @@ class FloorViewModel(
 
         viewModelScope.launch {
 
-            android.util.Log.d(
-                "ElyraDebug",
-                "FloorViewModel: createFloorWithRooms launched, name='$floorName'"
-            )
-
             _state.value =
                 _state.value.copy(
                     isLoading = true,
@@ -198,19 +210,8 @@ class FloorViewModel(
             val floorResult =
                 floorRepository.createFloor(Floor(name = floorName))
 
-            android.util.Log.d(
-                "ElyraDebug",
-                "FloorViewModel: createFloor result = $floorResult"
-            )
-
             val floor =
                 floorResult.getOrElse { exception ->
-
-                    android.util.Log.e(
-                        "ElyraDebug",
-                        "FloorViewModel: createFloor FAILED",
-                        exception
-                    )
 
                     _state.value =
                         _state.value.copy(
