@@ -59,6 +59,9 @@ import com.keeththigan.elyra.feature.floors.AddRoomScreen
 import com.keeththigan.elyra.feature.floors.AddFloorScreen
 import com.keeththigan.elyra.core.designsystem.ElyraTheme
 import com.keeththigan.elyra.feature.auth.AuthViewModel
+import com.keeththigan.elyra.feature.devices.DeviceViewModel
+import com.keeththigan.elyra.feature.floors.FloorViewModel
+import com.keeththigan.elyra.feature.floors.RoomViewModel
 
 
 private object AppRoutes {
@@ -72,7 +75,7 @@ const val DEVICE_DETAIL = "device_detail/{deviceId}"
 const val FLOOR_DETAIL = "floor_detail/{floorId}"
 const val ADD_FLOOR = "add_floor"
 const val ADD_DEVICE = "add_device"
-const val ADD_ROOM = "add_room"
+const val ADD_ROOM = "add_room/{floorId}"
 const val ROOM_DETAILS = "room_details/{roomId}"
 const val EDIT_FLOOR = "edit_floor/{floorId}"
 const val EDIT_ROOM = "edit_room/{roomId}"
@@ -116,7 +119,10 @@ private val bottomNavItems = listOf(
 
 @Composable
 fun AppNavigation(
-    authViewModel: AuthViewModel 
+    authViewModel: AuthViewModel,
+    deviceViewModel: DeviceViewModel,
+    floorViewModel: FloorViewModel,
+    roomViewModel: RoomViewModel
 ) {
 
     val navController = rememberNavController()
@@ -212,6 +218,10 @@ fun AppNavigation(
 
     HomeScreen(
 
+        deviceViewModel = deviceViewModel,
+        floorViewModel = floorViewModel,
+        roomViewModel = roomViewModel,
+
         onFloorClick = { floorId ->
 
             navController.navigate(
@@ -256,7 +266,8 @@ fun AppNavigation(
             composable(AppRoutes.DEVICES) {
 
     DevicesScreen(
-       
+
+        deviceViewModel = deviceViewModel,
 
         onDeviceClick = { deviceId ->
 
@@ -289,6 +300,9 @@ fun AppNavigation(
 
     DeviceDetailScreen(
         deviceId = deviceId,
+        deviceViewModel = deviceViewModel,
+        floorViewModel = floorViewModel,
+        roomViewModel = roomViewModel,
         onBack = {
             navController.popBackStack()
         },
@@ -298,9 +312,7 @@ fun AppNavigation(
             )
         },
          onRemoveDevice = {
-        // Later:
-        // delete device from repository/database
-        navController.popBackStack()
+        deviceViewModel.deleteDevice(deviceId)
     }
     )
 }
@@ -308,6 +320,8 @@ fun AppNavigation(
 composable(AppRoutes.ADD_DEVICE) {
 
     AddDeviceScreen(
+
+        deviceViewModel = deviceViewModel,
 
         onBack = {
             navController.popBackStack()
@@ -324,9 +338,12 @@ composable(AppRoutes.FLOORS) {
 
     FloorsScreen(
 
+        floorViewModel = floorViewModel,
+        roomViewModel = roomViewModel,
+        deviceViewModel = deviceViewModel,
+
         onFloorClick = { floorId ->
 
-            // We will create FloorDetailScreen next.
             navController.navigate(
                 "floor_detail/$floorId"
             )
@@ -339,12 +356,9 @@ composable(AppRoutes.FLOORS) {
     )
         },
 
-        
-
-       
         onDeleteFloor = { floorId ->
 
-            // Delete confirmation later.
+            floorViewModel.deleteFloor(floorId)
         }
     )
 }
@@ -360,18 +374,18 @@ composable(
 
     EditRoomScreen(
         roomId = roomId,
+        roomViewModel = roomViewModel,
+        deviceViewModel = deviceViewModel,
 
         onBack = {
             navController.popBackStack()
         },
 
         onSave = {
-            // Later save through ViewModel/Repository.
             navController.popBackStack()
         },
 
         onDelete = {
-            // Later delete through ViewModel/Repository.
             navController.popBackStack()
         }
     )
@@ -388,26 +402,35 @@ composable(
 
     EditDeviceScreen(
         deviceId = deviceId,
+        deviceViewModel = deviceViewModel,
 
         onBack = {
             navController.popBackStack()
         },
 
         onSave = {
-            // Later save through ViewModel/Repository.
             navController.popBackStack()
         },
 
         onDelete = {
-            // Later delete through ViewModel/Repository.
             navController.popBackStack()
         }
     )
 }
 
-composable(AppRoutes.ADD_ROOM) {
+composable(
+    route = AppRoutes.ADD_ROOM
+) { backStackEntry ->
+
+    val floorId =
+        backStackEntry.arguments
+            ?.getString("floorId")
+            ?: return@composable
 
     AddRoomScreen(
+        floorId = floorId,
+        roomViewModel = roomViewModel,
+
         onBack = {
             navController.popBackStack()
         },
@@ -429,6 +452,9 @@ composable(
 
     RoomDetailsScreen(
         roomId = roomId,
+        roomViewModel = roomViewModel,
+        floorViewModel = floorViewModel,
+        deviceViewModel = deviceViewModel,
 
         onBack = {
             navController.popBackStack()
@@ -466,6 +492,9 @@ composable(
 
     FloorDetailScreen(
         floorId = floorId,
+        floorViewModel = floorViewModel,
+        roomViewModel = roomViewModel,
+        deviceViewModel = deviceViewModel,
 
         onBack = {
             navController.popBackStack()
@@ -479,7 +508,7 @@ composable(
 },
 
         onAddRoom = {
-    navController.navigate(AppRoutes.ADD_ROOM)
+    navController.navigate("add_room/$floorId")
 },
 
        onEditFloor = {
@@ -502,6 +531,9 @@ composable(
 
     EditFloorScreen(
         floorId = floorId,
+        floorViewModel = floorViewModel,
+        roomViewModel = roomViewModel,
+        deviceViewModel = deviceViewModel,
 
         onBack = {
             navController.popBackStack()
@@ -509,7 +541,7 @@ composable(
 
         onAddRoom = {
             navController.navigate(
-                AppRoutes.ADD_ROOM
+                "add_room/$floorId"
             )
         },
 
@@ -530,6 +562,9 @@ composable(AppRoutes.ADD_FLOOR) {
 
     AddFloorScreen(
 
+        floorViewModel = floorViewModel,
+        deviceViewModel = deviceViewModel,
+
         onBack = {
             navController.popBackStack()
         },
@@ -540,10 +575,7 @@ composable(AppRoutes.ADD_FLOOR) {
     )
 },
 
-        onCreateFloor = { 
-            // Later:
-            // Save floor + rooms + devices to repository/database.
-
+        onCreateFloor = {
             navController.popBackStack()
         }
     )

@@ -32,26 +32,22 @@ import androidx.compose.material.icons.outlined.ChevronRight
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.keeththigan.elyra.core.designsystem.ElyraTheme
-
-
-// ============================================================================
-// HOME DEVICE
-// ============================================================================
-
-private data class HomeDevice(
-    val id: String,
-    val name: String,
-    val type: String,
-    val isOn: Boolean
-)
+import com.keeththigan.elyra.data.model.Device
+import com.keeththigan.elyra.data.model.DeviceStatus
+import com.keeththigan.elyra.data.model.DeviceType
+import com.keeththigan.elyra.feature.devices.DeviceViewModel
+import com.keeththigan.elyra.feature.floors.FloorViewModel
+import com.keeththigan.elyra.feature.floors.RoomViewModel
 
 
 // ============================================================================
@@ -72,6 +68,9 @@ private data class HomeFloor(
 
 @Composable
 fun HomeScreen(
+    deviceViewModel: DeviceViewModel,
+    floorViewModel: FloorViewModel,
+    roomViewModel: RoomViewModel,
     onFloorClick: (String) -> Unit,
     onDeviceClick: (String) -> Unit,
     onAddFloor: () -> Unit,
@@ -79,57 +78,32 @@ fun HomeScreen(
     onProfileClick: () -> Unit
 ) {
 
-    val devices = remember {
+    val deviceState by deviceViewModel.state.collectAsStateWithLifecycle()
+    val floorState by floorViewModel.state.collectAsStateWithLifecycle()
+    val roomState by roomViewModel.state.collectAsStateWithLifecycle()
 
-        listOf(
-            HomeDevice(
-                id = "living_room_light",
-                name = "Living Room Light",
-                type = "Light",
-                isOn = true
-            ),
-
-            HomeDevice(
-                id = "kitchen_outlet",
-                name = "Kitchen Outlet",
-                type = "Outlet",
-                isOn = false
-            ),
-
-            HomeDevice(
-                id = "kitchen_switch",
-                name = "Kitchen Switch",
-                type = "Switch",
-                isOn = true
-            ),
-
-            HomeDevice(
-                id = "bedroom_ac",
-                name = "Bedroom AC",
-                type = "AC",
-                isOn = false
-            )
-        )
+    LaunchedEffect(Unit) {
+        deviceViewModel.loadDevices()
+        floorViewModel.loadFloors()
+        roomViewModel.loadRooms()
     }
 
-    val floors = remember {
+    val devices = deviceState.devices
 
-        listOf(
-            HomeFloor(
-                id = "ground",
-                name = "Ground Floor",
-                roomCount = 3,
-                deviceCount = 5
-            ),
+    val floors =
+        floorState.floors.map { floor ->
 
             HomeFloor(
-                id = "first",
-                name = "First Floor",
-                roomCount = 2,
-                deviceCount = 4
+                id = floor.id,
+                name = floor.name,
+                roomCount = roomState.rooms.count {
+                    it.floorId == floor.id
+                },
+                deviceCount = deviceState.devices.count {
+                    it.floorId == floor.id
+                }
             )
-        )
-    }
+        }
 
 
     Column(
@@ -365,14 +339,16 @@ private fun SectionHeader(
 
 @Composable
 private fun DeviceCard(
-    device: HomeDevice,
+    device: Device,
     onClick: () -> Unit
 ) {
 
     val activeColor = Color(0xFF22C55E)
 
+    val isOn = device.status == DeviceStatus.ON
+
     val iconColor =
-        if (device.isOn) {
+        if (isOn) {
             activeColor
         } else {
             ElyraTheme.colors.textSecondary
@@ -430,7 +406,7 @@ private fun DeviceCard(
                     .size(8.dp)
                     .clip(CircleShape)
                     .background(
-                        if (device.isOn) {
+                        if (isOn) {
                             activeColor
                         } else {
                             ElyraTheme.colors.textTertiary
@@ -455,10 +431,10 @@ private fun DeviceCard(
         )
 
         Text(
-            text = if (device.isOn) "On" else "Off",
+            text = if (isOn) "On" else "Off",
             style = ElyraTheme.typography.bodySmall,
             color =
-                if (device.isOn) {
+                if (isOn) {
                     activeColor
                 } else {
                     ElyraTheme.colors.textSecondary
@@ -557,27 +533,24 @@ private fun FloorCard(
 // ============================================================================
 
 private fun homeDeviceIcon(
-    type: String
+    type: DeviceType
 ): ImageVector {
 
     return when (type) {
 
-        "Light" ->
+        DeviceType.LIGHT ->
             Icons.Outlined.Lightbulb
 
-        "Outlet" ->
+        DeviceType.OUTLET ->
             Icons.Outlined.Power
 
-        "Switch" ->
+        DeviceType.MULTI_SWITCH ->
             Icons.Outlined.Devices
 
-        "AC" ->
+        DeviceType.SAFETY_APPLIANCE ->
             Icons.Outlined.AcUnit
 
-        "Camera" ->
+        DeviceType.SECURITY_CAMERA ->
             Icons.Outlined.CameraAlt
-
-        else ->
-            Icons.Outlined.Devices
     }
 }
