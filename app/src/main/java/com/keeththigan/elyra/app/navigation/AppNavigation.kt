@@ -35,13 +35,16 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.NavType
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.keeththigan.elyra.feature.devices.DeviceDetailScreen
 import com.keeththigan.elyra.feature.devices.DevicesScreen
 import com.keeththigan.elyra.feature.devices.AddDeviceScreen
@@ -62,6 +65,7 @@ import com.keeththigan.elyra.feature.auth.AuthViewModel
 import com.keeththigan.elyra.feature.devices.DeviceViewModel
 import com.keeththigan.elyra.feature.floors.FloorViewModel
 import com.keeththigan.elyra.feature.floors.RoomViewModel
+import com.keeththigan.elyra.feature.settings.appearance.ThemeViewModel
 
 
 private object AppRoutes {
@@ -74,7 +78,7 @@ private object AppRoutes {
 const val DEVICE_DETAIL = "device_detail/{deviceId}"
 const val FLOOR_DETAIL = "floor_detail/{floorId}"
 const val ADD_FLOOR = "add_floor"
-const val ADD_DEVICE = "add_device"
+const val ADD_DEVICE = "add_device?floorId={floorId}&roomId={roomId}"
 const val ADD_ROOM = "add_room/{floorId}"
 const val ROOM_DETAILS = "room_details/{roomId}"
 const val EDIT_FLOOR = "edit_floor/{floorId}"
@@ -83,6 +87,15 @@ const val EDIT_DEVICE = "edit_device/{deviceId}"
     const val APPEARANCE = "appearance"
     const val ABOUT = "about"
 }
+
+/**
+ * Builds the "add device" route. Passing a floor/room attaches the new device
+ * to that room; omitting them creates it unassigned.
+ */
+private fun addDeviceRoute(
+    floorId: String = "",
+    roomId: String = ""
+): String = "add_device?floorId=$floorId&roomId=$roomId"
 
 private data class BottomNavItem(
     val route: String,
@@ -122,10 +135,22 @@ fun AppNavigation(
     authViewModel: AuthViewModel,
     deviceViewModel: DeviceViewModel,
     floorViewModel: FloorViewModel,
-    roomViewModel: RoomViewModel
+    roomViewModel: RoomViewModel,
+    themeViewModel: ThemeViewModel
 ) {
 
     val navController = rememberNavController()
+
+    /*
+     * All forward navigation goes through this helper so repeated taps can
+     * never stack duplicate copies of the same destination on the back stack
+     * (which is what made "back" require several presses to leave a screen).
+     */
+    fun navigateTo(route: String) {
+        navController.navigate(route) {
+            launchSingleTop = true
+        }
+    }
 
     val navBackStackEntry by
         navController.currentBackStackEntryAsState()
@@ -216,43 +241,44 @@ fun AppNavigation(
 
             composable(AppRoutes.HOME) {
 
+    val authState by authViewModel.authState.collectAsStateWithLifecycle()
+
     HomeScreen(
 
         deviceViewModel = deviceViewModel,
         floorViewModel = floorViewModel,
         roomViewModel = roomViewModel,
+        userName = authState.user?.name.orEmpty(),
 
         onFloorClick = { floorId ->
 
-            navController.navigate(
+            navigateTo(
                 "floor_detail/$floorId"
             )
         },
 
         onDeviceClick = { deviceId ->
 
-            navController.navigate(
+            navigateTo(
                 "device_detail/$deviceId"
             )
         },
 
         onAddFloor = {
 
-            navController.navigate(
+            navigateTo(
                 AppRoutes.ADD_FLOOR
             )
         },
 
         onAddDevice = {
 
-            navController.navigate(
-                AppRoutes.ADD_DEVICE
-            )
+            navigateTo(addDeviceRoute())
         },
 
         onProfileClick = {
 
-            navController.navigate(
+            navigateTo(
                 AppRoutes.SETTINGS
             )
         }
@@ -271,14 +297,12 @@ fun AppNavigation(
 
         onDeviceClick = { deviceId ->
 
-            navController.navigate(
+            navigateTo(
                 "device_detail/$deviceId"
             )
         },
         onAddDevice = {
-    navController.navigate(
-        AppRoutes.ADD_DEVICE
-    )
+    navigateTo(addDeviceRoute())
 },
         onSettingsClick = {}
     )
@@ -307,7 +331,7 @@ fun AppNavigation(
             navController.popBackStack()
         },
         onEditDevice = {
-            navController.navigate(
+            navigateTo(
                 "edit_device/$deviceId"
             )
         },
@@ -317,11 +341,31 @@ fun AppNavigation(
     )
 }
 
-composable(AppRoutes.ADD_DEVICE) {
+composable(
+    route = AppRoutes.ADD_DEVICE,
+    arguments = listOf(
+        navArgument("floorId") {
+            type = NavType.StringType
+            defaultValue = ""
+        },
+        navArgument("roomId") {
+            type = NavType.StringType
+            defaultValue = ""
+        }
+    )
+) { backStackEntry ->
 
     AddDeviceScreen(
 
         deviceViewModel = deviceViewModel,
+
+        // When "Add device" is opened from inside a room, the new device is
+        // attached to that room instead of being created unassigned.
+        floorId = backStackEntry.arguments
+            ?.getString("floorId").orEmpty(),
+
+        roomId = backStackEntry.arguments
+            ?.getString("roomId").orEmpty(),
 
         onBack = {
             navController.popBackStack()
@@ -344,14 +388,14 @@ composable(AppRoutes.FLOORS) {
 
         onFloorClick = { floorId ->
 
-            navController.navigate(
+            navigateTo(
                 "floor_detail/$floorId"
             )
         },
 
         onAddFloor = {
 
-            navController.navigate(
+            navigateTo(
         AppRoutes.ADD_FLOOR
     )
         },
@@ -462,20 +506,23 @@ composable(
 
         onDeviceClick = { deviceId ->
 
-            navController.navigate(
+            navigateTo(
                 "device_detail/$deviceId"
             )
         },
           onEditRoom = {
-            navController.navigate(
+            navigateTo(
                 "edit_room/$roomId"
             )
         },
 
-        onAddDevice = {
+        onAddDevice = { deviceFloorId, deviceRoomId ->
 
-            navController.navigate(
-                AppRoutes.ADD_DEVICE
+            navigateTo(
+                addDeviceRoute(
+                    floorId = deviceFloorId,
+                    roomId = deviceRoomId
+                )
             )
         }
     )
@@ -502,18 +549,18 @@ composable(
 
       onRoomClick = { roomId ->
 
-    navController.navigate(
+    navigateTo(
         "room_details/$roomId"
     )
 },
 
         onAddRoom = {
-    navController.navigate("add_room/$floorId")
+    navigateTo("add_room/$floorId")
 },
 
        onEditFloor = {
 
-    navController.navigate(
+    navigateTo(
         "edit_floor/$floorId"
     )
 }
@@ -540,14 +587,14 @@ composable(
         },
 
         onAddRoom = {
-            navController.navigate(
+            navigateTo(
                 "add_room/$floorId"
             )
         },
 
         onRoomClick = { roomId ->
 
-            navController.navigate(
+            navigateTo(
                 "room_details/$roomId"
             )
         },
@@ -570,9 +617,7 @@ composable(AppRoutes.ADD_FLOOR) {
         },
 
         onAddDevice = {
-    navController.navigate(
-        AppRoutes.ADD_DEVICE
-    )
+    navigateTo(addDeviceRoute())
 },
 
         onCreateFloor = {
@@ -588,10 +633,10 @@ composable(AppRoutes.ADD_FLOOR) {
 
 SettingsScreen(
     onAppearanceClick = {
-        navController.navigate(AppRoutes.APPEARANCE)
+        navigateTo(AppRoutes.APPEARANCE)
     },
     onAboutClick = {
-        navController.navigate(AppRoutes.ABOUT)
+        navigateTo(AppRoutes.ABOUT)
     },
      authViewModel = authViewModel
 
@@ -602,7 +647,14 @@ SettingsScreen(
 
             composable(AppRoutes.APPEARANCE) {
 
+    val appearance by
+        themeViewModel.appearance.collectAsStateWithLifecycle()
+
     AppearanceScreen(
+        selectedOption = appearance,
+        onOptionSelected = { option ->
+            themeViewModel.setAppearance(option)
+        },
         onBack = {
             navController.popBackStack()
         }
