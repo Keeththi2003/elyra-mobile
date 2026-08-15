@@ -1,6 +1,8 @@
 package com.keeththigan.elyra.app
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.keeththigan.elyra.app.navigation.AppNavigation
@@ -15,7 +17,9 @@ fun ElyraApp() {
 
     ElyraTheme {
 
-        val authRepository = AuthRepository()
+        val authRepository = remember {
+            AuthRepository()
+        }
 
         val authViewModel: AuthViewModel = viewModel(
             factory = AuthViewModelFactory(
@@ -26,9 +30,15 @@ fun ElyraApp() {
         val authState =
             authViewModel.authState.collectAsStateWithLifecycle()
 
+        LaunchedEffect(authState.value.isAuthenticated) {
+            if (authState.value.isAuthenticated && authState.value.user == null) {
+                authViewModel.loadUserProfile()
+            }
+        }
+
         if (authState.value.isAuthenticated) {
 
-            AppNavigation()
+            AppNavigation(authViewModel = authViewModel)
 
         } else {
 
