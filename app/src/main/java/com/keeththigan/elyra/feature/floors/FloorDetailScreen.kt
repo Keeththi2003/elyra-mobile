@@ -28,13 +28,17 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.keeththigan.elyra.core.designsystem.ElyraTheme
+import com.keeththigan.elyra.data.model.DeviceStatus
+import com.keeththigan.elyra.feature.devices.DeviceViewModel
 
 // ============================================================================
 // ROOM MODEL
@@ -49,62 +53,55 @@ private data class ElyraRoom(
 
 
 // ============================================================================
-// SAMPLE ROOMS
-// ============================================================================
-
-private val sampleRooms = listOf(
-
-    ElyraRoom(
-        id = "living_room",
-        name = "Living Room",
-        deviceCount = 2,
-        activeDeviceCount = 1
-    ),
-
-    ElyraRoom(
-        id = "kitchen",
-        name = "Kitchen",
-        deviceCount = 2,
-        activeDeviceCount = 1
-    ),
-
-    ElyraRoom(
-        id = "entrance",
-        name = "Entrance",
-        deviceCount = 1,
-        activeDeviceCount = 1
-    )
-)
-
-
-// ============================================================================
 // FLOOR DETAIL SCREEN
 // ============================================================================
 
 @Composable
 fun FloorDetailScreen(
     floorId: String,
+    floorViewModel: FloorViewModel,
+    roomViewModel: RoomViewModel,
+    deviceViewModel: DeviceViewModel,
     onBack: () -> Unit,
     onRoomClick: (String) -> Unit,
     onAddRoom: () -> Unit,
     onEditFloor: () -> Unit
 ) {
 
-    // Later this will come from your repository/database.
-    val floorName = remember(floorId) {
-        when (floorId) {
-            "first" -> "First Floor"
-            else -> "Ground Floor"
-        }
+    val floorState by floorViewModel.state.collectAsStateWithLifecycle()
+    val roomState by roomViewModel.state.collectAsStateWithLifecycle()
+    val deviceState by deviceViewModel.state.collectAsStateWithLifecycle()
+
+    LaunchedEffect(floorId) {
+        floorViewModel.loadFloor(floorId)
+        roomViewModel.loadRoomsForFloor(floorId)
+        deviceViewModel.loadDevices()
     }
 
+    val floorName = floorState.selectedFloor?.name ?: ""
+
+    val rooms =
+        roomState.rooms.map { room ->
+
+            ElyraRoom(
+                id = room.id,
+                name = room.name,
+                deviceCount = deviceState.devices.count {
+                    it.roomId == room.id
+                },
+                activeDeviceCount = deviceState.devices.count {
+                    it.roomId == room.id && it.status == DeviceStatus.ON
+                }
+            )
+        }
+
     val totalDevices =
-        sampleRooms.sumOf {
+        rooms.sumOf {
             it.deviceCount
         }
 
     val activeDevices =
-        sampleRooms.sumOf {
+        rooms.sumOf {
             it.activeDeviceCount
         }
 
@@ -198,7 +195,7 @@ fun FloorDetailScreen(
         ) {
 
             FloorStatCard(
-                value = sampleRooms.size.toString(),
+                value = rooms.size.toString(),
                 label = "Rooms",
                 modifier = Modifier.weight(1f)
             )
@@ -284,7 +281,7 @@ fun FloorDetailScreen(
         ) {
 
             items(
-                items = sampleRooms,
+                items = rooms,
                 key = {
                     it.id
                 }
