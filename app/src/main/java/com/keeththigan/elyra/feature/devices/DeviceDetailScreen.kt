@@ -18,7 +18,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.AcUnit
 import androidx.compose.material.icons.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.CameraAlt
 import androidx.compose.material.icons.outlined.CheckCircle
@@ -36,6 +35,7 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.Slider
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -47,7 +47,13 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.keeththigan.elyra.core.designsystem.ElyraTheme
+import com.keeththigan.elyra.data.model.Device
+import com.keeththigan.elyra.data.model.DeviceStatus
+import com.keeththigan.elyra.data.model.DeviceType
+import com.keeththigan.elyra.feature.floors.FloorViewModel
+import com.keeththigan.elyra.feature.floors.RoomViewModel
 
 // ============================================================================
 // DEVICE DETAIL SCREEN
@@ -56,24 +62,70 @@ import com.keeththigan.elyra.core.designsystem.ElyraTheme
 @Composable
 fun DeviceDetailScreen(
     deviceId: String,
+    deviceViewModel: DeviceViewModel,
+    floorViewModel: FloorViewModel,
+    roomViewModel: RoomViewModel,
     onEditDevice: () -> Unit,
-        onRemoveDevice: () -> Unit,
+    onRemoveDevice: () -> Unit,
     onBack: () -> Unit
 ) {
 
-    /*
-     * Temporary mock data.
-     *
-     * Later this should come from ViewModel / repository.
-     */
+    val deviceState by deviceViewModel.state.collectAsStateWithLifecycle()
+    val floorState by floorViewModel.state.collectAsStateWithLifecycle()
+    val roomState by roomViewModel.state.collectAsStateWithLifecycle()
 
-    val device = remember(deviceId) {
-        getMockDevice(deviceId)
+    LaunchedEffect(deviceId) {
+        deviceViewModel.loadDevice(deviceId)
     }
 
-    var isOn by remember {
-        mutableStateOf(device.isOn)
+    val device = deviceState.selectedDevice
+
+    LaunchedEffect(device?.floorId, device?.roomId) {
+        device?.floorId?.takeIf { it.isNotBlank() }?.let {
+            floorViewModel.loadFloor(it)
+        }
+        device?.roomId?.takeIf { it.isNotBlank() }?.let {
+            roomViewModel.loadRoom(it)
+        }
     }
+
+    LaunchedEffect(deviceState.isDeleted) {
+        if (deviceState.isDeleted) {
+            deviceViewModel.consumeDeleted()
+            onBack()
+        }
+    }
+
+    if (device == null) {
+
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(
+                    ElyraTheme.colors.background
+                ),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+
+            Text(
+                text = if (deviceState.error != null) {
+                    deviceState.error ?: ""
+                } else {
+                    "Loading device…"
+                },
+                style = ElyraTheme.typography.bodyMedium,
+                color = ElyraTheme.colors.textSecondary
+            )
+        }
+
+        return
+    }
+
+    val floorName = floorState.selectedFloor?.name ?: ""
+    val roomName = roomState.selectedRoom?.name ?: ""
+
+    val isOn = device.status == DeviceStatus.ON
 
     Column(
         modifier = Modifier
@@ -123,7 +175,9 @@ Row(
         )
 
         Text(
-            text = "${device.floor} · ${device.room}",
+            text = listOf(floorName, roomName)
+                .filter { it.isNotBlank() }
+                .joinToString(" · "),
             style = ElyraTheme.typography.bodySmall,
             color = ElyraTheme.colors.textSecondary
         )
@@ -169,6 +223,8 @@ Row(
 
             DeviceHeader(
                 device = device,
+                floorName = floorName,
+                roomName = roomName,
                 isOn = isOn
             )
 
@@ -184,7 +240,7 @@ Row(
             PowerControlCard(
                 isOn = isOn,
                 onToggle = {
-                    isOn = it
+                    deviceViewModel.toggleDevice(deviceId, it)
                 }
             )
 
@@ -200,7 +256,7 @@ Row(
 
             when (device.type) {
 
-                MockDeviceType.LIGHT -> {
+                DeviceType.LIGHT -> {
 
                     LightControls()
 
@@ -211,17 +267,17 @@ Row(
                     ScheduleCard()
                 }
 
-                MockDeviceType.OUTLET -> {
+                DeviceType.OUTLET -> {
 
                     UsageCard()
                 }
 
-                MockDeviceType.MULTI_SWITCH -> {
+                DeviceType.MULTI_SWITCH -> {
 
                     MultiSwitchControls()
                 }
 
-                MockDeviceType.IRON -> {
+                DeviceType.SAFETY_APPLIANCE -> {
 
                     SafetyControls(
                         isOn = isOn
@@ -234,7 +290,7 @@ Row(
                     UsageCard()
                 }
 
-                MockDeviceType.CAMERA -> {
+                DeviceType.SECURITY_CAMERA -> {
 
                     CameraPreview()
 
@@ -243,17 +299,6 @@ Row(
                     )
 
                     CameraStatus()
-                }
-
-                MockDeviceType.AC -> {
-
-                    TemperatureControl()
-
-                    Spacer(
-                        modifier = Modifier.height(16.dp)
-                    )
-
-                    UsageCard()
                 }
             }
 
@@ -275,110 +320,14 @@ Spacer(
 
 
 // ============================================================================
-// MOCK DEVICE
-// ============================================================================
-
-private enum class MockDeviceType {
-
-    LIGHT,
-    OUTLET,
-    MULTI_SWITCH,
-    IRON,
-    CAMERA,
-    AC
-}
-
-private data class MockDevice(
-
-    val id: String,
-
-    val name: String,
-
-    val floor: String,
-
-    val room: String,
-
-    val type: MockDeviceType,
-
-    val isOn: Boolean
-)
-
-private fun getMockDevice(
-    deviceId: String
-): MockDevice {
-
-    return when (deviceId) {
-
-        "living_room_light" ->
-            MockDevice(
-                id = deviceId,
-                name = "Living Room Light",
-                floor = "Ground Floor",
-                room = "Living Room",
-                type = MockDeviceType.LIGHT,
-                isOn = true
-            )
-
-        "kitchen_outlet" ->
-            MockDevice(
-                id = deviceId,
-                name = "Kitchen Outlet",
-                floor = "Ground Floor",
-                room = "Kitchen",
-                type = MockDeviceType.OUTLET,
-                isOn = false
-            )
-
-        "kitchen_switch" ->
-            MockDevice(
-                id = deviceId,
-                name = "Kitchen 3-Gang Switch",
-                floor = "Ground Floor",
-                room = "Kitchen",
-                type = MockDeviceType.MULTI_SWITCH,
-                isOn = true
-            )
-
-        "bedroom_iron" ->
-            MockDevice(
-                id = deviceId,
-                name = "Bedroom Iron",
-                floor = "First Floor",
-                room = "Bedroom",
-                type = MockDeviceType.IRON,
-                isOn = false
-            )
-
-        "entrance_camera" ->
-            MockDevice(
-                id = deviceId,
-                name = "Entrance Camera",
-                floor = "Ground Floor",
-                room = "Entrance",
-                type = MockDeviceType.CAMERA,
-                isOn = true
-            )
-
-        else ->
-            MockDevice(
-                id = deviceId,
-                name = "Bedroom AC",
-                floor = "First Floor",
-                room = "Bedroom",
-                type = MockDeviceType.AC,
-                isOn = false
-            )
-    }
-}
-
-
-// ============================================================================
 // DEVICE HEADER
 // ============================================================================
 
 @Composable
 private fun DeviceHeader(
-    device: MockDevice,
+    device: Device,
+    floorName: String,
+    roomName: String,
     isOn: Boolean
 ) {
 
@@ -433,7 +382,9 @@ private fun DeviceHeader(
         )
 
         Text(
-            text = "${device.floor} · ${device.room}",
+            text = listOf(floorName, roomName)
+                .filter { it.isNotBlank() }
+                .joinToString(" · "),
             style = ElyraTheme.typography.bodyMedium,
             color = ElyraTheme.colors.textSecondary
         )
@@ -863,43 +814,6 @@ private fun CameraStatus() {
 }
 
 
-// ============================================================================
-// TEMPERATURE
-// ============================================================================
-
-@Composable
-private fun TemperatureControl() {
-
-    var temperature by remember {
-        mutableFloatStateOf(24f)
-    }
-
-    SettingsCard {
-
-        CardTitle(
-            icon = Icons.Outlined.AcUnit,
-            title = "Temperature"
-        )
-
-        Spacer(
-            modifier = Modifier.height(12.dp)
-        )
-
-        Text(
-            text = "${temperature.toInt()}°C",
-            style = ElyraTheme.typography.headlineMedium,
-            color = ElyraTheme.colors.textPrimary
-        )
-
-        Slider(
-            value = temperature,
-            onValueChange = {
-                temperature = it
-            },
-            valueRange = 16f..30f
-        )
-    }
-}
 
 
 // ============================================================================
@@ -1040,28 +954,25 @@ private fun CardTitle(
 // ============================================================================
 
 private fun deviceIcon(
-    type: MockDeviceType
+    type: DeviceType
 ): ImageVector {
 
     return when (type) {
 
-        MockDeviceType.LIGHT ->
+        DeviceType.LIGHT ->
             Icons.Outlined.Lightbulb
 
-        MockDeviceType.OUTLET ->
+        DeviceType.OUTLET ->
             Icons.Outlined.Power
 
-        MockDeviceType.MULTI_SWITCH ->
+        DeviceType.MULTI_SWITCH ->
             Icons.Outlined.Power
 
-        MockDeviceType.IRON ->
+        DeviceType.SAFETY_APPLIANCE ->
             Icons.Outlined.Thermostat
 
-        MockDeviceType.CAMERA ->
+        DeviceType.SECURITY_CAMERA ->
             Icons.Outlined.CameraAlt
-
-        MockDeviceType.AC ->
-            Icons.Outlined.AcUnit
     }
 }
 // ============================================================================
