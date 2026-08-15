@@ -28,71 +28,36 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.keeththigan.elyra.core.designsystem.ElyraTheme
+import com.keeththigan.elyra.data.model.Device
+import com.keeththigan.elyra.data.model.DeviceStatus
+import com.keeththigan.elyra.data.model.DeviceType
 
 
 @Composable
 fun DevicesScreen(
+    deviceViewModel: DeviceViewModel,
     onDeviceClick: (String) -> Unit,
     onAddDevice: () -> Unit,
     onSettingsClick: () -> Unit
 ) {
 
-    /*
-     * Temporary UI data.
-     *
-     * Later this list will come from the repository/database.
-     */
-    val devices = remember {
+    val state by deviceViewModel.state.collectAsStateWithLifecycle()
 
-        listOf(
-
-            Device(
-                id = "device_001",
-                name = "Living Room Light",
-                type = DeviceType.LIGHT,
-                status = DeviceStatus.ON,
-                brightness = 80
-            ),
-
-            Device(
-                id = "device_002",
-                name = "Kitchen Outlet",
-                type = DeviceType.OUTLET,
-                status = DeviceStatus.OFF
-            ),
-
-            Device(
-                id = "device_003",
-                name = "Bedroom Switch",
-                type = DeviceType.MULTI_SWITCH,
-                status = DeviceStatus.ON,
-                switchCount = 3
-            ),
-
-            Device(
-                id = "device_004",
-                name = "Bedroom Iron",
-                type = DeviceType.SAFETY_APPLIANCE,
-                status = DeviceStatus.OFF,
-                maxOnDurationMinutes = 30
-            ),
-
-            Device(
-                id = "device_005",
-                name = "Front Door Camera",
-                type = DeviceType.SECURITY_CAMERA,
-                status = DeviceStatus.ON
-            )
-        )
+    LaunchedEffect(Unit) {
+        deviceViewModel.loadDevices()
     }
+
+    val devices = state.devices
 
     Column(
         modifier = Modifier
@@ -178,6 +143,29 @@ fun DevicesScreen(
                 Spacer(
                     modifier = Modifier.height(8.dp)
                 )
+            }
+
+            if (state.isLoading && devices.isEmpty()) {
+
+                item {
+
+                    Text(
+                        text = "Loading devices…",
+                        style = ElyraTheme.typography.bodyMedium,
+                        color = ElyraTheme.colors.textSecondary
+                    )
+                }
+
+            } else if (devices.isEmpty()) {
+
+                item {
+
+                    Text(
+                        text = "No devices yet. Tap + to add your first device.",
+                        style = ElyraTheme.typography.bodyMedium,
+                        color = ElyraTheme.colors.textSecondary
+                    )
+                }
             }
 
             items(
