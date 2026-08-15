@@ -1,32 +1,37 @@
 package com.keeththigan.elyra.feature.auth.navigation
 
 import androidx.compose.runtime.Composable
-import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.keeththigan.elyra.feature.auth.login.LoginScreen
 import com.keeththigan.elyra.feature.auth.signup.SignUpScreen
 import com.keeththigan.elyra.feature.auth.AuthViewModel
+import com.keeththigan.elyra.feature.auth.forgotpassword.ForgotPasswordScreen
+
+private object AuthRoutes {
+    const val SIGN_UP = "signup"
+    const val SIGN_IN = "signin"
+    const val FORGOT_PASSWORD = "forgot_password"
+}
 
 @Composable
 fun AuthNavigation(
     authViewModel: AuthViewModel 
 ) {
 
-        val navController = androidx.navigation.compose.rememberNavController()
+    val navController = androidx.navigation.compose.rememberNavController()
 
 
     NavHost(
         navController = navController,
-        startDestination = "signup"
+        startDestination = AuthRoutes.SIGN_UP
     ) {
 
         // ============================================================
         // SIGN UP
         // ============================================================
 
-        composable("signup") {
+        composable(AuthRoutes.SIGN_UP) {
 
             SignUpScreen(
                 onBack = {
@@ -34,17 +39,11 @@ fun AuthNavigation(
                 },
 
                 onSignIn = {
-                    navController.navigate("signin")
+                    navController.navigate(AuthRoutes.SIGN_IN)
                 },
 
                 onCreateAccount = {
-                    // Authentication succeeded.
-                    // Return this to your main/home navigation later.
-                    navController.navigate("home") {
-                        popUpTo("signup") {
-                            inclusive = true
-                        }
-                    }
+                    // The root ElyraApp switches to the main app when authState changes.
                 },
 
                 authViewModel = authViewModel
@@ -55,27 +54,47 @@ fun AuthNavigation(
         // SIGN IN
         // ============================================================
 
-        composable("signin") {
+        composable(AuthRoutes.SIGN_IN) {
 
-    LoginScreen(
-        onBack = {
-            navController.popBackStack()
-        },
+            LoginScreen(
+                onBack = {
+                    navController.popBackStack()
+                },
 
-        onSignUp = {
-            navController.navigate("signup")
-        },
+                onSignUp = {
+                    navController.navigate(AuthRoutes.SIGN_UP)
+                },
 
-        onLogin = {
-            // We will connect Firebase login here
-        },
+                onLogin = {
+                    // The root ElyraApp switches to the main app when authState changes.
+                },
 
-        onForgotPassword = {
-            navController.navigate("forgot_password")
-        },
+                onForgotPassword = {
+                    navController.navigate(AuthRoutes.FORGOT_PASSWORD)
+                },
 
-        authViewModel = authViewModel
-    )
-}
+                authViewModel = authViewModel
+            )
+        }
+
+        // ============================================================
+        // FORGOT PASSWORD
+        // ============================================================
+
+        composable(AuthRoutes.FORGOT_PASSWORD) {
+
+            ForgotPasswordScreen(
+                onBack = {
+                    navController.popBackStack()
+                },
+                onSendResetLink = { email ->
+                    authViewModel.sendPasswordResetEmail(email)
+                },
+                onSignIn = {
+                    navController.popBackStack()
+                },
+                authViewModel = authViewModel
+            )
+        }
     }
 }

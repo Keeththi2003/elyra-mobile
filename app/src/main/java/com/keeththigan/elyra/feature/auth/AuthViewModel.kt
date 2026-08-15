@@ -2,6 +2,10 @@ package com.keeththigan.elyra.feature.auth
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.firebase.auth.FirebaseAuthException
+import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
+import com.google.firebase.auth.FirebaseAuthInvalidUserException
+import com.google.firebase.auth.FirebaseAuthUserCollisionException
 import com.google.firebase.auth.FirebaseUser
 import com.keeththigan.elyra.data.model.User
 import com.keeththigan.elyra.data.repository.AuthRepository
@@ -18,7 +22,8 @@ data class AuthState(
     val isLoading: Boolean = false,
     val isAuthenticated: Boolean = false,
     val user: User? = null,
-    val error: String? = null
+    val error: String? = null,
+    val message: String? = null
 )
 
 
@@ -81,7 +86,8 @@ class AuthViewModel(
         viewModelScope.launch {
 
             _authState.value = AuthState(
-                isLoading = true
+                isLoading = true,
+                message = null
             )
 
             val result = repository.signUp(
@@ -96,6 +102,8 @@ class AuthViewModel(
                     _authState.value = AuthState(
                         isLoading = false,
                         isAuthenticated = true,
+                        error = null,
+                        message = null,
                         user = user
                     )
                 }
@@ -138,7 +146,8 @@ class AuthViewModel(
         viewModelScope.launch {
 
             _authState.value = AuthState(
-                isLoading = true
+                isLoading = true,
+                message = null
             )
 
             val result = repository.signIn(
@@ -152,7 +161,56 @@ class AuthViewModel(
                     _authState.value = AuthState(
                         isLoading = false,
                         isAuthenticated = true,
+                        error = null,
+                        message = null,
                         user = user
+                    )
+                }
+                .onFailure { exception ->
+
+                    _authState.value = AuthState(
+                        isLoading = false,
+                        error = getFirebaseErrorMessage(
+                            exception
+                        )
+                    )
+                }
+        }
+    }
+
+
+    // ========================================================================
+    // PASSWORD RESET
+    // ========================================================================
+
+    fun sendPasswordResetEmail(
+        email: String
+    ) {
+
+        if (email.isBlank()) {
+            _authState.value = AuthState(
+                error = "Please enter your email."
+            )
+            return
+        }
+
+        viewModelScope.launch {
+
+            _authState.value = AuthState(
+                isLoading = true,
+                message = null
+            )
+
+            val result = repository.sendPasswordResetEmail(
+                email = email
+            )
+
+            result
+                .onSuccess {
+
+                    _authState.value = AuthState(
+                        isLoading = false,
+                        message = "Password reset email sent. Check your inbox."
                     )
                 }
                 .onFailure { exception ->
@@ -177,7 +235,8 @@ class AuthViewModel(
         repository.signOut()
 
         _authState.value = AuthState(
-            isAuthenticated = false
+            isAuthenticated = false,
+            message = null
         )
     }
 
@@ -192,6 +251,14 @@ class AuthViewModel(
             _authState.value.copy(
                 error = null
             )
+    }
+
+
+    fun clearMessage() {
+
+        _authState.value = _authState.value.copy(
+            message = null
+        )
     }
 
 
@@ -218,7 +285,9 @@ class AuthViewModel(
 
             _authState.value =
                 _authState.value.copy(
-                    isLoading = true
+                            isLoading = true,
+                            error = null,
+                            message = null
                 )
 
             val result =
@@ -258,8 +327,37 @@ class AuthViewModel(
         exception: Throwable
     ): String {
 
-        val message =
-            exception.message ?: return "Something went wrong."
+        val message = exception.message ?: ""
+
+        when (exception) {
+            is FirebaseAuthUserCollisionException -> {
+                return "This email is already registered."
+            }
+
+            is FirebaseAuthInvalidUserException -> {
+                return "No account found with this email."
+            }
+
+            is FirebaseAuthInvalidCredentialsException -> {
+                return "Please check your email and password."
+            }
+
+            is FirebaseAuthException -> {
+                return when (exception.errorCode) {
+                    "ERROR_EMAIL_ALREADY_IN_USE" -> "This email is already registered."
+                    "ERROR_INVALID_EMAIL" -> "Please enter a valid email address."
+                    "ERROR_WRONG_PASSWORD" -> "Incorrect password."
+                    "ERROR_USER_NOT_FOUND" -> "No account found with this email."
+                    "ERROR_USER_DISABLED" -> "This account has been disabled."
+                    "ERROR_TOO_MANY_REQUESTS" -> "Too many attempts. Try again later."
+                    "ERROR_NETWORK_REQUEST_FAILED" -> "Network error. Please check your connection."
+                    "ERROR_WEAK_PASSWORD" -> "Password must contain at least 6 characters."
+                    "ERROR_OPERATION_NOT_ALLOWED" -> "Email and password sign-in is disabled for this project."
+                    "PERMISSION_DENIED" -> "Your account was created, but Firestore blocked the profile save. Deploy the Firestore rules in this project."
+                    else -> exception.message ?: "Something went wrong."
+                }
+            }
+        }
 
         return when {
 
@@ -270,10 +368,22 @@ class AuthViewModel(
                 "This email is already registered."
 
             message.contains(
+                "invalid email",
+                ignoreCase = true
+            ) ->
+                "Please enter a valid email address."
+
+            message.contains(
                 "badly formatted",
                 ignoreCase = true
             ) ->
                 "Please enter a valid email address."
+
+            message.contains(
+                "wrong password",
+                ignoreCase = true
+            ) ->
+                "Incorrect password."
 
             message.contains(
                 "password is invalid",
@@ -282,10 +392,34 @@ class AuthViewModel(
                 "Incorrect password."
 
             message.contains(
+                "too many requests",
+                ignoreCase = true
+            ) ->
+                "Too many attempts. Try again later."
+
+            message.contains(
+                "operation not allowed",
+                ignoreCase = true
+            ) ->
+                "Email and password sign-in is disabled for this project."
+
+            message.contains(
                 "no user record",
                 ignoreCase = true
             ) ->
                 "No account found with this email."
+
+            message.contains(
+                "user disabled",
+                ignoreCase = true
+            ) ->
+                "This account has been disabled."
+
+            message.contains(
+                "network request failed",
+                ignoreCase = true
+            ) ->
+                "Network error. Please check your connection."
 
             message.contains(
                 "network",
@@ -294,13 +428,32 @@ class AuthViewModel(
                 "Network error. Please check your connection."
 
             message.contains(
+                "weak password",
+                ignoreCase = true
+            ) ->
+                "Password must contain at least 6 characters."
+
+            message.contains(
                 "profile not found",
                 ignoreCase = true
             ) ->
                 "User profile could not be found."
 
+            message.contains(
+                "permission_denied",
+                ignoreCase = true
+            ) || message.contains(
+                "missing or insufficient permissions",
+                ignoreCase = true
+            ) ->
+                "Your account was created, but Firestore blocked the profile save. Deploy the Firestore rules in this project."
+
             else ->
-                message
+                if (message.isBlank()) {
+                    "Something went wrong."
+                } else {
+                    message
+                }
         }
     }
 }
