@@ -8,9 +8,18 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.keeththigan.elyra.app.navigation.AppNavigation
 import com.keeththigan.elyra.core.designsystem.ElyraTheme
 import com.keeththigan.elyra.data.repository.AuthRepository
+import com.keeththigan.elyra.data.repository.DeviceRepository
+import com.keeththigan.elyra.data.repository.FloorRepository
+import com.keeththigan.elyra.data.repository.RoomRepository
 import com.keeththigan.elyra.feature.auth.AuthViewModel
 import com.keeththigan.elyra.feature.auth.AuthViewModelFactory
 import com.keeththigan.elyra.feature.auth.navigation.AuthNavigation
+import com.keeththigan.elyra.feature.devices.DeviceViewModel
+import com.keeththigan.elyra.feature.devices.DeviceViewModelFactory
+import com.keeththigan.elyra.feature.floors.FloorViewModel
+import com.keeththigan.elyra.feature.floors.FloorViewModelFactory
+import com.keeththigan.elyra.feature.floors.RoomViewModel
+import com.keeththigan.elyra.feature.floors.RoomViewModelFactory
 
 @Composable
 fun ElyraApp() {
@@ -38,7 +47,51 @@ fun ElyraApp() {
 
         if (authState.value.isAuthenticated) {
 
-            AppNavigation(authViewModel = authViewModel)
+            val deviceRepository = remember {
+                DeviceRepository()
+            }
+
+            val floorRepository = remember {
+                FloorRepository()
+            }
+
+            val roomRepository = remember {
+                RoomRepository()
+            }
+
+            // Keyed by uid so signing out and back in as a different user
+            // never reuses another account's cached devices/floors/rooms.
+            val viewModelKey = authState.value.user?.id
+
+            val deviceViewModel: DeviceViewModel = viewModel(
+                key = viewModelKey,
+                factory = DeviceViewModelFactory(
+                    repository = deviceRepository
+                )
+            )
+
+            val floorViewModel: FloorViewModel = viewModel(
+                key = viewModelKey,
+                factory = FloorViewModelFactory(
+                    floorRepository = floorRepository,
+                    roomRepository = roomRepository,
+                    deviceRepository = deviceRepository
+                )
+            )
+
+            val roomViewModel: RoomViewModel = viewModel(
+                key = viewModelKey,
+                factory = RoomViewModelFactory(
+                    repository = roomRepository
+                )
+            )
+
+            AppNavigation(
+                authViewModel = authViewModel,
+                deviceViewModel = deviceViewModel,
+                floorViewModel = floorViewModel,
+                roomViewModel = roomViewModel
+            )
 
         } else {
 
