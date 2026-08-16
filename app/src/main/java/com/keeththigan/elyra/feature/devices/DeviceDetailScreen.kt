@@ -846,7 +846,7 @@ private fun SafetyCard(
                 )
             }
 
-            DurationStepper(
+            DurationField(
                 minutes = maxMinutes,
                 onChange = onMaxDurationChange
             )
@@ -886,46 +886,53 @@ private fun SafetyCard(
 }
 
 
+/**
+ * Free-text minutes entry — a stepper made setting anything other than a
+ * multiple of five tedious.
+ */
 @Composable
-private fun DurationStepper(
+private fun DurationField(
     minutes: Int,
     onChange: (Int) -> Unit
 ) {
 
+    var text by remember(minutes) { mutableStateOf(minutes.toString()) }
+
     Row(verticalAlignment = Alignment.CenterVertically) {
 
-        StepperButton(label = "−") {
-            onChange((minutes - 5).coerceAtLeast(1))
-        }
+        BasicTextField(
+            value = text,
+            onValueChange = { input ->
+                // Digits only, capped at four so the field stays sane.
+                text = input.filter { it.isDigit() }.take(4)
+                text.toIntOrNull()?.takeIf { it > 0 }?.let(onChange)
+            },
+            singleLine = true,
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Number
+            ),
+            textStyle = ElyraTheme.typography.titleMedium.copy(
+                color = ElyraTheme.colors.textPrimary
+            ),
+            decorationBox = { inner ->
+                Box(
+                    modifier = Modifier
+                        .width(64.dp)
+                        .height(40.dp)
+                        .clip(RoundedCornerShape(11.dp))
+                        .background(ElyraTheme.colors.surfaceSecondary)
+                        .padding(horizontal = 12.dp),
+                    contentAlignment = Alignment.CenterStart
+                ) { inner() }
+            }
+        )
 
         Spacer(modifier = Modifier.width(8.dp))
 
-        StepperButton(label = "+") {
-            onChange(minutes + 5)
-        }
-    }
-}
-
-
-@Composable
-private fun StepperButton(
-    label: String,
-    onClick: () -> Unit
-) {
-
-    Box(
-        modifier = Modifier
-            .size(34.dp)
-            .clip(RoundedCornerShape(10.dp))
-            .background(ElyraTheme.colors.surfaceSecondary)
-            .clickable(onClick = onClick),
-        contentAlignment = Alignment.Center
-    ) {
-
         Text(
-            text = label,
-            style = ElyraTheme.typography.titleMedium,
-            color = ElyraTheme.colors.textPrimary
+            text = "min",
+            style = ElyraTheme.typography.bodySmall,
+            color = ElyraTheme.colors.textSecondary
         )
     }
 }
