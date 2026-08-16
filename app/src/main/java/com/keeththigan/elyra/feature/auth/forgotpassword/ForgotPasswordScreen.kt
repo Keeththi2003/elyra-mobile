@@ -38,12 +38,15 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.keeththigan.elyra.core.designsystem.ElyraTheme
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.keeththigan.elyra.feature.auth.AuthViewModel
 
 @Composable
 fun ForgotPasswordScreen(
     onBack: () -> Unit,
     onSendResetLink: (String) -> Unit,
-    onSignIn: () -> Unit
+    onSignIn: () -> Unit,
+    authViewModel: AuthViewModel
 ) {
 
     var email by remember {
@@ -54,7 +57,9 @@ fun ForgotPasswordScreen(
         mutableStateOf(false)
     }
 
-    val canContinue = email.isNotBlank()
+    val authState by authViewModel.authState.collectAsStateWithLifecycle()
+
+    val canContinue = email.isNotBlank() && !authState.isLoading
 
     Column(
         modifier = Modifier
@@ -168,6 +173,10 @@ fun ForgotPasswordScreen(
             value = email,
             onValueChange = {
                 email = it
+
+                if (authState.error != null) {
+                    authViewModel.clearError()
+                }
             },
             modifier = Modifier
                 .fillMaxWidth()
@@ -238,6 +247,36 @@ fun ForgotPasswordScreen(
             }
         )
 
+        // ========================================================
+        // ERROR / SUCCESS MESSAGE
+        // ========================================================
+
+        authState.error?.let { error ->
+
+            Spacer(
+                modifier = Modifier.height(16.dp)
+            )
+
+            Text(
+                text = error,
+                style = ElyraTheme.typography.bodySmall,
+                color = ElyraTheme.colors.error
+            )
+        }
+
+        authState.message?.let { message ->
+
+            Spacer(
+                modifier = Modifier.height(16.dp)
+            )
+
+            Text(
+                text = message,
+                style = ElyraTheme.typography.bodySmall,
+                color = ElyraTheme.colors.textPrimary
+            )
+        }
+
         Spacer(
             modifier = Modifier.height(24.dp)
         )
@@ -263,13 +302,17 @@ fun ForgotPasswordScreen(
                 .clickable(
                     enabled = canContinue
                 ) {
-                    onSendResetLink(email)
+                    onSendResetLink(email.trim())
                 },
             contentAlignment = Alignment.Center
         ) {
 
             Text(
-                text = "Send reset link",
+                text = if (authState.isLoading) {
+                    "Sending..."
+                } else {
+                    "Send reset link"
+                },
                 style = ElyraTheme.typography.labelLarge,
                 color =
                     if (canContinue) {

@@ -58,6 +58,8 @@ import com.keeththigan.elyra.feature.floors.RoomDetailsScreen
 import com.keeththigan.elyra.feature.floors.AddRoomScreen
 import com.keeththigan.elyra.feature.floors.AddFloorScreen
 import com.keeththigan.elyra.core.designsystem.ElyraTheme
+import com.keeththigan.elyra.feature.auth.AuthViewModel
+
 
 private object AppRoutes {
 
@@ -113,7 +115,9 @@ private val bottomNavItems = listOf(
 )
 
 @Composable
-fun AppNavigation() {
+fun AppNavigation(
+    authViewModel: AuthViewModel 
+) {
 
     val navController = rememberNavController()
 
@@ -556,8 +560,12 @@ SettingsScreen(
     },
     onAboutClick = {
         navController.navigate(AppRoutes.ABOUT)
-    }
-)          }
+    },
+     authViewModel = authViewModel
+
+
+)         
+}
 
 
             composable(AppRoutes.APPEARANCE) {

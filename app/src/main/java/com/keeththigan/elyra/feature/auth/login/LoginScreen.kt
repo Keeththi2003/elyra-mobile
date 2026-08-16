@@ -29,6 +29,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -37,23 +39,28 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.onFocusChanged
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import com.keeththigan.elyra.core.designsystem.ElyraTheme
-import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
-import androidx.compose.foundation.clickable
+import com.keeththigan.elyra.feature.auth.AuthViewModel
+
 
 @Composable
 fun LoginScreen(
     onBack: () -> Unit,
     onSignUp: () -> Unit,
     onForgotPassword: () -> Unit,
-    onLogin: () -> Unit
-) {
+    onLogin: () -> Unit,
+    authViewModel: AuthViewModel,
+    showBackButton: Boolean = true
+)  {
+
+    // ========================================================
+    // STATE
+    // ========================================================
 
     var email by remember {
         mutableStateOf("")
@@ -67,9 +74,27 @@ fun LoginScreen(
         mutableStateOf(false)
     }
 
+    // ========================================================
+    // AUTH STATE
+    // ========================================================
+
+    val authState by authViewModel.authState.collectAsState()
+
+    LaunchedEffect(authState.isAuthenticated) {
+        if (authState.isAuthenticated) {
+            onLogin()
+        }
+    }
+
+    // ========================================================
+    // ========================================================
+    // CAN LOGIN
+    // ========================================================
+
     val canLogin =
         email.isNotBlank() &&
                 password.isNotBlank()
+
 
     Column(
         modifier = Modifier
@@ -92,22 +117,25 @@ fun LoginScreen(
                 .height(48.dp)
         ) {
 
-            IconButton(
-                onClick = onBack,
-                modifier = Modifier
-                    .size(44.dp)
-                    .align(Alignment.CenterStart)
-                    .clip(CircleShape)
-                    .background(
-                        ElyraTheme.colors.surfaceSecondary
-                    )
-            ) {
+            if (showBackButton) {
 
-                Icon(
-                    imageVector = Icons.Outlined.ArrowBack,
-                    contentDescription = "Back",
-                    tint = ElyraTheme.colors.textPrimary
-                )
+                IconButton(
+                    onClick = onBack,
+                    modifier = Modifier
+                        .size(44.dp)
+                        .align(Alignment.CenterStart)
+                        .clip(CircleShape)
+                        .background(
+                            ElyraTheme.colors.surfaceSecondary
+                        )
+                ) {
+
+                    Icon(
+                        imageVector = Icons.Outlined.ArrowBack,
+                        contentDescription = "Back",
+                        tint = ElyraTheme.colors.textPrimary
+                    )
+                }
             }
         }
 
@@ -173,22 +201,40 @@ fun LoginScreen(
             verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
 
+            // ====================================================
+            // EMAIL
+            // ====================================================
+
             ElyraAuthTextField(
                 label = "Email",
                 value = email,
                 onValueChange = {
                     email = it
+
+                    // Clear previous error when user edits
+                    if (authState.error != null) {
+                        authViewModel.clearError()
+                    }
                 },
                 placeholder = "you@example.com",
                 keyboardType = KeyboardType.Email,
                 imeAction = ImeAction.Next
             )
 
+            // ====================================================
+            // PASSWORD
+            // ====================================================
+
             ElyraAuthTextField(
                 label = "Password",
                 value = password,
                 onValueChange = {
                     password = it
+
+                    // Clear previous error when user edits
+                    if (authState.error != null) {
+                        authViewModel.clearError()
+                    }
                 },
                 placeholder = "Enter your password",
                 keyboardType = KeyboardType.Password,
@@ -198,6 +244,23 @@ fun LoginScreen(
                 onPasswordVisibilityChange = {
                     passwordVisible = !passwordVisible
                 }
+            )
+        }
+
+        // ========================================================
+        // ERROR
+        // ========================================================
+
+        if (authState.error != null) {
+
+            Spacer(
+                modifier = Modifier.height(12.dp)
+            )
+
+            Text(
+                text = authState.error ?: "",
+                style = ElyraTheme.typography.bodyMedium,
+                color = ElyraTheme.colors.error
             )
         }
 
@@ -233,9 +296,19 @@ fun LoginScreen(
         // ========================================================
 
         ElyraPrimaryButton(
-            text = "Sign in",
-            enabled = canLogin,
-            onClick = onLogin
+            text = if (authState.isLoading) {
+                "Signing in..."
+            } else {
+                "Sign in"
+            },
+            enabled = canLogin && !authState.isLoading,
+            onClick = {
+
+                authViewModel.signIn(
+                    email = email.trim(),
+                    password = password
+                )
+            }
         )
 
         Spacer(

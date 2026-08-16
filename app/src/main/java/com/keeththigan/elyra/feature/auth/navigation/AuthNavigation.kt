@@ -1,124 +1,114 @@
 package com.keeththigan.elyra.feature.auth.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
+import androidx.navigation.compose.currentBackStackEntryAsState
 import com.keeththigan.elyra.feature.auth.login.LoginScreen
-import com.keeththigan.elyra.feature.auth.onboarding.OnboardingScreen
-import com.keeththigan.elyra.feature.auth.signup.SignUpScreen   
-import com.keeththigan.elyra.feature.auth.forgotpassword.ForgotPasswordScreen    
+import com.keeththigan.elyra.feature.auth.signup.SignUpScreen
+import com.keeththigan.elyra.feature.auth.AuthViewModel
+import com.keeththigan.elyra.feature.auth.forgotpassword.ForgotPasswordScreen
 
 private object AuthRoutes {
-
-    const val ONBOARDING = "onboarding"
-    const val LOGIN = "login"
-    const val SIGN_UP = "sign_up"
-        const val FORGOT_PASSWORD = "forgot_password"
-
+    const val SIGN_UP = "signup"
+    const val SIGN_IN = "signin"
+    const val FORGOT_PASSWORD = "forgot_password"
 }
 
 @Composable
-fun AuthNavigation() {
+fun AuthNavigation(
+    authViewModel: AuthViewModel
+) {
 
-    val navController = rememberNavController()
+    val navController = androidx.navigation.compose.rememberNavController()
+
+    // Re-evaluated on every navigation change so the back button is only
+    // shown when there is actually somewhere to go back to. On the start
+    // destination, navController.popBackStack() is a silent no-op, which
+    // otherwise makes the back arrow look broken.
+    val currentBackStackEntry by navController.currentBackStackEntryAsState()
+
+    val canNavigateBack =
+        currentBackStackEntry?.let {
+            navController.previousBackStackEntry != null
+        } ?: false
 
     NavHost(
         navController = navController,
-        startDestination = AuthRoutes.ONBOARDING
+        startDestination = AuthRoutes.SIGN_UP
     ) {
 
-        // ========================================================
-        // ONBOARDING
-        // ========================================================
+        // ============================================================
+        // SIGN UP
+        // ============================================================
 
-        composable(AuthRoutes.ONBOARDING) {
+        composable(AuthRoutes.SIGN_UP) {
 
-            OnboardingScreen(
-
-                onGetStarted = {
-                    navController.navigate(
-                        AuthRoutes.SIGN_UP
-                    )
+            SignUpScreen(
+                showBackButton = canNavigateBack,
+                onBack = {
+                    navController.popBackStack()
                 },
 
                 onSignIn = {
-                    navController.navigate(
-                        AuthRoutes.LOGIN
-                    )
-                }
+                    navController.navigate(AuthRoutes.SIGN_IN)
+                },
+
+                onCreateAccount = {
+                    // The root ElyraApp switches to the main app when authState changes.
+                },
+
+                authViewModel = authViewModel
             )
         }
 
-        // ========================================================
-        // LOGIN
-        // ========================================================
+        // ============================================================
+        // SIGN IN
+        // ============================================================
 
-        composable(AuthRoutes.LOGIN) {
+        composable(AuthRoutes.SIGN_IN) {
 
             LoginScreen(
-
+                showBackButton = canNavigateBack,
                 onBack = {
                     navController.popBackStack()
                 },
 
                 onSignUp = {
-                    navController.navigate(
-                        AuthRoutes.SIGN_UP
-                    )
+                    navController.navigate(AuthRoutes.SIGN_UP)
                 },
 
-                 onForgotPassword = {
-            navController.navigate(
-                AuthRoutes.FORGOT_PASSWORD
-            )
-        },
-
                 onLogin = {
-                    // Later
-                }
+                    // The root ElyraApp switches to the main app when authState changes.
+                },
+
+                onForgotPassword = {
+                    navController.navigate(AuthRoutes.FORGOT_PASSWORD)
+                },
+
+                authViewModel = authViewModel
             )
         }
 
-        // ========================================================
-        // SIGN UP
-        // ========================================================
+        // ============================================================
+        // FORGOT PASSWORD
+        // ============================================================
 
-        composable(AuthRoutes.SIGN_UP) {
+        composable(AuthRoutes.FORGOT_PASSWORD) {
 
-    SignUpScreen(
-        onBack = {
-            navController.popBackStack()
-        },
-
-        onSignIn = {
-            navController.navigate(
-                AuthRoutes.LOGIN
+            ForgotPasswordScreen(
+                onBack = {
+                    navController.popBackStack()
+                },
+                onSendResetLink = { email ->
+                    authViewModel.sendPasswordResetEmail(email)
+                },
+                onSignIn = {
+                    navController.popBackStack()
+                },
+                authViewModel = authViewModel
             )
-        },
-
-        onCreateAccount = {
-            // Account creation will be implemented later.
         }
-    )
-}
-
-composable(AuthRoutes.FORGOT_PASSWORD) {
-
-    ForgotPasswordScreen(
-
-        onBack = {
-            navController.popBackStack()
-        },
-
-        onSendResetLink = { email ->
-            // Password reset implementation later
-        },
-
-        onSignIn = {
-            navController.popBackStack()
-        }
-    )
-}
     }
 }
