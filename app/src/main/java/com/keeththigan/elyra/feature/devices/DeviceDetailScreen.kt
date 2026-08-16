@@ -57,7 +57,9 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.firebase.Timestamp
 import com.keeththigan.elyra.core.designsystem.ElyraTheme
+import com.keeththigan.elyra.core.designsystem.components.topbar.ElyraDetailTopBar
 import com.keeththigan.elyra.data.model.Device
+import com.keeththigan.elyra.data.model.DeviceConnectivity
 import com.keeththigan.elyra.data.model.DeviceStatus
 import com.keeththigan.elyra.data.model.DeviceType
 import com.keeththigan.elyra.feature.floors.FloorViewModel
@@ -140,32 +142,21 @@ fun DeviceDetailScreen(
         // TOP BAR
         // ====================================================================
 
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 12.dp, vertical = 8.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-
-            IconButton(onClick = onBack) {
-                Icon(
-                    imageVector = Icons.Outlined.ArrowBack,
-                    contentDescription = "Back",
-                    tint = ElyraTheme.colors.textPrimary
-                )
+        ElyraDetailTopBar(
+            title = device.name,
+            subtitle = location,
+            onBack = onBack,
+            actions = {
+                IconButton(onClick = onEditDevice) {
+                    Icon(
+                        imageVector = Icons.Outlined.Edit,
+                        contentDescription = "Edit device",
+                        modifier = Modifier.size(20.dp),
+                        tint = ElyraTheme.colors.textSecondary
+                    )
+                }
             }
-
-            Spacer(modifier = Modifier.weight(1f))
-
-            IconButton(onClick = onEditDevice) {
-                Icon(
-                    imageVector = Icons.Outlined.Edit,
-                    contentDescription = "Edit device",
-                    modifier = Modifier.size(20.dp),
-                    tint = ElyraTheme.colors.textSecondary
-                )
-            }
-        }
+        )
 
         Column(
             modifier = Modifier
@@ -193,6 +184,7 @@ fun DeviceDetailScreen(
             PowerCard(
                 isOn = isOn,
                 statusLabel = device.status.label(),
+                enabled = device.isControllable,
                 onToggle = { deviceViewModel.toggleDevice(deviceId, it) }
             )
 
@@ -238,6 +230,11 @@ fun DeviceDetailScreen(
                             deviceViewModel.toggleSwitchChannel(
                                 deviceId, index, on
                             )
+                        },
+                        onChannelRename = { index, newName ->
+                            deviceViewModel.renameSwitchChannel(
+                                deviceId, index, newName
+                            )
                         }
                     )
                 }
@@ -266,13 +263,13 @@ fun DeviceDetailScreen(
             Spacer(modifier = Modifier.height(14.dp))
 
             // ================================================================
-            // STATUS OVERRIDE
+            // CONNECTIVITY
             // ================================================================
 
-            StatusCard(
-                current = device.status,
-                onStatusSelected = {
-                    deviceViewModel.setDeviceStatus(deviceId, it)
+            ConnectivityCard(
+                device = device,
+                onSimulateConnectivity = {
+                    deviceViewModel.setConnectivity(deviceId, it)
                 }
             )
 
@@ -364,6 +361,7 @@ private fun DeviceHero(
 private fun PowerCard(
     isOn: Boolean,
     statusLabel: String,
+    enabled: Boolean,
     onToggle: (Boolean) -> Unit
 ) {
 
@@ -376,13 +374,21 @@ private fun PowerCard(
                 Text(
                     text = "Power",
                     style = ElyraTheme.typography.titleMedium,
-                    color = ElyraTheme.colors.textPrimary
+                    color = if (enabled) {
+                        ElyraTheme.colors.textPrimary
+                    } else {
+                        ElyraTheme.colors.textDisabled
+                    }
                 )
 
                 Spacer(modifier = Modifier.height(4.dp))
 
                 Text(
-                    text = statusLabel,
+                    text = if (enabled) {
+                        statusLabel
+                    } else {
+                        "Unavailable while the device is unreachable"
+                    },
                     style = ElyraTheme.typography.bodySmall,
                     color = ElyraTheme.colors.textSecondary
                 )
@@ -391,6 +397,7 @@ private fun PowerCard(
             Switch(
                 checked = isOn,
                 onCheckedChange = onToggle,
+                enabled = enabled,
                 colors = SwitchDefaults.colors(
                     checkedThumbColor = ElyraTheme.colors.onPrimary,
                     checkedTrackColor = ElyraTheme.colors.primary,
@@ -600,8 +607,13 @@ private fun TimeField(
 @Composable
 private fun MultiSwitchCard(
     device: Device,
-    onChannelToggle: (Int, Boolean) -> Unit
+    onChannelToggle: (Int, Boolean) -> Unit,
+    onChannelRename: (Int, String) -> Unit
 ) {
+
+    var renamingIndex by remember(device.id) {
+        mutableStateOf<Int?>(null)
+    }
 
     ElyraCard {
 
@@ -613,8 +625,9 @@ private fun MultiSwitchCard(
         Spacer(modifier = Modifier.height(4.dp))
 
         Text(
-            text = "${device.switches.size}-gang unit · each switch is " +
-                "controlled independently",
+            text = "${device.switches.size}-gang unit · " +
+                "${device.activeChannelCount} on · each switch is addressed " +
+                "independently",
             style = ElyraTheme.typography.bodySmall,
             color = ElyraTheme.colors.textSecondary
         )
@@ -623,57 +636,135 @@ private fun MultiSwitchCard(
 
         device.switches.sortedBy { it.index }.forEach { channel ->
 
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 10.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
+            if (renamingIndex == channel.index) {
 
-                Box(
-                    modifier = Modifier
-                        .size(8.dp)
-                        .clip(CircleShape)
-                        .background(
-                            if (channel.isOn) {
-                                ElyraTheme.colors.textPrimary
-                            } else {
-                                ElyraTheme.colors.borderStrong
-                            }
-                        )
+                ChannelRenameRow(
+                    initialName = channel.displayName(),
+                    onDone = { newName ->
+                        onChannelRename(channel.index, newName)
+                        renamingIndex = null
+                    },
+                    onCancel = { renamingIndex = null }
                 )
 
-                Spacer(modifier = Modifier.width(12.dp))
+            } else {
 
-                Column(modifier = Modifier.weight(1f)) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 10.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
 
-                    Text(
-                        text = channel.name.ifBlank { "Switch ${channel.index}" },
-                        style = ElyraTheme.typography.bodyLarge,
-                        color = ElyraTheme.colors.textPrimary
+                    Box(
+                        modifier = Modifier
+                            .size(8.dp)
+                            .clip(CircleShape)
+                            .background(
+                                if (channel.isOn) {
+                                    ElyraTheme.colors.textPrimary
+                                } else {
+                                    ElyraTheme.colors.borderStrong
+                                }
+                            )
                     )
 
-                    Text(
-                        text = if (channel.isOn) "On" else "Off",
-                        style = ElyraTheme.typography.bodySmall,
-                        color = ElyraTheme.colors.textSecondary
+                    Spacer(modifier = Modifier.width(12.dp))
+
+                    Column(
+                        modifier = Modifier
+                            .weight(1f)
+                            .clickable { renamingIndex = channel.index }
+                    ) {
+
+                        Text(
+                            text = channel.displayName(),
+                            style = ElyraTheme.typography.bodyLarge,
+                            color = ElyraTheme.colors.textPrimary
+                        )
+
+                        Text(
+                            text = if (channel.isOn) "On · tap to rename"
+                            else "Off · tap to rename",
+                            style = ElyraTheme.typography.bodySmall,
+                            color = ElyraTheme.colors.textSecondary
+                        )
+                    }
+
+                    Switch(
+                        checked = channel.isOn,
+                        onCheckedChange = {
+                            onChannelToggle(channel.index, it)
+                        },
+                        enabled = device.isControllable,
+                        colors = SwitchDefaults.colors(
+                            checkedThumbColor = ElyraTheme.colors.onPrimary,
+                            checkedTrackColor = ElyraTheme.colors.primary,
+                            uncheckedThumbColor = ElyraTheme.colors.textTertiary,
+                            uncheckedTrackColor = ElyraTheme.colors.surfaceSecondary
+                        )
                     )
                 }
-
-                Switch(
-                    checked = channel.isOn,
-                    onCheckedChange = {
-                        onChannelToggle(channel.index, it)
-                    },
-                    colors = SwitchDefaults.colors(
-                        checkedThumbColor = ElyraTheme.colors.onPrimary,
-                        checkedTrackColor = ElyraTheme.colors.primary,
-                        uncheckedThumbColor = ElyraTheme.colors.textTertiary,
-                        uncheckedTrackColor = ElyraTheme.colors.surfaceSecondary
-                    )
-                )
             }
         }
+    }
+}
+
+
+@Composable
+private fun ChannelRenameRow(
+    initialName: String,
+    onDone: (String) -> Unit,
+    onCancel: () -> Unit
+) {
+
+    var text by remember { mutableStateOf(initialName) }
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 10.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+
+        BasicTextField(
+            value = text,
+            onValueChange = { text = it },
+            singleLine = true,
+            modifier = Modifier.weight(1f),
+            textStyle = ElyraTheme.typography.bodyLarge.copy(
+                color = ElyraTheme.colors.textPrimary
+            ),
+            decorationBox = { inner ->
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(44.dp)
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(ElyraTheme.colors.surfaceSecondary)
+                        .padding(horizontal = 12.dp),
+                    contentAlignment = Alignment.CenterStart
+                ) { inner() }
+            }
+        )
+
+        Spacer(modifier = Modifier.width(10.dp))
+
+        Text(
+            text = "Save",
+            modifier = Modifier.clickable { onDone(text.trim()) },
+            style = ElyraTheme.typography.labelLarge,
+            color = ElyraTheme.colors.textPrimary
+        )
+
+        Spacer(modifier = Modifier.width(12.dp))
+
+        Text(
+            text = "Cancel",
+            modifier = Modifier.clickable { onCancel() },
+            style = ElyraTheme.typography.labelLarge,
+            color = ElyraTheme.colors.textSecondary
+        )
     }
 }
 
@@ -1011,60 +1102,115 @@ private fun UsageStat(
 // ============================================================================
 
 @Composable
-private fun StatusCard(
-    current: DeviceStatus,
-    onStatusSelected: (DeviceStatus) -> Unit
+private fun ConnectivityCard(
+    device: Device,
+    onSimulateConnectivity: (DeviceConnectivity) -> Unit
 ) {
+
+    var showSimulator by remember(device.id) { mutableStateOf(false) }
+
+    val dotColor = when (device.connectivity) {
+        DeviceConnectivity.ONLINE -> ElyraTheme.colors.success
+        DeviceConnectivity.OFFLINE -> ElyraTheme.colors.textTertiary
+        DeviceConnectivity.ERROR -> ElyraTheme.colors.error
+    }
 
     ElyraCard {
 
-        Text(
-            text = "Operational status",
-            style = ElyraTheme.typography.titleMedium,
-            color = ElyraTheme.colors.textPrimary
-        )
+        Row(verticalAlignment = Alignment.CenterVertically) {
+
+            Box(
+                modifier = Modifier
+                    .size(10.dp)
+                    .clip(CircleShape)
+                    .background(dotColor)
+            )
+
+            Spacer(modifier = Modifier.width(12.dp))
+
+            Column(modifier = Modifier.weight(1f)) {
+
+                Text(
+                    text = "Connectivity",
+                    style = ElyraTheme.typography.titleMedium,
+                    color = ElyraTheme.colors.textPrimary
+                )
+
+                Spacer(modifier = Modifier.height(4.dp))
+
+                Text(
+                    text = when (device.connectivity) {
+                        DeviceConnectivity.ONLINE ->
+                            "Online · reporting normally"
+                        DeviceConnectivity.OFFLINE ->
+                            "Offline · last known state shown"
+                        DeviceConnectivity.ERROR ->
+                            "Fault reported by the device"
+                    },
+                    style = ElyraTheme.typography.bodySmall,
+                    color = ElyraTheme.colors.textSecondary
+                )
+            }
+        }
 
         Spacer(modifier = Modifier.height(14.dp))
 
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
+        Text(
+            text = if (showSimulator) "Hide simulator" else "Simulate device report",
+            modifier = Modifier.clickable { showSimulator = !showSimulator },
+            style = ElyraTheme.typography.labelMedium,
+            color = ElyraTheme.colors.textSecondary
+        )
 
-            listOf(
-                DeviceStatus.ON,
-                DeviceStatus.OFF,
-                DeviceStatus.ERROR,
-                DeviceStatus.DISCONNECTED
-            ).forEach { status ->
+        if (showSimulator) {
 
-                val selected = status == current
+            Spacer(modifier = Modifier.height(12.dp))
 
-                Box(
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(38.dp)
-                        .clip(RoundedCornerShape(11.dp))
-                        .background(
-                            if (selected) {
-                                ElyraTheme.colors.primary
+            Text(
+                text = "Connectivity is reported by the hardware, not chosen " +
+                    "by you. These controls stand in for the device while " +
+                    "there is no physical unit attached.",
+                style = ElyraTheme.typography.bodySmall,
+                color = ElyraTheme.colors.textTertiary
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+
+                DeviceConnectivity.entries.forEach { option ->
+
+                    val selected = option == device.connectivity
+
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(38.dp)
+                            .clip(RoundedCornerShape(11.dp))
+                            .background(
+                                if (selected) {
+                                    ElyraTheme.colors.primary
+                                } else {
+                                    ElyraTheme.colors.surfaceSecondary
+                                }
+                            )
+                            .clickable { onSimulateConnectivity(option) },
+                        contentAlignment = Alignment.Center
+                    ) {
+
+                        Text(
+                            text = option.label(),
+                            style = ElyraTheme.typography.labelMedium,
+                            color = if (selected) {
+                                ElyraTheme.colors.onPrimary
                             } else {
-                                ElyraTheme.colors.surfaceSecondary
+                                ElyraTheme.colors.textSecondary
                             }
                         )
-                        .clickable { onStatusSelected(status) },
-                    contentAlignment = Alignment.Center
-                ) {
-
-                    Text(
-                        text = status.shortLabel(),
-                        style = ElyraTheme.typography.labelMedium,
-                        color = if (selected) {
-                            ElyraTheme.colors.onPrimary
-                        } else {
-                            ElyraTheme.colors.textSecondary
-                        }
-                    )
+                    }
                 }
             }
         }
@@ -1210,10 +1356,9 @@ private fun DeviceStatus.label(): String =
     }
 
 
-private fun DeviceStatus.shortLabel(): String =
+private fun DeviceConnectivity.label(): String =
     when (this) {
-        DeviceStatus.ON -> "On"
-        DeviceStatus.OFF -> "Off"
-        DeviceStatus.ERROR -> "Error"
-        DeviceStatus.DISCONNECTED -> "Offline"
+        DeviceConnectivity.ONLINE -> "Online"
+        DeviceConnectivity.OFFLINE -> "Offline"
+        DeviceConnectivity.ERROR -> "Error"
     }
