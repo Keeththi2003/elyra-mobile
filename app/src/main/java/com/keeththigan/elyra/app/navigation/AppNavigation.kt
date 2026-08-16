@@ -71,7 +71,6 @@ import com.keeththigan.elyra.feature.notifications.NotificationViewModel
 import com.keeththigan.elyra.feature.notifications.NotificationsScreen
 import com.keeththigan.elyra.feature.reports.ReportsScreen
 
-
 private object AppRoutes {
 
     const val HOME = "home"
@@ -244,10 +243,6 @@ fun AppNavigation(
             modifier = Modifier.padding(paddingValues)
         ) {
 
-            // =====================================================
-            // HOME
-            // =====================================================
-
             composable(AppRoutes.HOME) {
 
     val authState by authViewModel.authState.collectAsStateWithLifecycle()
@@ -295,10 +290,6 @@ fun AppNavigation(
     )
 }
 
-            // =====================================================
-            // DEVICES
-            // =====================================================
-
             composable(AppRoutes.DEVICES) {
 
     DevicesScreen(
@@ -317,11 +308,6 @@ fun AppNavigation(
         onSettingsClick = {}
     )
 }
-
-
-            // =====================================================
-            // DEVICE DETAIL
-            // =====================================================
 
            composable(
     route = AppRoutes.DEVICE_DETAIL
@@ -389,7 +375,6 @@ composable(
         }
     )
 }
-
 
 composable(AppRoutes.FLOORS) {
 
@@ -541,7 +526,6 @@ composable(
     )
 }
 
-
 composable(
     route = AppRoutes.FLOOR_DETAIL
 ) { backStackEntry ->
@@ -647,9 +631,6 @@ composable(AppRoutes.ADD_FLOOR) {
         }
     )
 }
-            // =====================================================
-            // SETTINGS
-            // =====================================================
 
             composable(AppRoutes.SETTINGS) {
 
@@ -678,10 +659,8 @@ SettingsScreen(
     },
      authViewModel = authViewModel
 
-
 )         
 }
-
 
             composable(
     route = AppRoutes.REPORTS,
@@ -754,7 +733,6 @@ SettingsScreen(
         }
     )
 }
-
 
         }
     }

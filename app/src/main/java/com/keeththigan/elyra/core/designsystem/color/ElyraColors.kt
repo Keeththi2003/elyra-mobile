@@ -24,17 +24,8 @@ import androidx.compose.ui.graphics.Color
  */
 object ElyraColors {
 
-    // ============================================================
-    // PURE BLACK / WHITE
-    // ============================================================
-
     val White = Color(0xFFFFFFFF)
     val Black = Color(0xFF000000)
-
-
-    // ============================================================
-    // LIGHT NEUTRALS
-    // ============================================================
 
     val Neutral50 = Color(0xFFFAFAFA)
 
@@ -54,11 +45,6 @@ object ElyraColors {
 
     val Neutral700 = Color(0xFF404040)
 
-
-    // ============================================================
-    // DARK NEUTRALS
-    // ============================================================
-
     val Neutral800 = Color(0xFF2A2A2A)
 
     val Neutral850 = Color(0xFF222222)
@@ -69,51 +55,25 @@ object ElyraColors {
 
     val Neutral1000 = Color(0xFF000000)
 
-
-    // ============================================================
-    // SUCCESS
-    // Used only for positive states.
-    // ============================================================
-
     val Green100 = Color(0xFFEAF7EE)
     val Green500 = Color(0xFF34A853)
     val Green600 = Color(0xFF188038)
     val Green900 = Color(0xFF0B4627)
-
-
-    // ============================================================
-    // WARNING
-    // ============================================================
 
     val Amber100 = Color(0xFFFFF4D6)
     val Amber500 = Color(0xFFF5A623)
     val Amber600 = Color(0xFFB7791F)
     val Amber900 = Color(0xFF633C00)
 
-
-    // ============================================================
-    // ERROR
-    // ============================================================
-
     val Red100 = Color(0xFFFFEBEB)
     val Red500 = Color(0xFFFF453A)
     val Red600 = Color(0xFFD70015)
     val Red900 = Color(0xFF8B0000)
 
-
-    // ============================================================
-    // INFORMATION
-    // ============================================================
-
     val Blue100 = Color(0xFFEAF3FF)
     val Blue500 = Color(0xFF0A84FF)
     val Blue600 = Color(0xFF0066CC)
     val Blue900 = Color(0xFF003A75)
-
-
-    // ============================================================
-    // SYSTEM / OVERLAY
-    // ============================================================
 
     val Scrim = Color(0x99000000)
 

@@ -52,19 +52,11 @@ import com.keeththigan.elyra.data.model.Device
 import com.keeththigan.elyra.data.model.DeviceType
 import com.keeththigan.elyra.feature.devices.DeviceViewModel
 
-// ============================================================================
-// TEMPORARY ROOM MODEL
-// ============================================================================
-
 private data class FloorRoom(
     val id: Int,
     val name: String,
     val devices: MutableList<Device>
 )
-
-// ============================================================================
-// ADD FLOOR SCREEN
-// ============================================================================
 
 @Composable
 fun AddFloorScreen(
@@ -118,10 +110,6 @@ fun AddFloorScreen(
             )
     ) {
 
-        // ====================================================================
-        // TOP BAR
-        // ====================================================================
-
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -169,10 +157,6 @@ fun AddFloorScreen(
             }
         }
 
-        // ====================================================================
-        // CONTENT
-        // ====================================================================
-
         LazyColumn(
             modifier = Modifier
                 .weight(1f)
@@ -181,10 +165,6 @@ fun AddFloorScreen(
                 ),
             verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
-
-            // =================================================================
-            // FLOOR INFORMATION
-            // =================================================================
 
             item {
 
@@ -205,10 +185,6 @@ fun AddFloorScreen(
                     placeholder = "e.g. Ground Floor"
                 )
             }
-
-            // =================================================================
-            // ROOMS
-            // =================================================================
 
             item {
 
@@ -245,10 +221,6 @@ fun AddFloorScreen(
                         modifier = Modifier.height(10.dp)
                     )
                 }
-
-                // -------------------------------------------------------------
-                // ADD ROOM
-                // -------------------------------------------------------------
 
                 Row(
                     modifier = Modifier
@@ -339,10 +311,6 @@ fun AddFloorScreen(
             }
         }
 
-        // ====================================================================
-        // CREATE FLOOR
-        // ====================================================================
-
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -415,11 +383,6 @@ fun AddFloorScreen(
     }
 }
 
-
-// ============================================================================
-// ROOM SETUP CARD
-// ============================================================================
-
 @Composable
 private fun RoomSetupCard(
     room: FloorRoom,
@@ -443,10 +406,6 @@ private fun RoomSetupCard(
             )
             .padding(16.dp)
     ) {
-
-        // --------------------------------------------------------------------
-        // ROOM HEADER
-        // --------------------------------------------------------------------
 
         Row(
             verticalAlignment = Alignment.CenterVertically
@@ -509,10 +468,6 @@ private fun RoomSetupCard(
             modifier = Modifier.height(16.dp)
         )
 
-        // --------------------------------------------------------------------
-        // SELECT DEVICE
-        // --------------------------------------------------------------------
-
         Text(
             text = "Devices",
             style = ElyraTheme.typography.titleSmall,
@@ -536,10 +491,6 @@ private fun RoomSetupCard(
             )
         }
 
-        // --------------------------------------------------------------------
-        // SELECTED DEVICES
-        // --------------------------------------------------------------------
-
         room.devices.forEach { device ->
 
             SelectedDeviceRow(
@@ -553,10 +504,6 @@ private fun RoomSetupCard(
                 modifier = Modifier.height(6.dp)
             )
         }
-
-        // --------------------------------------------------------------------
-        // DROPDOWN
-        // --------------------------------------------------------------------
 
         Box(
             modifier = Modifier.fillMaxWidth()
@@ -609,10 +556,6 @@ private fun RoomSetupCard(
             }
         }
 
-        // --------------------------------------------------------------------
-        // DEVICE SELECTOR
-        // --------------------------------------------------------------------
-
         if (showDeviceSelector) {
 
             Spacer(
@@ -655,10 +598,6 @@ private fun RoomSetupCard(
                 Spacer(
                     modifier = Modifier.height(4.dp)
                 )
-
-                // -------------------------------------------------------------
-                // ADD NEW DEVICE
-                // -------------------------------------------------------------
 
                 Row(
                     modifier = Modifier
@@ -717,11 +656,6 @@ private fun RoomSetupCard(
         }
     }
 }
-
-
-// ============================================================================
-// SELECTED DEVICE
-// ============================================================================
 
 @Composable
 private fun SelectedDeviceRow(
@@ -785,11 +719,6 @@ private fun SelectedDeviceRow(
     }
 }
 
-
-// ============================================================================
-// DEVICE SELECTOR ROW
-// ============================================================================
-
 @Composable
 private fun DeviceSelectorRow(
     device: Device,
@@ -846,11 +775,6 @@ private fun DeviceSelectorRow(
     }
 }
 
-
-// ============================================================================
-// DEVICE ICON
-// ============================================================================
-
 @Composable
 private fun DeviceIcon(
     type: DeviceType
@@ -902,11 +826,6 @@ private fun DeviceIcon(
     }
 }
 
-
-// ============================================================================
-// EMPTY ROOMS
-// ============================================================================
-
 @Composable
 private fun EmptyRoomsCard() {
 
@@ -952,11 +871,6 @@ private fun EmptyRoomsCard() {
     }
 }
 
-
-// ============================================================================
-// SECTION HEADER
-// ============================================================================
-
 @Composable
 private fun SectionHeader(
     title: String,
@@ -982,11 +896,6 @@ private fun SectionHeader(
         )
     }
 }
-
-
-// ============================================================================
-// TEXT FIELD
-// ============================================================================
 
 @Composable
 private fun FloorTextField(
@@ -1042,11 +951,6 @@ private fun FloorTextField(
         }
     )
 }
-
-
-// ============================================================================
-// DEVICE TYPE NAME
-// ============================================================================
 
 private fun DeviceType.displayName(): String {
 

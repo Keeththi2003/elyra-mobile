@@ -28,10 +28,6 @@ import com.keeththigan.elyra.R
  * and Headline styles rather than oversized typography.
  */
 
-// ================================================================
-// FONT FAMILY
-// ================================================================
-
 val ElyraFontFamily = FontFamily(
     Font(
         resId = R.font.inter_regular,
@@ -51,16 +47,7 @@ val ElyraFontFamily = FontFamily(
     )
 )
 
-
-// ================================================================
-// TYPOGRAPHY
-// ================================================================
-
 val ElyraTypography = Typography(
-
-    // ------------------------------------------------------------
-    // DISPLAY
-    // ------------------------------------------------------------
 
     displayLarge = TextStyle(
         fontFamily = ElyraFontFamily,
@@ -86,11 +73,6 @@ val ElyraTypography = Typography(
         letterSpacing = (-0.3).sp
     ),
 
-
-    // ------------------------------------------------------------
-    // HEADLINES
-    // ------------------------------------------------------------
-
     headlineLarge = TextStyle(
         fontFamily = ElyraFontFamily,
         fontWeight = FontWeight.Bold,
@@ -114,11 +96,6 @@ val ElyraTypography = Typography(
         lineHeight = 26.sp,
         letterSpacing = 0.sp
     ),
-
-
-    // ------------------------------------------------------------
-    // TITLES
-    // ------------------------------------------------------------
 
     titleLarge = TextStyle(
         fontFamily = ElyraFontFamily,
@@ -144,11 +121,6 @@ val ElyraTypography = Typography(
         letterSpacing = 0.sp
     ),
 
-
-    // ------------------------------------------------------------
-    // BODY
-    // ------------------------------------------------------------
-
     bodyLarge = TextStyle(
         fontFamily = ElyraFontFamily,
         fontWeight = FontWeight.Normal,
@@ -172,11 +144,6 @@ val ElyraTypography = Typography(
         lineHeight = 18.sp,
         letterSpacing = 0.05.sp
     ),
-
-
-    // ------------------------------------------------------------
-    // LABELS
-    // ------------------------------------------------------------
 
     labelLarge = TextStyle(
         fontFamily = ElyraFontFamily,

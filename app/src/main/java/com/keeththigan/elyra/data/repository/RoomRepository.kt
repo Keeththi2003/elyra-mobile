@@ -22,11 +22,6 @@ class RoomRepository {
     private val devicesCollection =
         firestore.collection("devices")
 
-
-    // ========================================================================
-    // CREATE
-    // ========================================================================
-
     suspend fun createRoom(
         room: Room
     ): Result<Room> {
@@ -60,11 +55,6 @@ class RoomRepository {
         }
     }
 
-
-    // ========================================================================
-    // OBSERVE (realtime)
-    // ========================================================================
-
     fun observeRooms(): Flow<Result<List<Room>>> = callbackFlow {
 
         val uid = auth.currentUser?.uid
@@ -97,11 +87,6 @@ class RoomRepository {
 
         awaitClose { registration.remove() }
     }
-
-
-    // ========================================================================
-    // READ
-    // ========================================================================
 
     suspend fun getRoom(
         roomId: String
@@ -202,11 +187,6 @@ class RoomRepository {
         }
     }
 
-
-    // ========================================================================
-    // UPDATE
-    // ========================================================================
-
     suspend fun updateRoom(
         room: Room
     ): Result<Room> {
@@ -256,11 +236,6 @@ class RoomRepository {
             Result.failure(e)
         }
     }
-
-
-    // ========================================================================
-    // DELETE
-    // ========================================================================
 
     suspend fun deleteRoom(
         roomId: String

@@ -19,11 +19,6 @@ class DeviceRepository {
     private val devicesCollection =
         firestore.collection("devices")
 
-
-    // ========================================================================
-    // CREATE
-    // ========================================================================
-
     suspend fun createDevice(
         device: Device
     ): Result<Device> {
@@ -57,15 +52,6 @@ class DeviceRepository {
         }
     }
 
-
-    // ========================================================================
-    // OBSERVE (realtime)
-    //
-    // Emits on every change to this user's devices, whether the write came
-    // from this app or from anywhere else (console, simulator, another
-    // device), so the UI stays in sync without manual refreshes.
-    // ========================================================================
-
     fun observeDevices(): Flow<Result<List<Device>>> = callbackFlow {
 
         val uid = auth.currentUser?.uid
@@ -98,11 +84,6 @@ class DeviceRepository {
 
         awaitClose { registration.remove() }
     }
-
-
-    // ========================================================================
-    // READ
-    // ========================================================================
 
     suspend fun getDevice(
         deviceId: String
@@ -171,11 +152,6 @@ class DeviceRepository {
         }
     }
 
-
-    // ========================================================================
-    // UPDATE
-    // ========================================================================
-
     /**
      * Writes the device straight through — no read-before-write.
      *
@@ -214,11 +190,6 @@ class DeviceRepository {
             Result.failure(e)
         }
     }
-
-
-    // ========================================================================
-    // DELETE
-    // ========================================================================
 
     suspend fun deleteDevice(
         deviceId: String
@@ -260,11 +231,6 @@ class DeviceRepository {
             Result.failure(e)
         }
     }
-
-
-    // ========================================================================
-    // CASCADE HELPERS (used by FloorRepository / RoomRepository)
-    // ========================================================================
 
     suspend fun unassignDevicesFromRoom(
         roomId: String

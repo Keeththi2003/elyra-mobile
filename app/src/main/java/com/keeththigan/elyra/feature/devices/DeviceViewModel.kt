@@ -19,11 +19,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-
-// ============================================================================
-// DEVICE STATE
-// ============================================================================
-
 data class DeviceUiState(
     val isLoading: Boolean = false,
     val devices: List<Device> = emptyList(),
@@ -36,11 +31,6 @@ data class DeviceUiState(
     /** False when the phone has no usable internet connection. */
     val isOnline: Boolean = true
 )
-
-
-// ============================================================================
-// DEVICE VIEW MODEL
-// ============================================================================
 
 class DeviceViewModel(
     private val repository: DeviceRepository,
@@ -61,11 +51,6 @@ class DeviceViewModel(
         startSafetyCutoffWorker()
     }
 
-
-    // ========================================================================
-    // CONNECTIVITY
-    // ========================================================================
-
     private fun observeConnectivity() {
 
         _state.value =
@@ -77,11 +62,6 @@ class DeviceViewModel(
             }
         }
     }
-
-
-    // ========================================================================
-    // REALTIME OBSERVATION
-    // ========================================================================
 
     private fun observeDevices() {
 
@@ -159,11 +139,6 @@ class DeviceViewModel(
                 }
         }
     }
-
-
-    // ========================================================================
-    // CREATE
-    // ========================================================================
 
     fun createDevice(
         name: String,
@@ -243,11 +218,6 @@ class DeviceViewModel(
                 }
         }
     }
-
-
-    // ========================================================================
-    // UPDATE
-    // ========================================================================
 
     fun updateDevice(
         device: Device,
@@ -473,19 +443,6 @@ class DeviceViewModel(
         )
     }
 
-
-    // ========================================================================
-    // SAFETY CUTOFF
-    //
-    // Watches safety-critical devices and forces them OFF once they exceed
-    // their configured maximum ON duration.
-    //
-    // NOTE: the brief describes this running as a backend listener/worker.
-    // Cloud Functions require the Blaze plan, so this project runs the same
-    // rule as an in-app worker writing the OFF state back to Firestore, where
-    // every other client picks it up through the realtime listeners.
-    // ========================================================================
-
     private fun startSafetyCutoffWorker() {
 
         viewModelScope.launch {
@@ -545,11 +502,6 @@ class DeviceViewModel(
         }
     }
 
-
-    // ========================================================================
-    // DELETE
-    // ========================================================================
-
     fun deleteDevice(
         deviceId: String
     ) {
@@ -579,11 +531,6 @@ class DeviceViewModel(
         }
     }
 
-
-    // ========================================================================
-    // HELPERS
-    // ========================================================================
-
     private fun findDevice(
         deviceId: String
     ): Device? =
@@ -598,11 +545,6 @@ class DeviceViewModel(
         val elapsed = Timestamp.now().seconds - startedAt.seconds
         return elapsed.coerceAtLeast(0L)
     }
-
-
-    // ========================================================================
-    // ONE-SHOT SIGNAL CONSUMPTION
-    // ========================================================================
 
     fun consumeSaved() {
         _state.value = _state.value.copy(isSaved = false)

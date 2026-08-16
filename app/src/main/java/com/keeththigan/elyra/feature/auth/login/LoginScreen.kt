@@ -47,7 +47,6 @@ import androidx.compose.ui.unit.dp
 import com.keeththigan.elyra.core.designsystem.ElyraTheme
 import com.keeththigan.elyra.feature.auth.AuthViewModel
 
-
 @Composable
 fun LoginScreen(
     onBack: () -> Unit,
@@ -57,10 +56,6 @@ fun LoginScreen(
     authViewModel: AuthViewModel,
     showBackButton: Boolean = true
 )  {
-
-    // ========================================================
-    // STATE
-    // ========================================================
 
     var email by remember {
         mutableStateOf("")
@@ -74,10 +69,6 @@ fun LoginScreen(
         mutableStateOf(false)
     }
 
-    // ========================================================
-    // AUTH STATE
-    // ========================================================
-
     val authState by authViewModel.authState.collectAsState()
 
     LaunchedEffect(authState.isAuthenticated) {
@@ -86,15 +77,9 @@ fun LoginScreen(
         }
     }
 
-    // ========================================================
-    // ========================================================
-    // CAN LOGIN
-    // ========================================================
-
     val canLogin =
         email.isNotBlank() &&
                 password.isNotBlank()
-
 
     Column(
         modifier = Modifier
@@ -105,10 +90,6 @@ fun LoginScreen(
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 24.dp)
     ) {
-
-        // ========================================================
-        // TOP BAR
-        // ========================================================
 
         Box(
             modifier = Modifier
@@ -142,10 +123,6 @@ fun LoginScreen(
         Spacer(
             modifier = Modifier.height(32.dp)
         )
-
-        // ========================================================
-        // BRAND
-        // ========================================================
 
         Column(
             modifier = Modifier.fillMaxWidth(),
@@ -192,18 +169,10 @@ fun LoginScreen(
             modifier = Modifier.height(40.dp)
         )
 
-        // ========================================================
-        // FORM
-        // ========================================================
-
         Column(
             modifier = Modifier.fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
-
-            // ====================================================
-            // EMAIL
-            // ====================================================
 
             ElyraAuthTextField(
                 label = "Email",
@@ -220,10 +189,6 @@ fun LoginScreen(
                 keyboardType = KeyboardType.Email,
                 imeAction = ImeAction.Next
             )
-
-            // ====================================================
-            // PASSWORD
-            // ====================================================
 
             ElyraAuthTextField(
                 label = "Password",
@@ -247,10 +212,6 @@ fun LoginScreen(
             )
         }
 
-        // ========================================================
-        // ERROR
-        // ========================================================
-
         if (authState.error != null) {
 
             Spacer(
@@ -263,10 +224,6 @@ fun LoginScreen(
                 color = ElyraTheme.colors.error
             )
         }
-
-        // ========================================================
-        // FORGOT PASSWORD
-        // ========================================================
 
         Box(
             modifier = Modifier
@@ -291,10 +248,6 @@ fun LoginScreen(
             modifier = Modifier.height(28.dp)
         )
 
-        // ========================================================
-        // SIGN IN BUTTON
-        // ========================================================
-
         ElyraPrimaryButton(
             text = if (authState.isLoading) {
                 "Signing in..."
@@ -314,10 +267,6 @@ fun LoginScreen(
         Spacer(
             modifier = Modifier.height(28.dp)
         )
-
-        // ========================================================
-        // SIGN UP
-        // ========================================================
 
         Row(
             modifier = Modifier
@@ -346,11 +295,6 @@ fun LoginScreen(
         }
     }
 }
-
-
-// =================================================================
-// AUTH TEXT FIELD
-// =================================================================
 
 @Composable
 private fun ElyraAuthTextField(
@@ -478,11 +422,6 @@ private fun ElyraAuthTextField(
         )
     }
 }
-
-
-// =================================================================
-// PRIMARY BUTTON
-// =================================================================
 
 @Composable
 private fun ElyraPrimaryButton(

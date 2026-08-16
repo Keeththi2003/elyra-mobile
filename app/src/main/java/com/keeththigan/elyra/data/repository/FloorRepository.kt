@@ -25,11 +25,6 @@ class FloorRepository {
     private val devicesCollection =
         firestore.collection("devices")
 
-
-    // ========================================================================
-    // CREATE
-    // ========================================================================
-
     suspend fun createFloor(
         floor: Floor
     ): Result<Floor> {
@@ -63,11 +58,6 @@ class FloorRepository {
         }
     }
 
-
-    // ========================================================================
-    // OBSERVE (realtime)
-    // ========================================================================
-
     fun observeFloors(): Flow<Result<List<Floor>>> = callbackFlow {
 
         val uid = auth.currentUser?.uid
@@ -100,11 +90,6 @@ class FloorRepository {
 
         awaitClose { registration.remove() }
     }
-
-
-    // ========================================================================
-    // READ
-    // ========================================================================
 
     suspend fun getFloor(
         floorId: String
@@ -173,11 +158,6 @@ class FloorRepository {
         }
     }
 
-
-    // ========================================================================
-    // UPDATE
-    // ========================================================================
-
     suspend fun updateFloor(
         floor: Floor
     ): Result<Floor> {
@@ -227,11 +207,6 @@ class FloorRepository {
             Result.failure(e)
         }
     }
-
-
-    // ========================================================================
-    // DELETE
-    // ========================================================================
 
     suspend fun deleteFloor(
         floorId: String

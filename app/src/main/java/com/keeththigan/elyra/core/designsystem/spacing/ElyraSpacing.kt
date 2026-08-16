@@ -24,10 +24,6 @@ import androidx.compose.ui.unit.dp
  */
 object ElyraSpacing {
 
-    // ============================================================
-    // BASE SPACING SCALE
-    // ============================================================
-
     /**
      * 2dp
      *
@@ -110,11 +106,6 @@ object ElyraSpacing {
      */
     val hero = 64.dp
 
-
-    // ============================================================
-    // SCREEN
-    // ============================================================
-
     /**
      * Standard horizontal screen padding.
      */
@@ -136,11 +127,6 @@ object ElyraSpacing {
      * Standard bottom spacing.
      */
     val screenBottom = 24.dp
-
-
-    // ============================================================
-    // COMPONENTS
-    // ============================================================
 
     /**
      * Standard card content padding.
@@ -172,11 +158,6 @@ object ElyraSpacing {
      */
     val inputVertical = 14.dp
 
-
-    // ============================================================
-    // LISTS
-    // ============================================================
-
     /**
      * Space between list items.
      */
@@ -186,11 +167,6 @@ object ElyraSpacing {
      * Space between major list sections.
      */
     val listSectionGap = 24.dp
-
-
-    // ============================================================
-    // CONTENT
-    // ============================================================
 
     /**
      * Small gap between icon and text.
@@ -211,11 +187,6 @@ object ElyraSpacing {
      * Gap between major content blocks.
      */
     val sectionGap = 24.dp
-
-
-    // ============================================================
-    // BOTTOM NAVIGATION
-    // ============================================================
 
     /**
      * Bottom navigation content padding.

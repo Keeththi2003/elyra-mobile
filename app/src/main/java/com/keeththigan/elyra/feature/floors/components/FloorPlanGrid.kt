@@ -108,7 +108,6 @@ fun FloorPlanGrid(
     }
 }
 
-
 @Composable
 private fun RoomZone(
     room: Room,
@@ -232,7 +231,6 @@ private fun RoomZone(
     }
 }
 
-
 @Composable
 private fun DeviceChip(
     device: Device,
@@ -272,7 +270,6 @@ private fun DeviceChip(
         )
     }
 }
-
 
 @Composable
 private fun AddZone(
@@ -320,7 +317,6 @@ private fun AddZone(
         )
     }
 }
-
 
 private fun DeviceType.planIcon(): ImageVector =
     when (this) {

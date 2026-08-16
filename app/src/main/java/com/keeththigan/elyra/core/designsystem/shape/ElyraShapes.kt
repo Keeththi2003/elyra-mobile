@@ -16,10 +16,6 @@ import androidx.compose.ui.unit.dp
  */
 object ElyraShapes {
 
-    // ============================================================
-    // BASE RADII
-    // ============================================================
-
     /**
      * 4dp
      *
@@ -68,11 +64,6 @@ object ElyraShapes {
      * Useful for pills, badges and compact status indicators.
      */
     val full = 999.dp
-
-
-    // ============================================================
-    // COMPONENT SHAPES
-    // ============================================================
 
     /**
      * Standard card shape.
@@ -123,11 +114,6 @@ object ElyraShapes {
         bottomStart = 0.dp,
         bottomEnd = 0.dp
     )
-
-
-    // ============================================================
-    // MATERIAL 3 SHAPE SYSTEM
-    // ============================================================
 
     /**
      * Shapes mapped into Material 3's shape system.

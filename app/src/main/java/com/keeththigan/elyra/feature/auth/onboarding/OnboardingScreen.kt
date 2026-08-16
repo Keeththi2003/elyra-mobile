@@ -50,16 +50,11 @@ import androidx.compose.ui.platform.LocalConfiguration
 import com.keeththigan.elyra.core.designsystem.ElyraTheme
 import kotlinx.coroutines.delay
 
-
 @Composable
 fun OnboardingScreen(
     onGetStarted: () -> Unit,
     onSignIn: () -> Unit
 ) {
-
-    // ================================================================
-    // SCREEN SIZE
-    // ================================================================
 
     val configuration = LocalConfiguration.current
 
@@ -68,11 +63,6 @@ fun OnboardingScreen(
     val isSmallScreen = screenHeight < 700
 
     val isLargeScreen = screenHeight >= 800
-
-
-    // ================================================================
-    // RESPONSIVE VALUES
-    // ================================================================
 
     val horizontalPadding = when {
         isSmallScreen -> 20.dp
@@ -103,11 +93,6 @@ fun OnboardingScreen(
     } else {
         54.dp
     }
-
-
-    // ================================================================
-    // ENTRANCE ANIMATION
-    // ================================================================
 
     var animationStarted by remember {
         mutableFloatStateOf(0f)
@@ -140,11 +125,6 @@ fun OnboardingScreen(
         label = "heroScale"
     )
 
-
-    // ================================================================
-    // SCREEN
-    // ================================================================
-
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -154,10 +134,6 @@ fun OnboardingScreen(
             .padding(horizontal = horizontalPadding),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-
-        // ============================================================
-        // BRAND
-        // ============================================================
 
         Box(
             modifier = Modifier
@@ -173,11 +149,6 @@ fun OnboardingScreen(
                 modifier = Modifier.align(Alignment.Center)
             )
         }
-
-
-        // ============================================================
-        // HERO
-        // ============================================================
 
         Box(
             modifier = Modifier
@@ -196,11 +167,6 @@ fun OnboardingScreen(
         Spacer(
             modifier = Modifier.weight(1f)
         )
-
-
-        // ============================================================
-        // TEXT
-        // ============================================================
 
         Column(
             modifier = Modifier.fillMaxWidth()
@@ -231,17 +197,11 @@ fun OnboardingScreen(
             )
         }
 
-
         Spacer(
             modifier = Modifier.height(
                 if (isSmallScreen) 18.dp else 24.dp
             )
         )
-
-
-        // ============================================================
-        // GET STARTED
-        // ============================================================
 
         Box(
             modifier = Modifier
@@ -263,15 +223,9 @@ fun OnboardingScreen(
             )
         }
 
-
         Spacer(
             modifier = Modifier.height(14.dp)
         )
-
-
-        // ============================================================
-        // SIGN IN
-        // ============================================================
 
         Row(
             modifier = Modifier
@@ -301,17 +255,11 @@ fun OnboardingScreen(
             )
         }
 
-
         Spacer(
             modifier = Modifier.height(8.dp)
         )
     }
 }
-
-
-// ============================================================================
-// HERO GRAPHIC
-// ============================================================================
 
 @Composable
 private fun ElyraHeroGraphic(
@@ -324,15 +272,10 @@ private fun ElyraHeroGraphic(
 
     val surface = ElyraTheme.colors.surfaceSecondary
 
-
     Box(
         modifier = Modifier.size(size),
         contentAlignment = Alignment.Center
     ) {
-
-        // ================================================================
-        // OUTER RINGS
-        // ================================================================
 
         Canvas(
             modifier = Modifier.size(size)
@@ -354,11 +297,6 @@ private fun ElyraHeroGraphic(
             )
         }
 
-
-        // ================================================================
-        // HOME
-        // ================================================================
-
         Box(
             modifier = Modifier
                 .size(size * 0.50f)
@@ -375,11 +313,6 @@ private fun ElyraHeroGraphic(
 
                 val canvasWidth = this.size.width
                 val canvasHeight = this.size.height
-
-
-                // --------------------------------------------------------
-                // ROOF
-                // --------------------------------------------------------
 
                 val roofPath = Path().apply {
 
@@ -408,11 +341,6 @@ private fun ElyraHeroGraphic(
                     )
                 )
 
-
-                // --------------------------------------------------------
-                // HOUSE BODY
-                // --------------------------------------------------------
-
                 drawRoundRect(
                     color = primary,
                     topLeft = androidx.compose.ui.geometry.Offset(
@@ -431,11 +359,6 @@ private fun ElyraHeroGraphic(
                     )
                 )
 
-
-                // --------------------------------------------------------
-                // DOOR
-                // --------------------------------------------------------
-
                 drawRoundRect(
                     color = primary,
                     topLeft = androidx.compose.ui.geometry.Offset(
@@ -453,11 +376,6 @@ private fun ElyraHeroGraphic(
             }
         }
 
-
-        // ================================================================
-        // LIGHT
-        // ================================================================
-
         HeroDevice(
             modifier = Modifier.align(Alignment.TopEnd),
             size = size * 0.16f
@@ -470,11 +388,6 @@ private fun ElyraHeroGraphic(
                 modifier = Modifier.size(size * 0.065f)
             )
         }
-
-
-        // ================================================================
-        // WIFI
-        // ================================================================
 
         HeroDevice(
             modifier = Modifier.align(Alignment.BottomStart),
@@ -489,11 +402,6 @@ private fun ElyraHeroGraphic(
             )
         }
 
-
-        // ================================================================
-        // LOCK
-        // ================================================================
-
         HeroDevice(
             modifier = Modifier.align(Alignment.BottomEnd),
             size = size * 0.16f
@@ -506,11 +414,6 @@ private fun ElyraHeroGraphic(
                 modifier = Modifier.size(size * 0.065f)
             )
         }
-
-
-        // ================================================================
-        // CONNECTION DOTS
-        // ================================================================
 
         Box(
             modifier = Modifier
@@ -533,11 +436,6 @@ private fun ElyraHeroGraphic(
         )
     }
 }
-
-
-// ============================================================================
-// HERO DEVICE
-// ============================================================================
 
 @Composable
 private fun HeroDevice(

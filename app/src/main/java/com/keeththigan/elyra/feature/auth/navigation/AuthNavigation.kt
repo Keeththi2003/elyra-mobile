@@ -39,10 +39,6 @@ fun AuthNavigation(
         startDestination = AuthRoutes.SIGN_UP
     ) {
 
-        // ============================================================
-        // SIGN UP
-        // ============================================================
-
         composable(AuthRoutes.SIGN_UP) {
 
             SignUpScreen(
@@ -64,10 +60,6 @@ fun AuthNavigation(
                 authViewModel = authViewModel
             )
         }
-
-        // ============================================================
-        // SIGN IN
-        // ============================================================
 
         composable(AuthRoutes.SIGN_IN) {
 
@@ -103,10 +95,6 @@ fun AuthNavigation(
                 authViewModel = authViewModel
             )
         }
-
-        // ============================================================
-        // FORGOT PASSWORD
-        // ============================================================
 
         composable(AuthRoutes.FORGOT_PASSWORD) {
 

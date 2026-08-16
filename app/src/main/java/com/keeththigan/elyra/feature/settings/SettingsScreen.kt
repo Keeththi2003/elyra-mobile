@@ -36,7 +36,6 @@ import androidx.compose.ui.unit.dp
 import com.keeththigan.elyra.core.designsystem.ElyraTheme
 import com.keeththigan.elyra.feature.auth.AuthViewModel
 
-
 @Composable
 fun SettingsScreen(
     authViewModel: AuthViewModel,
@@ -67,10 +66,6 @@ fun SettingsScreen(
             modifier = Modifier.height(20.dp)
         )
 
-        // =========================================================
-        // HEADER
-        // =========================================================
-
         Text(
             text = "Settings",
             style = ElyraTheme.typography.displaySmall,
@@ -91,11 +86,6 @@ fun SettingsScreen(
             modifier = Modifier.height(28.dp)
         )
 
-
-        // =========================================================
-        // ACCOUNT
-        // =========================================================
-
         SectionTitle("Account")
 
         Spacer(
@@ -113,10 +103,6 @@ fun SettingsScreen(
 
             Divider()
 
-            // =====================================================
-            // LOGOUT
-            // =====================================================
-
             SettingsItem(
                 icon = Icons.Outlined.Logout,
                 title = "Log out",
@@ -127,15 +113,9 @@ fun SettingsScreen(
             )
         }
 
-
         Spacer(
             modifier = Modifier.height(28.dp)
         )
-
-
-        // =========================================================
-        // PREFERENCES
-        // =========================================================
 
         SectionTitle("Preferences")
 
@@ -181,15 +161,9 @@ fun SettingsScreen(
             )
         }
 
-
         Spacer(
             modifier = Modifier.height(28.dp)
         )
-
-
-        // =========================================================
-        // ABOUT
-        // =========================================================
 
         SectionTitle("About")
 
@@ -206,7 +180,6 @@ fun SettingsScreen(
                 onClick = onAboutClick
             )
         }
-
 
         Spacer(
             modifier = Modifier.height(32.dp)
@@ -225,11 +198,6 @@ fun SettingsScreen(
     }
 }
 
-
-// ================================================================
-// SECTION TITLE
-// ================================================================
-
 @Composable
 private fun SectionTitle(
     text: String
@@ -244,11 +212,6 @@ private fun SectionTitle(
         color = ElyraTheme.colors.textSecondary
     )
 }
-
-
-// ================================================================
-// SETTINGS CARD
-// ================================================================
 
 @Composable
 private fun SettingsCard(
@@ -269,11 +232,6 @@ private fun SettingsCard(
         content()
     }
 }
-
-
-// ================================================================
-// SETTINGS ITEM
-// ================================================================
 
 @Composable
 private fun SettingsItem(
@@ -334,13 +292,6 @@ private fun SettingsItem(
     }
 }
 
-
-
-
-// ================================================================
-// ICON
-// ================================================================
-
 @Composable
 private fun SettingsIcon(
     icon: ImageVector
@@ -368,11 +319,6 @@ private fun SettingsIcon(
     }
 }
 
-
-// ================================================================
-// DIVIDER
-// ================================================================
-
 @Composable
 private fun Divider() {
 
@@ -388,11 +334,6 @@ private fun Divider() {
             )
     )
 }
-
-
-// ================================================================
-// TOGGLE ITEM
-// ================================================================
 
 @Composable
 private fun SettingsToggleItem(

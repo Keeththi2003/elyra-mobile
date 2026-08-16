@@ -12,11 +12,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-
-// ============================================================================
-// FLOOR STATE
-// ============================================================================
-
 data class FloorUiState(
     val isLoading: Boolean = false,
     val floors: List<Floor> = emptyList(),
@@ -25,11 +20,6 @@ data class FloorUiState(
     val isSaved: Boolean = false,
     val isDeleted: Boolean = false
 )
-
-
-// ============================================================================
-// FLOOR VIEW MODEL
-// ============================================================================
 
 class FloorViewModel(
     private val floorRepository: FloorRepository,
@@ -47,11 +37,6 @@ class FloorViewModel(
     init {
         observeFloors()
     }
-
-
-    // ========================================================================
-    // LOAD (realtime)
-    // ========================================================================
 
     private fun observeFloors() {
 
@@ -132,11 +117,6 @@ class FloorViewModel(
                 }
         }
     }
-
-
-    // ========================================================================
-    // CREATE
-    // ========================================================================
 
     fun createFloor(
         name: String
@@ -274,11 +254,6 @@ class FloorViewModel(
         }
     }
 
-
-    // ========================================================================
-    // UPDATE
-    // ========================================================================
-
     fun updateFloor(
         floorId: String,
         name: String
@@ -332,11 +307,6 @@ class FloorViewModel(
         }
     }
 
-
-    // ========================================================================
-    // DELETE
-    // ========================================================================
-
     fun deleteFloor(
         floorId: String
     ) {
@@ -373,11 +343,6 @@ class FloorViewModel(
                 }
         }
     }
-
-
-    // ========================================================================
-    // ONE-SHOT SIGNAL CONSUMPTION
-    // ========================================================================
 
     fun consumeSaved() {
         _state.value =

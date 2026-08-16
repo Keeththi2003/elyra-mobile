@@ -88,10 +88,6 @@ fun RoomDetailsScreen(
             )
     ) {
 
-        // ====================================================================
-        // TOP BAR
-        // ====================================================================
-
         ElyraDetailTopBar(
             title = roomName.ifBlank { "Room" },
             subtitle = floorName.ifBlank { null },
@@ -108,10 +104,6 @@ fun RoomDetailsScreen(
             }
         )
 
-        // ====================================================================
-        // CONTENT
-        // ====================================================================
-
         LazyColumn(
             modifier = Modifier
                 .weight(1f)
@@ -120,10 +112,6 @@ fun RoomDetailsScreen(
                 ),
             verticalArrangement = Arrangement.spacedBy(18.dp)
         ) {
-
-            // =================================================================
-            // ROOM HEADER
-            // =================================================================
 
             if (roomState.error != null || deviceState.error != null) {
 
@@ -146,10 +134,6 @@ fun RoomDetailsScreen(
                 )
             }
 
-            // =================================================================
-            // DEVICE SECTION HEADER
-            // =================================================================
-
             item {
 
                 Column {
@@ -171,10 +155,6 @@ fun RoomDetailsScreen(
                     )
                 }
             }
-
-            // =================================================================
-            // DEVICE LIST
-            // =================================================================
 
             if (devices.isEmpty()) {
 
@@ -207,14 +187,6 @@ fun RoomDetailsScreen(
                 }
             }
 
-            // =================================================================
-            // ADD DEVICE
-            //
-            // Only shown when the room already has devices — the empty state
-            // above carries its own "Add device" action, and rendering both
-            // put two identical cards on screen.
-            // =================================================================
-
             item {
 
                 if (devices.isNotEmpty()) {
@@ -236,11 +208,6 @@ fun RoomDetailsScreen(
         }
     }
 }
-
-
-// ============================================================================
-// ROOM SUMMARY
-// ============================================================================
 
 @Composable
 private fun RoomSummaryCard(
@@ -318,11 +285,6 @@ private fun RoomSummaryCard(
         }
     }
 }
-
-
-// ============================================================================
-// DEVICE CARD
-// ============================================================================
 
 @Composable
 private fun RoomDeviceCard(
@@ -425,11 +387,6 @@ private fun RoomDeviceCard(
     }
 }
 
-
-// ============================================================================
-// DEVICE ICON
-// ============================================================================
-
 @Composable
 private fun DeviceIcon(
     type: DeviceType
@@ -474,11 +431,6 @@ private fun DeviceIcon(
         )
     }
 }
-
-
-// ============================================================================
-// EMPTY DEVICES
-// ============================================================================
 
 @Composable
 private fun EmptyRoomDevices(
@@ -545,11 +497,6 @@ private fun EmptyRoomDevices(
         )
     }
 }
-
-
-// ============================================================================
-// ADD DEVICE
-// ============================================================================
 
 @Composable
 private fun AddDeviceCard(
@@ -623,11 +570,6 @@ private fun AddDeviceCard(
         )
     }
 }
-
-
-// ============================================================================
-// DISPLAY HELPERS
-// ============================================================================
 
 private fun DeviceType.roomDeviceDisplayName(): String {
 

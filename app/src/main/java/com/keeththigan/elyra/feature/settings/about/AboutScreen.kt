@@ -47,10 +47,6 @@ fun AboutScreen(
             modifier = Modifier.height(16.dp)
         )
 
-        // =========================================================
-        // TOP BAR
-        // =========================================================
-
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
@@ -92,10 +88,6 @@ fun AboutScreen(
         Spacer(
             modifier = Modifier.height(40.dp)
         )
-
-        // =========================================================
-        // BRAND
-        // =========================================================
 
         Column(
             modifier = Modifier.fillMaxWidth(),
@@ -157,10 +149,6 @@ fun AboutScreen(
             modifier = Modifier.height(40.dp)
         )
 
-        // =========================================================
-        // INFORMATION
-        // =========================================================
-
         AboutItem(
             icon = Icons.Outlined.Description,
             title = "Terms of Service",
@@ -190,11 +178,6 @@ fun AboutScreen(
         )
     }
 }
-
-
-// ================================================================
-// ABOUT ITEM
-// ================================================================
 
 @Composable
 private fun AboutItem(
@@ -259,11 +242,6 @@ private fun AboutItem(
         )
     }
 }
-
-
-// ================================================================
-// DIVIDER
-// ================================================================
 
 @Composable
 private fun AboutDivider() {

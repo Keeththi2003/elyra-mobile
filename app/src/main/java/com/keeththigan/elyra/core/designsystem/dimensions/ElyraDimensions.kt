@@ -12,10 +12,6 @@ import androidx.compose.ui.unit.dp
  */
 object ElyraDimensions {
 
-    // ============================================================
-    // TOP APP BAR
-    // ============================================================
-
     /**
      * Standard application top bar height.
      */
@@ -26,20 +22,10 @@ object ElyraDimensions {
      */
     val topBarHeightCompact = 56.dp
 
-
-    // ============================================================
-    // BOTTOM NAVIGATION
-    // ============================================================
-
     /**
      * Standard bottom navigation height.
      */
     val bottomNavigationHeight = 80.dp
-
-
-    // ============================================================
-    // BUTTONS
-    // ============================================================
 
     /**
      * Standard primary button height.
@@ -56,11 +42,6 @@ object ElyraDimensions {
      */
     val buttonHeightLarge = 56.dp
 
-
-    // ============================================================
-    // INPUTS
-    // ============================================================
-
     /**
      * Standard text field height.
      */
@@ -70,11 +51,6 @@ object ElyraDimensions {
      * Compact input height.
      */
     val inputHeightSmall = 48.dp
-
-
-    // ============================================================
-    // ICONS
-    // ============================================================
 
     /**
      * Standard icon size.
@@ -96,11 +72,6 @@ object ElyraDimensions {
      */
     val iconExtraLarge = 48.dp
 
-
-    // ============================================================
-    // ICON BUTTONS
-    // ============================================================
-
     /**
      * Standard touch target.
      *
@@ -118,11 +89,6 @@ object ElyraDimensions {
      */
     val iconButtonSizeLarge = 56.dp
 
-
-    // ============================================================
-    // AVATARS
-    // ============================================================
-
     val avatarSmall = 32.dp
 
     val avatarMedium = 40.dp
@@ -130,11 +96,6 @@ object ElyraDimensions {
     val avatarLarge = 56.dp
 
     val avatarExtraLarge = 80.dp
-
-
-    // ============================================================
-    // DEVICE UI
-    // ============================================================
 
     /**
      * Standard device illustration/icon container.
@@ -146,20 +107,10 @@ object ElyraDimensions {
      */
     val deviceIconContainerLarge = 72.dp
 
-
-    // ============================================================
-    // DIVIDERS
-    // ============================================================
-
     /**
      * Standard divider thickness.
      */
     val divider = 1.dp
-
-
-    // ============================================================
-    // PROGRESS / STATUS
-    // ============================================================
 
     /**
      * Small status indicator.
@@ -175,11 +126,6 @@ object ElyraDimensions {
      * Large status indicator.
      */
     val statusIndicatorLarge = 12.dp
-
-
-    // ============================================================
-    // LOADING
-    // ============================================================
 
     val progressIndicatorSmall = 20.dp
 

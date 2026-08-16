@@ -23,20 +23,11 @@ import androidx.compose.ui.graphics.Color
 @Immutable
 data class ElyraSemanticColors(
 
-    // ============================================================
-    // BACKGROUND
-    // ============================================================
-
     val background: Color,
 
     val backgroundSecondary: Color,
 
     val backgroundTertiary: Color,
-
-
-    // ============================================================
-    // SURFACES
-    // ============================================================
 
     val surface: Color,
 
@@ -48,11 +39,6 @@ data class ElyraSemanticColors(
 
     val surfaceDisabled: Color,
 
-
-    // ============================================================
-    // CONTENT / TEXT
-    // ============================================================
-
     val textPrimary: Color,
 
     val textSecondary: Color,
@@ -63,24 +49,11 @@ data class ElyraSemanticColors(
 
     val textOnPrimary: Color,
 
-
-    // ============================================================
-    // BORDERS / DIVIDERS
-    // ============================================================
-
     val border: Color,
 
     val borderSubtle: Color,
 
     val borderStrong: Color,
-
-
-    // ============================================================
-    // PRIMARY
-    //
-    // Light  → Black
-    // Dark   → White
-    // ============================================================
 
     val primary: Color,
 
@@ -90,13 +63,6 @@ data class ElyraSemanticColors(
 
     val onPrimaryContainer: Color,
 
-
-    // ============================================================
-    // SECONDARY
-    //
-    // Secondary is neutral rather than colorful.
-    // ============================================================
-
     val secondary: Color,
 
     val secondaryContainer: Color,
@@ -104,11 +70,6 @@ data class ElyraSemanticColors(
     val onSecondary: Color,
 
     val onSecondaryContainer: Color,
-
-
-    // ============================================================
-    // SUCCESS
-    // ============================================================
 
     val success: Color,
 
@@ -118,11 +79,6 @@ data class ElyraSemanticColors(
 
     val onSuccessContainer: Color,
 
-
-    // ============================================================
-    // WARNING
-    // ============================================================
-
     val warning: Color,
 
     val warningContainer: Color,
@@ -130,11 +86,6 @@ data class ElyraSemanticColors(
     val onWarning: Color,
 
     val onWarningContainer: Color,
-
-
-    // ============================================================
-    // ERROR
-    // ============================================================
 
     val error: Color,
 
@@ -144,11 +95,6 @@ data class ElyraSemanticColors(
 
     val onErrorContainer: Color,
 
-
-    // ============================================================
-    // INFORMATION
-    // ============================================================
-
     val info: Color,
 
     val infoContainer: Color,
@@ -156,11 +102,6 @@ data class ElyraSemanticColors(
     val onInfo: Color,
 
     val onInfoContainer: Color,
-
-
-    // ============================================================
-    // DEVICE STATES
-    // ============================================================
 
     /**
      * Device currently active.
@@ -186,11 +127,6 @@ data class ElyraSemanticColors(
      * Device connecting / processing.
      */
     val devicePending: Color,
-
-
-    // ============================================================
-    // SPECIAL UI
-    // ============================================================
 
     val scrim: Color,
 

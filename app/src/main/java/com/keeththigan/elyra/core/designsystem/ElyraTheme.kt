@@ -14,16 +14,7 @@ import com.keeththigan.elyra.core.designsystem.shape.ElyraShapes
 import com.keeththigan.elyra.core.designsystem.spacing.ElyraSpacing
 import com.keeththigan.elyra.core.designsystem.typography.ElyraTypography
 
-
-// ============================================================================
-// LIGHT THEME
-// ============================================================================
-
 private val ElyraLightColors = ElyraSemanticColors(
-
-    // ------------------------------------------------------------------------
-    // BACKGROUND
-    // ------------------------------------------------------------------------
 
     /*
      * Grouped-background model: the page sits on a soft neutral and cards
@@ -36,11 +27,6 @@ private val ElyraLightColors = ElyraSemanticColors(
 
     backgroundTertiary = ElyraColors.Neutral200,
 
-
-    // ------------------------------------------------------------------------
-    // SURFACES
-    // ------------------------------------------------------------------------
-
     surface = ElyraColors.White,
 
     surfaceElevated = ElyraColors.White,
@@ -50,11 +36,6 @@ private val ElyraLightColors = ElyraSemanticColors(
     surfaceInteractive = ElyraColors.Neutral200,
 
     surfaceDisabled = ElyraColors.Neutral150,
-
-
-    // ------------------------------------------------------------------------
-    // TEXT
-    // ------------------------------------------------------------------------
 
     textPrimary = ElyraColors.Black,
 
@@ -66,23 +47,11 @@ private val ElyraLightColors = ElyraSemanticColors(
 
     textOnPrimary = ElyraColors.White,
 
-
-    // ------------------------------------------------------------------------
-    // BORDERS
-    // ------------------------------------------------------------------------
-
     border = ElyraColors.Neutral200,
 
     borderSubtle = ElyraColors.Neutral150,
 
     borderStrong = ElyraColors.Neutral300,
-
-
-    // ------------------------------------------------------------------------
-    // PRIMARY
-    //
-    // BLACK
-    // ------------------------------------------------------------------------
 
     primary = ElyraColors.Black,
 
@@ -92,13 +61,6 @@ private val ElyraLightColors = ElyraSemanticColors(
 
     onPrimaryContainer = ElyraColors.Black,
 
-
-    // ------------------------------------------------------------------------
-    // SECONDARY
-    //
-    // Neutral gray.
-    // ------------------------------------------------------------------------
-
     secondary = ElyraColors.Neutral600,
 
     secondaryContainer = ElyraColors.Neutral100,
@@ -106,11 +68,6 @@ private val ElyraLightColors = ElyraSemanticColors(
     onSecondary = ElyraColors.White,
 
     onSecondaryContainer = ElyraColors.Black,
-
-
-    // ------------------------------------------------------------------------
-    // SUCCESS
-    // ------------------------------------------------------------------------
 
     success = ElyraColors.Green600,
 
@@ -120,11 +77,6 @@ private val ElyraLightColors = ElyraSemanticColors(
 
     onSuccessContainer = ElyraColors.Green900,
 
-
-    // ------------------------------------------------------------------------
-    // WARNING
-    // ------------------------------------------------------------------------
-
     warning = ElyraColors.Amber600,
 
     warningContainer = ElyraColors.Amber100,
@@ -132,11 +84,6 @@ private val ElyraLightColors = ElyraSemanticColors(
     onWarning = ElyraColors.White,
 
     onWarningContainer = ElyraColors.Amber900,
-
-
-    // ------------------------------------------------------------------------
-    // ERROR
-    // ------------------------------------------------------------------------
 
     error = ElyraColors.Red600,
 
@@ -146,11 +93,6 @@ private val ElyraLightColors = ElyraSemanticColors(
 
     onErrorContainer = ElyraColors.Red900,
 
-
-    // ------------------------------------------------------------------------
-    // INFORMATION
-    // ------------------------------------------------------------------------
-
     info = ElyraColors.Blue600,
 
     infoContainer = ElyraColors.Blue100,
@@ -158,11 +100,6 @@ private val ElyraLightColors = ElyraSemanticColors(
     onInfo = ElyraColors.White,
 
     onInfoContainer = ElyraColors.Blue900,
-
-
-    // ------------------------------------------------------------------------
-    // DEVICE STATES
-    // ------------------------------------------------------------------------
 
     deviceActive = ElyraColors.Green600,
 
@@ -172,37 +109,18 @@ private val ElyraLightColors = ElyraSemanticColors(
 
     devicePending = ElyraColors.Amber600,
 
-
-    // ------------------------------------------------------------------------
-    // SPECIAL
-    // ------------------------------------------------------------------------
-
     scrim = ElyraColors.Scrim,
 
     selection = ElyraColors.Neutral200
 )
 
-
-// ============================================================================
-// DARK THEME
-// ============================================================================
-
 private val ElyraDarkColors = ElyraSemanticColors(
-
-    // ------------------------------------------------------------------------
-    // BACKGROUND
-    // ------------------------------------------------------------------------
 
     background = ElyraColors.Black,
 
     backgroundSecondary = ElyraColors.Neutral950,
 
     backgroundTertiary = ElyraColors.Neutral900,
-
-
-    // ------------------------------------------------------------------------
-    // SURFACES
-    // ------------------------------------------------------------------------
 
     /*
      * Lifted one step off pure black so cards separate from the page
@@ -218,11 +136,6 @@ private val ElyraDarkColors = ElyraSemanticColors(
 
     surfaceDisabled = ElyraColors.Neutral900,
 
-
-    // ------------------------------------------------------------------------
-    // TEXT
-    // ------------------------------------------------------------------------
-
     textPrimary = ElyraColors.White,
 
     textSecondary = ElyraColors.Neutral400,
@@ -233,23 +146,11 @@ private val ElyraDarkColors = ElyraSemanticColors(
 
     textOnPrimary = ElyraColors.Black,
 
-
-    // ------------------------------------------------------------------------
-    // BORDERS
-    // ------------------------------------------------------------------------
-
     border = ElyraColors.Neutral800,
 
     borderSubtle = ElyraColors.Neutral900,
 
     borderStrong = ElyraColors.Neutral700,
-
-
-    // ------------------------------------------------------------------------
-    // PRIMARY
-    //
-    // WHITE
-    // ------------------------------------------------------------------------
 
     primary = ElyraColors.White,
 
@@ -259,11 +160,6 @@ private val ElyraDarkColors = ElyraSemanticColors(
 
     onPrimaryContainer = ElyraColors.White,
 
-
-    // ------------------------------------------------------------------------
-    // SECONDARY
-    // ------------------------------------------------------------------------
-
     secondary = ElyraColors.Neutral400,
 
     secondaryContainer = ElyraColors.Neutral900,
@@ -271,11 +167,6 @@ private val ElyraDarkColors = ElyraSemanticColors(
     onSecondary = ElyraColors.Black,
 
     onSecondaryContainer = ElyraColors.White,
-
-
-    // ------------------------------------------------------------------------
-    // SUCCESS
-    // ------------------------------------------------------------------------
 
     success = ElyraColors.Green500,
 
@@ -285,11 +176,6 @@ private val ElyraDarkColors = ElyraSemanticColors(
 
     onSuccessContainer = ElyraColors.Green100,
 
-
-    // ------------------------------------------------------------------------
-    // WARNING
-    // ------------------------------------------------------------------------
-
     warning = ElyraColors.Amber500,
 
     warningContainer = ElyraColors.Amber900,
@@ -297,11 +183,6 @@ private val ElyraDarkColors = ElyraSemanticColors(
     onWarning = ElyraColors.Black,
 
     onWarningContainer = ElyraColors.Amber100,
-
-
-    // ------------------------------------------------------------------------
-    // ERROR
-    // ------------------------------------------------------------------------
 
     error = ElyraColors.Red500,
 
@@ -311,11 +192,6 @@ private val ElyraDarkColors = ElyraSemanticColors(
 
     onErrorContainer = ElyraColors.Red100,
 
-
-    // ------------------------------------------------------------------------
-    // INFORMATION
-    // ------------------------------------------------------------------------
-
     info = ElyraColors.Blue500,
 
     infoContainer = ElyraColors.Blue900,
@@ -323,11 +199,6 @@ private val ElyraDarkColors = ElyraSemanticColors(
     onInfo = ElyraColors.White,
 
     onInfoContainer = ElyraColors.Blue100,
-
-
-    // ------------------------------------------------------------------------
-    // DEVICE STATES
-    // ------------------------------------------------------------------------
 
     deviceActive = ElyraColors.Green500,
 
@@ -337,30 +208,15 @@ private val ElyraDarkColors = ElyraSemanticColors(
 
     devicePending = ElyraColors.Amber500,
 
-
-    // ------------------------------------------------------------------------
-    // SPECIAL
-    // ------------------------------------------------------------------------
-
     scrim = ElyraColors.Scrim,
 
     selection = ElyraColors.Neutral800
 )
 
-
-// ============================================================================
-// COMPOSITION LOCAL
-// ============================================================================
-
 private val LocalElyraColors =
     staticCompositionLocalOf<ElyraSemanticColors> {
         ElyraLightColors
     }
-
-
-// ============================================================================
-// ELYRA THEME
-// ============================================================================
 
 @Composable
 fun ElyraTheme(
@@ -373,11 +229,6 @@ fun ElyraTheme(
     } else {
         ElyraLightColors
     }
-
-
-    // ========================================================================
-    // MATERIAL 3 COLOR SCHEME
-    // ========================================================================
 
     val materialColorScheme = if (darkTheme) {
 
@@ -444,11 +295,6 @@ fun ElyraTheme(
         )
     }
 
-
-    // ========================================================================
-    // PROVIDE ELYRA DESIGN TOKENS
-    // ========================================================================
-
     androidx.compose.runtime.CompositionLocalProvider(
         LocalElyraColors provides colors
     ) {
@@ -466,11 +312,6 @@ fun ElyraTheme(
     }
 }
 
-
-// ============================================================================
-// ELYRA THEME ACCESS
-// ============================================================================
-
 object ElyraTheme {
 
     /**
@@ -485,7 +326,6 @@ object ElyraTheme {
         @ReadOnlyComposable
         get() = LocalElyraColors.current
 
-
     /**
      * Elyra typography.
      */
@@ -493,7 +333,6 @@ object ElyraTheme {
         @Composable
         @ReadOnlyComposable
         get() = MaterialTheme.typography
-
 
     /**
      * Elyra shapes.
@@ -503,13 +342,11 @@ object ElyraTheme {
         @ReadOnlyComposable
         get() = MaterialTheme.shapes
 
-
     /**
      * Elyra spacing.
      */
     val spacing
         get() = ElyraSpacing
-
 
     /**
      * Elyra dimensions.

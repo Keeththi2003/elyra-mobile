@@ -12,7 +12,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-
 data class NotificationUiState(
     val isLoading: Boolean = false,
     val notifications: List<AppNotification> = emptyList(),
@@ -22,7 +21,6 @@ data class NotificationUiState(
     val unreadCount: Int
         get() = notifications.count { !it.isRead }
 }
-
 
 class NotificationViewModel(
     private val repository: NotificationRepository,
@@ -130,7 +128,6 @@ class NotificationViewModel(
         }
     }
 }
-
 
 class NotificationViewModelFactory(
     private val repository: NotificationRepository,

@@ -105,10 +105,6 @@ fun ReportsScreen(
             verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
 
-            // ============================================================
-            // HEADLINE FIGURES
-            // ============================================================
-
             item {
 
                 Row(
@@ -145,10 +141,6 @@ fun ReportsScreen(
                     )
                 }
             }
-
-            // ============================================================
-            // RUNTIME BY DEVICE
-            // ============================================================
 
             item {
                 SectionTitle(
@@ -197,10 +189,6 @@ fun ReportsScreen(
                 }
             }
 
-            // ============================================================
-            // SHARE OF RUNTIME BY TYPE
-            // ============================================================
-
             if (byType.isNotEmpty() && singleDevice == null) {
 
                 item {
@@ -220,11 +208,6 @@ fun ReportsScreen(
         }
     }
 }
-
-
-// ============================================================================
-// CHARTS
-// ============================================================================
 
 @Composable
 private fun UsageBar(
@@ -304,7 +287,6 @@ private fun UsageBar(
         }
     }
 }
-
 
 @Composable
 private fun TypeBreakdown(
@@ -404,11 +386,6 @@ private fun TypeBreakdown(
     }
 }
 
-
-// ============================================================================
-// PIECES
-// ============================================================================
-
 @Composable
 private fun MetricTile(
     value: String,
@@ -446,7 +423,6 @@ private fun MetricTile(
     }
 }
 
-
 @Composable
 private fun SectionTitle(
     title: String,
@@ -470,7 +446,6 @@ private fun SectionTitle(
         )
     }
 }
-
 
 @Composable
 private fun EmptyReport(
@@ -498,11 +473,6 @@ private fun EmptyReport(
     }
 }
 
-
-// ============================================================================
-// FORMATTING
-// ============================================================================
-
 internal fun formatDuration(
     seconds: Long
 ): String {
@@ -517,7 +487,6 @@ internal fun formatDuration(
         else -> "${secs}s"
     }
 }
-
 
 private fun DeviceType.label(): String =
     when (this) {

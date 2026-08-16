@@ -25,7 +25,6 @@ class ThemeViewModel(
     }
 }
 
-
 class ThemeViewModelFactory(
     private val preferences: ThemePreferences
 ) : ViewModelProvider.Factory {

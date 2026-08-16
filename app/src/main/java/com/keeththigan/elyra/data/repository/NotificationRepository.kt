@@ -20,11 +20,6 @@ class NotificationRepository {
     private val notificationsCollection =
         firestore.collection("notifications")
 
-
-    // ========================================================================
-    // OBSERVE (realtime)
-    // ========================================================================
-
     fun observeNotifications(): Flow<Result<List<AppNotification>>> =
         callbackFlow {
 
@@ -61,11 +56,6 @@ class NotificationRepository {
             awaitClose { registration.remove() }
         }
 
-
-    // ========================================================================
-    // CREATE
-    // ========================================================================
-
     suspend fun createNotification(
         notification: AppNotification
     ): Result<AppNotification> {
@@ -95,11 +85,6 @@ class NotificationRepository {
             Result.failure(e)
         }
     }
-
-
-    // ========================================================================
-    // MARK READ
-    // ========================================================================
 
     suspend fun markAsRead(
         notificationId: String
@@ -150,11 +135,6 @@ class NotificationRepository {
             Result.failure(e)
         }
     }
-
-
-    // ========================================================================
-    // DELETE
-    // ========================================================================
 
     suspend fun clearAll(): Result<Unit> {
 

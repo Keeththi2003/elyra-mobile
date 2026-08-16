@@ -9,11 +9,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-
-// ============================================================================
-// ROOM STATE
-// ============================================================================
-
 data class RoomUiState(
     val isLoading: Boolean = false,
     val rooms: List<Room> = emptyList(),
@@ -22,11 +17,6 @@ data class RoomUiState(
     val isSaved: Boolean = false,
     val isDeleted: Boolean = false
 )
-
-
-// ============================================================================
-// ROOM VIEW MODEL
-// ============================================================================
 
 class RoomViewModel(
     private val repository: RoomRepository
@@ -42,14 +32,6 @@ class RoomViewModel(
     init {
         observeRooms()
     }
-
-
-    // ========================================================================
-    // LOAD (realtime)
-    //
-    // The stream carries every room the user owns; per-floor screens filter
-    // it locally so switching floors never needs another round trip.
-    // ========================================================================
 
     private fun observeRooms() {
 
@@ -133,11 +115,6 @@ class RoomViewModel(
         }
     }
 
-
-    // ========================================================================
-    // CREATE
-    // ========================================================================
-
     fun createRoom(
         name: String,
         floorId: String
@@ -185,11 +162,6 @@ class RoomViewModel(
                 }
         }
     }
-
-
-    // ========================================================================
-    // UPDATE
-    // ========================================================================
 
     fun updateRoom(
         roomId: String,
@@ -244,11 +216,6 @@ class RoomViewModel(
         }
     }
 
-
-    // ========================================================================
-    // DELETE
-    // ========================================================================
-
     fun deleteRoom(
         roomId: String
     ) {
@@ -285,11 +252,6 @@ class RoomViewModel(
                 }
         }
     }
-
-
-    // ========================================================================
-    // ONE-SHOT SIGNAL CONSUMPTION
-    // ========================================================================
 
     fun consumeSaved() {
         _state.value =

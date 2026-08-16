@@ -70,10 +70,6 @@ fun ForgotPasswordScreen(
             .padding(horizontal = 24.dp)
     ) {
 
-        // ========================================================
-        // TOP BAR
-        // ========================================================
-
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -105,10 +101,6 @@ fun ForgotPasswordScreen(
             modifier = Modifier.height(56.dp)
         )
 
-        // ========================================================
-        // ICON
-        // ========================================================
-
         Box(
             modifier = Modifier
                 .size(64.dp)
@@ -131,10 +123,6 @@ fun ForgotPasswordScreen(
             modifier = Modifier.height(28.dp)
         )
 
-        // ========================================================
-        // HEADER
-        // ========================================================
-
         Text(
             text = "Forgot your password?",
             style = ElyraTheme.typography.displaySmall,
@@ -154,10 +142,6 @@ fun ForgotPasswordScreen(
         Spacer(
             modifier = Modifier.height(36.dp)
         )
-
-        // ========================================================
-        // EMAIL FIELD
-        // ========================================================
 
         Text(
             text = "Email",
@@ -247,10 +231,6 @@ fun ForgotPasswordScreen(
             }
         )
 
-        // ========================================================
-        // ERROR / SUCCESS MESSAGE
-        // ========================================================
-
         authState.error?.let { error ->
 
             Spacer(
@@ -280,10 +260,6 @@ fun ForgotPasswordScreen(
         Spacer(
             modifier = Modifier.height(24.dp)
         )
-
-        // ========================================================
-        // SEND BUTTON
-        // ========================================================
 
         Box(
             modifier = Modifier
@@ -326,10 +302,6 @@ fun ForgotPasswordScreen(
         Spacer(
             modifier = Modifier.weight(1f)
         )
-
-        // ========================================================
-        // RETURN TO LOGIN
-        // ========================================================
 
         Row(
             modifier = Modifier
