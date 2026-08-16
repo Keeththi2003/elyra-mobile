@@ -8,7 +8,10 @@ import com.keeththigan.elyra.data.model.DeviceConnectivity
 import com.keeththigan.elyra.data.model.DeviceType
 import com.keeththigan.elyra.data.model.SwitchChannel
 import com.keeththigan.elyra.core.connectivity.NetworkMonitor
+import com.keeththigan.elyra.data.model.AppNotification
+import com.keeththigan.elyra.data.model.NotificationType
 import com.keeththigan.elyra.data.repository.DeviceRepository
+import com.keeththigan.elyra.data.repository.NotificationRepository
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -41,7 +44,8 @@ data class DeviceUiState(
 
 class DeviceViewModel(
     private val repository: DeviceRepository,
-    private val networkMonitor: NetworkMonitor
+    private val networkMonitor: NetworkMonitor,
+    private val notificationRepository: NotificationRepository
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(DeviceUiState())
@@ -508,6 +512,10 @@ class DeviceViewModel(
 
                 expired.forEach { device ->
 
+                    val message =
+                        "${device.name} was switched off automatically " +
+                            "after ${device.maxOnDurationMinutes} minutes."
+
                     repository.updateDevice(
                         device.copy(
                             isOn = false,
@@ -518,12 +526,20 @@ class DeviceViewModel(
                         )
                     )
 
-                    _state.value =
-                        _state.value.copy(
-                            safetyAlert =
-                                "${device.name} was switched off automatically " +
-                                    "after ${device.maxOnDurationMinutes} minutes."
+                    // Persisted so the alert reaches every signed-in client,
+                    // not just the one that happened to run the check.
+                    notificationRepository.createNotification(
+                        AppNotification(
+                            type = NotificationType.SAFETY_CUTOFF,
+                            title = "Safety cutoff",
+                            message = message,
+                            deviceId = device.id,
+                            deviceName = device.name
                         )
+                    )
+
+                    _state.value =
+                        _state.value.copy(safetyAlert = message)
                 }
             }
         }

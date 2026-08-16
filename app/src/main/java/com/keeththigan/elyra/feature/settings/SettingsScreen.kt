@@ -17,10 +17,14 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ChevronRight
 import androidx.compose.material.icons.outlined.DarkMode
+import androidx.compose.material.icons.outlined.NotificationsActive
+import androidx.compose.material.icons.outlined.NotificationsNone
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Logout
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material3.Icon
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -35,6 +39,9 @@ import com.keeththigan.elyra.feature.auth.AuthViewModel
 @Composable
 fun SettingsScreen(
     authViewModel: AuthViewModel,
+    notificationsEnabled: Boolean = true,
+    onNotificationsEnabledChange: (Boolean) -> Unit = {},
+    onAlertsClick: () -> Unit = {},
     onProfileClick: () -> Unit = {},
     onAppearanceClick: () -> Unit = {},
     onAboutClick: () -> Unit = {}
@@ -135,6 +142,25 @@ fun SettingsScreen(
         )
 
         SettingsCard {
+
+            SettingsItem(
+                icon = Icons.Outlined.NotificationsNone,
+                title = "Alerts",
+                subtitle = "Safety cutoffs and device faults",
+                onClick = onAlertsClick
+            )
+
+            Divider()
+
+            SettingsToggleItem(
+                icon = Icons.Outlined.NotificationsActive,
+                title = "Push alerts",
+                subtitle = "Notify me when a safety cutoff fires",
+                checked = notificationsEnabled,
+                onCheckedChange = onNotificationsEnabledChange
+            )
+
+            Divider()
 
             SettingsItem(
                 icon = Icons.Outlined.DarkMode,
@@ -350,4 +376,59 @@ private fun Divider() {
                 horizontal = 16.dp
             )
     )
+}
+
+
+// ================================================================
+// TOGGLE ITEM
+// ================================================================
+
+@Composable
+private fun SettingsToggleItem(
+    icon: ImageVector,
+    title: String,
+    subtitle: String,
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit
+) {
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 14.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+
+        SettingsIcon(icon = icon)
+
+        Spacer(modifier = Modifier.size(14.dp))
+
+        Column(modifier = Modifier.weight(1f)) {
+
+            Text(
+                text = title,
+                style = ElyraTheme.typography.bodyMedium,
+                color = ElyraTheme.colors.textPrimary
+            )
+
+            Spacer(modifier = Modifier.height(2.dp))
+
+            Text(
+                text = subtitle,
+                style = ElyraTheme.typography.bodySmall,
+                color = ElyraTheme.colors.textSecondary
+            )
+        }
+
+        Switch(
+            checked = checked,
+            onCheckedChange = onCheckedChange,
+            colors = SwitchDefaults.colors(
+                checkedThumbColor = ElyraTheme.colors.onPrimary,
+                checkedTrackColor = ElyraTheme.colors.primary,
+                uncheckedThumbColor = ElyraTheme.colors.textTertiary,
+                uncheckedTrackColor = ElyraTheme.colors.surfaceInteractive
+            )
+        )
+    }
 }

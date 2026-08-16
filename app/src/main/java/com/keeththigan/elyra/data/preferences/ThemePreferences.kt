@@ -35,7 +35,23 @@ class ThemePreferences(
             .apply()
     }
 
+    // ------------------------------------------------------------------
+    // NOTIFICATIONS
+    // ------------------------------------------------------------------
+
+    fun areNotificationsEnabled(): Boolean =
+        prefs.getBoolean(KEY_NOTIFICATIONS, true)
+
+    fun setNotificationsEnabled(
+        enabled: Boolean
+    ) {
+        prefs.edit()
+            .putBoolean(KEY_NOTIFICATIONS, enabled)
+            .apply()
+    }
+
     private companion object {
         const val KEY_APPEARANCE = "appearance"
+        const val KEY_NOTIFICATIONS = "notifications_enabled"
     }
 }

@@ -11,10 +11,12 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.keeththigan.elyra.app.navigation.AppNavigation
 import com.keeththigan.elyra.core.connectivity.NetworkMonitor
 import com.keeththigan.elyra.core.designsystem.ElyraTheme
+import com.keeththigan.elyra.core.notification.ElyraNotifier
 import com.keeththigan.elyra.data.preferences.ThemePreferences
 import com.keeththigan.elyra.data.repository.AuthRepository
 import com.keeththigan.elyra.data.repository.DeviceRepository
 import com.keeththigan.elyra.data.repository.FloorRepository
+import com.keeththigan.elyra.data.repository.NotificationRepository
 import com.keeththigan.elyra.data.repository.RoomRepository
 import com.keeththigan.elyra.feature.auth.AuthViewModel
 import com.keeththigan.elyra.feature.auth.AuthViewModelFactory
@@ -25,6 +27,8 @@ import com.keeththigan.elyra.feature.floors.FloorViewModel
 import com.keeththigan.elyra.feature.floors.FloorViewModelFactory
 import com.keeththigan.elyra.feature.floors.RoomViewModel
 import com.keeththigan.elyra.feature.floors.RoomViewModelFactory
+import com.keeththigan.elyra.feature.notifications.NotificationViewModel
+import com.keeththigan.elyra.feature.notifications.NotificationViewModelFactory
 import com.keeththigan.elyra.feature.settings.appearance.AppearanceOption
 import com.keeththigan.elyra.feature.settings.appearance.ThemeViewModel
 import com.keeththigan.elyra.feature.settings.appearance.ThemeViewModelFactory
@@ -102,11 +106,29 @@ fun ElyraApp() {
                 NetworkMonitor(context)
             }
 
+            val notificationRepository = remember {
+                NotificationRepository()
+            }
+
+            val notifier = remember {
+                ElyraNotifier(context)
+            }
+
+            val notificationViewModel: NotificationViewModel = viewModel(
+                key = "notification_$uid",
+                factory = NotificationViewModelFactory(
+                    repository = notificationRepository,
+                    notifier = notifier,
+                    preferences = themePreferences
+                )
+            )
+
             val deviceViewModel: DeviceViewModel = viewModel(
                 key = "device_$uid",
                 factory = DeviceViewModelFactory(
                     repository = deviceRepository,
-                    networkMonitor = networkMonitor
+                    networkMonitor = networkMonitor,
+                    notificationRepository = notificationRepository
                 )
             )
 
@@ -131,7 +153,8 @@ fun ElyraApp() {
                 deviceViewModel = deviceViewModel,
                 floorViewModel = floorViewModel,
                 roomViewModel = roomViewModel,
-                themeViewModel = themeViewModel
+                themeViewModel = themeViewModel,
+                notificationViewModel = notificationViewModel
             )
 
         } else {

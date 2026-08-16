@@ -26,7 +26,7 @@ import androidx.compose.material.icons.outlined.CameraAlt
 import androidx.compose.material.icons.outlined.ChevronRight
 import androidx.compose.material.icons.outlined.Devices
 import androidx.compose.material.icons.outlined.Lightbulb
-import androidx.compose.material.icons.outlined.PersonOutline
+import androidx.compose.material.icons.outlined.NotificationsNone
 import androidx.compose.material.icons.outlined.Power
 import androidx.compose.material.icons.outlined.Security
 import androidx.compose.material.icons.outlined.Tune
@@ -62,11 +62,12 @@ fun HomeScreen(
     floorViewModel: FloorViewModel,
     roomViewModel: RoomViewModel,
     userName: String = "",
+    unreadAlertCount: Int = 0,
     onFloorClick: (String) -> Unit,
     onDeviceClick: (String) -> Unit,
     onAddFloor: () -> Unit,
     onAddDevice: () -> Unit,
-    onProfileClick: () -> Unit
+    onAlertsClick: () -> Unit
 ) {
 
     val deviceState by deviceViewModel.state.collectAsStateWithLifecycle()
@@ -134,16 +135,28 @@ fun HomeScreen(
                     .size(44.dp)
                     .clip(CircleShape)
                     .background(ElyraTheme.colors.surface)
-                    .clickable(onClick = onProfileClick),
+                    .clickable(onClick = onAlertsClick),
                 contentAlignment = Alignment.Center
             ) {
 
                 Icon(
-                    imageVector = Icons.Outlined.PersonOutline,
-                    contentDescription = "Profile",
+                    imageVector = Icons.Outlined.NotificationsNone,
+                    contentDescription = "Alerts",
                     modifier = Modifier.size(21.dp),
                     tint = ElyraTheme.colors.textPrimary
                 )
+
+                if (unreadAlertCount > 0) {
+
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.TopEnd)
+                            .padding(top = 9.dp, end = 9.dp)
+                            .size(9.dp)
+                            .clip(CircleShape)
+                            .background(ElyraTheme.colors.error)
+                    )
+                }
             }
         }
 
@@ -157,6 +170,37 @@ fun HomeScreen(
             ),
             verticalArrangement = Arrangement.spacedBy(28.dp)
         ) {
+
+            if (!deviceState.isOnline) {
+
+                item {
+
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(16.dp))
+                            .background(ElyraTheme.colors.warningContainer)
+                            .padding(horizontal = 16.dp, vertical = 14.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+
+                        Box(
+                            modifier = Modifier
+                                .size(8.dp)
+                                .clip(CircleShape)
+                                .background(ElyraTheme.colors.warning)
+                        )
+
+                        Spacer(modifier = Modifier.width(12.dp))
+
+                        Text(
+                            text = "You're offline — controls are disabled",
+                            style = ElyraTheme.typography.bodyMedium,
+                            color = ElyraTheme.colors.onWarningContainer
+                        )
+                    }
+                }
+            }
 
             if (error != null) {
 
@@ -251,6 +295,7 @@ fun HomeScreen(
 
                             QuickControlTile(
                                 device = device,
+                                isOnline = deviceState.isOnline,
                                 modifier = Modifier.weight(1f),
                                 onClick = { onDeviceClick(device.id) },
                                 onToggle = {
@@ -442,6 +487,7 @@ private fun SectionHeader(
 @Composable
 private fun QuickControlTile(
     device: Device,
+    isOnline: Boolean,
     modifier: Modifier = Modifier,
     onClick: () -> Unit,
     onToggle: (Boolean) -> Unit
@@ -492,7 +538,7 @@ private fun QuickControlTile(
             Switch(
                 checked = isOn,
                 onCheckedChange = onToggle,
-                enabled = device.isControllable,
+                enabled = device.isControllable && isOnline,
                 colors = SwitchDefaults.colors(
                     checkedThumbColor = ElyraTheme.colors.onPrimary,
                     checkedTrackColor = ElyraTheme.colors.primary,

@@ -67,6 +67,8 @@ import com.keeththigan.elyra.feature.devices.DeviceViewModel
 import com.keeththigan.elyra.feature.floors.FloorViewModel
 import com.keeththigan.elyra.feature.floors.RoomViewModel
 import com.keeththigan.elyra.feature.settings.appearance.ThemeViewModel
+import com.keeththigan.elyra.feature.notifications.NotificationViewModel
+import com.keeththigan.elyra.feature.notifications.NotificationsScreen
 
 
 private object AppRoutes {
@@ -88,6 +90,7 @@ const val EDIT_DEVICE = "edit_device/{deviceId}"
     const val APPEARANCE = "appearance"
     const val ABOUT = "about"
     const val PROFILE = "profile"
+    const val NOTIFICATIONS = "notifications"
 }
 
 /**
@@ -138,7 +141,8 @@ fun AppNavigation(
     deviceViewModel: DeviceViewModel,
     floorViewModel: FloorViewModel,
     roomViewModel: RoomViewModel,
-    themeViewModel: ThemeViewModel
+    themeViewModel: ThemeViewModel,
+    notificationViewModel: NotificationViewModel
 ) {
 
     val navController = rememberNavController()
@@ -246,12 +250,16 @@ fun AppNavigation(
 
     val authState by authViewModel.authState.collectAsStateWithLifecycle()
 
+    val notificationState by
+        notificationViewModel.state.collectAsStateWithLifecycle()
+
     HomeScreen(
 
         deviceViewModel = deviceViewModel,
         floorViewModel = floorViewModel,
         roomViewModel = roomViewModel,
         userName = authState.user?.name.orEmpty(),
+        unreadAlertCount = notificationState.unreadCount,
 
         onFloorClick = { floorId ->
 
@@ -279,11 +287,8 @@ fun AppNavigation(
             navigateTo(addDeviceRoute())
         },
 
-        onProfileClick = {
-
-            navigateTo(
-                AppRoutes.SETTINGS
-            )
+        onAlertsClick = {
+            navigateTo(AppRoutes.NOTIFICATIONS)
         }
     )
 }
@@ -634,7 +639,17 @@ composable(AppRoutes.ADD_FLOOR) {
 
             composable(AppRoutes.SETTINGS) {
 
+val notificationState by
+    notificationViewModel.state.collectAsStateWithLifecycle()
+
 SettingsScreen(
+    notificationsEnabled = notificationState.notificationsEnabled,
+    onNotificationsEnabledChange = {
+        notificationViewModel.setNotificationsEnabled(it)
+    },
+    onAlertsClick = {
+        navigateTo(AppRoutes.NOTIFICATIONS)
+    },
     onProfileClick = {
         navigateTo(AppRoutes.PROFILE)
     },
@@ -650,6 +665,16 @@ SettingsScreen(
 )         
 }
 
+
+            composable(AppRoutes.NOTIFICATIONS) {
+
+    NotificationsScreen(
+        notificationViewModel = notificationViewModel,
+        onBack = {
+            navController.popBackStack()
+        }
+    )
+}
 
             composable(AppRoutes.PROFILE) {
 
