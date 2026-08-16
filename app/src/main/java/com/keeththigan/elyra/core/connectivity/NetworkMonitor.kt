@@ -11,16 +11,13 @@ import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 
 /**
- * Reports whether the app itself has a usable internet connection.
+ * Whether the phone has a usable internet connection.
  *
- * This is deliberately separate from a device's own [
- * com.keeththigan.elyra.data.model.DeviceConnectivity]: one describes the
- * phone's link to the cloud, the other describes the hardware's link to the
- * hub. Both have to be healthy before a control is safe to operate.
- *
- * It matters because Firestore keeps working offline from its local cache —
- * writes queue silently and listeners still fire — so without this the UI
- * would happily "control" hardware it cannot actually reach.
+ * Firestore serves reads from its local cache and queues writes while
+ * offline, so without this check the UI would appear to control hardware it
+ * cannot reach. Distinct from
+ * [com.keeththigan.elyra.data.model.DeviceConnectivity], which is the
+ * hardware's own link to the hub; both must be healthy to operate a device.
  */
 class NetworkMonitor(
     context: Context

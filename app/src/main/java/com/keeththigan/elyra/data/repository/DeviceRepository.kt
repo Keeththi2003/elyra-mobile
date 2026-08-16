@@ -153,12 +153,9 @@ class DeviceRepository {
     }
 
     /**
-     * Writes the device straight through — no read-before-write.
-     *
-     * Ownership is enforced by the Firestore security rules (which check both
-     * the existing and incoming userId), so a client-side pre-fetch adds no
-     * safety, only a full network round trip on every toggle. createdAt is
-     * carried on the object we already hold, so there is nothing to re-read.
+     * Writes straight through without a read-before-write: ownership is
+     * enforced by the Firestore security rules, so a pre-fetch would only add
+     * a round trip to every toggle.
      */
     suspend fun updateDevice(
         device: Device

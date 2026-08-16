@@ -23,10 +23,8 @@ fun AuthNavigation(
 
     val navController = androidx.navigation.compose.rememberNavController()
 
-    // Re-evaluated on every navigation change so the back button is only
-    // shown when there is actually somewhere to go back to. On the start
-    // destination, navController.popBackStack() is a silent no-op, which
-    // otherwise makes the back arrow look broken.
+    // popBackStack() is a silent no-op on the start destination, so only show
+    // the back arrow when there is somewhere to go.
     val currentBackStackEntry by navController.currentBackStackEntryAsState()
 
     val canNavigateBack =
@@ -69,12 +67,9 @@ fun AuthNavigation(
                     navController.popBackStack()
                 },
 
-                /*
-                 * Sign Up is the start destination, so it is always already
-                 * below Sign In on the stack. Popping back to it keeps the
-                 * two screens a simple toggle — navigating instead would push
-                 * a new copy every time and make "back" need several presses.
-                 */
+                // Sign Up is the start destination, so it always sits below
+                // Sign In. Popping keeps the two a toggle; navigating would
+                // push a duplicate copy on every switch.
                 onSignUp = {
                     navController.popBackStack(
                         AuthRoutes.SIGN_UP,

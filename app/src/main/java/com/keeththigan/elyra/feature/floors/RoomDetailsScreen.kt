@@ -342,8 +342,6 @@ private fun RoomDeviceCard(
             )
         }
 
-        // ON / OFF
-
         Box(
             modifier = Modifier
                 .clip(CircleShape)

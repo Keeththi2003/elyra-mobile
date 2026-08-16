@@ -38,14 +38,9 @@ import com.keeththigan.elyra.data.model.DeviceType
 import com.keeththigan.elyra.data.model.Room
 
 /**
- * Abstract floor plan.
- *
- * Rooms are drawn as zones on a two-column plan rather than a true
- * architectural layout: it needs no per-home floor-plan asset, stays legible
- * on a phone, and every zone carries live state — the devices inside it, how
- * many are running, and whether anything needs attention. That makes the plan
- * the primary way to work with a floor rather than a decorative diagram, so
- * it replaces the separate room list entirely.
+ * Abstract floor plan: rooms as zones on a two-column grid rather than a true
+ * architectural layout, so no per-home asset is needed and it stays legible on
+ * a phone. Each zone shows live device state, so this replaces the room list.
  */
 @Composable
 fun FloorPlanGrid(
@@ -151,7 +146,6 @@ private fun RoomZone(
             .padding(14.dp)
     ) {
 
-        // ---- Zone header -------------------------------------------------
 
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -193,7 +187,6 @@ private fun RoomZone(
 
         Spacer(modifier = Modifier.weight(1f))
 
-        // ---- Devices placed inside the zone ------------------------------
 
         if (devices.isEmpty()) {
 

@@ -148,11 +148,8 @@ fun AppNavigation(
 
     val navController = rememberNavController()
 
-    /*
-     * All forward navigation goes through this helper so repeated taps can
-     * never stack duplicate copies of the same destination on the back stack
-     * (which is what made "back" require several presses to leave a screen).
-     */
+    // All forward navigation goes through here so repeated taps cannot stack
+    // duplicate copies of a destination on the back stack.
     fun navigateTo(route: String) {
         navController.navigate(route) {
             launchSingleTop = true
@@ -168,13 +165,8 @@ fun AppNavigation(
     val currentRoute =
         currentDestination?.route
 
-    /*
-     * Bottom navigation stays visible while browsing — the tabs, plus the
-     * detail screens you reach from them — so you can always jump sections.
-     *
-     * It is hidden only on focused create/edit flows, where the task should
-     * be finished or cancelled rather than abandoned sideways.
-     */
+    // Visible while browsing (tabs and the detail screens below them), hidden
+    // on create/edit flows so the task is finished or cancelled, not abandoned.
     val isFocusedTask =
         currentRoute?.let { route ->
             route.startsWith("add_") || route.startsWith("edit_")

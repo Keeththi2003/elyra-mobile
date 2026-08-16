@@ -89,16 +89,10 @@ fun ElyraApp() {
                 RoomRepository()
             }
 
-            /*
-             * Keyed by the Firebase uid so signing out and back in as a
-             * different user never reuses the previous account's cached data.
-             *
-             * The uid is read straight from FirebaseAuth, which has it
-             * synchronously the moment we're authenticated. authState.user is
-             * populated later by an async Firestore profile fetch, so keying on
-             * that would flip the key null -> uid mid-session and silently swap
-             * in fresh, empty ViewModels, orphaning the ones screens already hold.
-             */
+            // ViewModels are keyed by uid so a different account never reuses
+            // the previous one's cached data. Read from FirebaseAuth rather than
+            // authState.user, which arrives later and would flip the key
+            // mid-session, swapping in empty ViewModels behind the screens.
             val uid =
                 authViewModel.getCurrentFirebaseUser()?.uid ?: "pending"
 

@@ -14,11 +14,9 @@ import com.keeththigan.elyra.R
 /**
  * Posts system notifications for safety-critical events.
  *
- * Alerts are raised locally on the device that detects the condition rather
- * than pushed from a server: Cloud Messaging needs a backend sender, and the
- * project runs on the Firebase free tier where Cloud Functions are not
- * available. The alert history itself lives in Firestore, so every signed-in
- * device still sees the same list.
+ * Raised locally by whichever client detects the condition, since Cloud
+ * Messaging would need a backend sender and the project runs on the Firebase
+ * free tier. The history lives in Firestore, so all clients see the same list.
  */
 class ElyraNotifier(
     private val context: Context

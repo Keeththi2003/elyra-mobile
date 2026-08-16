@@ -180,7 +180,6 @@ fun LoginScreen(
                 onValueChange = {
                     email = it
 
-                    // Clear previous error when user edits
                     if (authState.error != null) {
                         authViewModel.clearError()
                     }
@@ -196,7 +195,6 @@ fun LoginScreen(
                 onValueChange = {
                     password = it
 
-                    // Clear previous error when user edits
                     if (authState.error != null) {
                         authViewModel.clearError()
                     }

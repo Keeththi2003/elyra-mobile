@@ -152,9 +152,7 @@ fun AboutScreen(
         AboutItem(
             icon = Icons.Outlined.Description,
             title = "Terms of Service",
-            onClick = {
-                // Later
-            }
+            onClick = { /* TODO: open the hosted document */ }
         )
 
         AboutDivider()
@@ -162,9 +160,7 @@ fun AboutScreen(
         AboutItem(
             icon = Icons.Outlined.PrivacyTip,
             title = "Privacy Policy",
-            onClick = {
-                // Later
-            }
+            onClick = { /* TODO: open the hosted document */ }
         )
 
         AboutDivider()
@@ -172,9 +168,7 @@ fun AboutScreen(
         AboutItem(
             icon = Icons.Outlined.Security,
             title = "Open source licenses",
-            onClick = {
-                // Later
-            }
+            onClick = { /* TODO: open the hosted document */ }
         )
     }
 }

@@ -8,26 +8,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import com.keeththigan.elyra.R
 
-/**
- * Elyra Typography System
- *
- * Typography hierarchy:
- *
- * Display
- *   ↓
- * Headlines
- *   ↓
- * Titles
- *   ↓
- * Body
- *   ↓
- * Labels / Captions
- *
- * The system is intentionally restrained.
- * Most application content should use Body, Title,
- * and Headline styles rather than oversized typography.
- */
-
 val ElyraFontFamily = FontFamily(
     Font(
         resId = R.font.inter_regular,
