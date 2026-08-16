@@ -176,6 +176,14 @@ class DeviceRepository {
     // UPDATE
     // ========================================================================
 
+    /**
+     * Writes the device straight through — no read-before-write.
+     *
+     * Ownership is enforced by the Firestore security rules (which check both
+     * the existing and incoming userId), so a client-side pre-fetch adds no
+     * safety, only a full network round trip on every toggle. createdAt is
+     * carried on the object we already hold, so there is nothing to re-read.
+     */
     suspend fun updateDevice(
         device: Device
     ): Result<Device> {
@@ -188,28 +196,9 @@ class DeviceRepository {
 
         return try {
 
-            val existingSnapshot =
-                devicesCollection
-                    .document(device.id)
-                    .get()
-                    .await()
-
-            val existing =
-                existingSnapshot.toObject(Device::class.java)
-                    ?: return Result.failure(
-                        Exception("Device not found.")
-                    )
-
-            if (existing.userId != uid) {
-                return Result.failure(
-                    Exception("You don't have access to this device.")
-                )
-            }
-
             val updatedDevice =
                 device.copy(
                     userId = uid,
-                    createdAt = existing.createdAt,
                     updatedAt = null
                 )
 

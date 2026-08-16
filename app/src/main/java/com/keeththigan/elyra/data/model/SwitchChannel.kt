@@ -1,5 +1,7 @@
 package com.keeththigan.elyra.data.model
 
+import com.google.firebase.firestore.PropertyName
+
 /**
  * One individually addressable switch inside a multi-switch gang box.
  *
@@ -10,7 +12,15 @@ package com.keeththigan.elyra.data.model
 data class SwitchChannel(
     val index: Int = 0,
     val name: String = "",
-    val isOn: Boolean = false
+
+    /**
+     * @PropertyName is required for the same reason as [Device.isOn]:
+     * Kotlin's `isOn()` getter would otherwise be written to Firestore as
+     * `on` and read back as `isOn`, so every channel would deserialise off.
+     */
+    @get:PropertyName("isOn")
+    @set:PropertyName("isOn")
+    var isOn: Boolean = false
 ) {
 
     /** Falls back to a positional label only when unnamed. */

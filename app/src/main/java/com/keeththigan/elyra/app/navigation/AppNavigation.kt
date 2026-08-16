@@ -52,6 +52,7 @@ import com.keeththigan.elyra.feature.home.presentation.HomeScreen
 import com.keeththigan.elyra.feature.settings.SettingsScreen
 import com.keeththigan.elyra.feature.settings.appearance.AppearanceScreen
 import com.keeththigan.elyra.feature.settings.about.AboutScreen
+import com.keeththigan.elyra.feature.settings.profile.ProfileScreen
 import com.keeththigan.elyra.feature.floors.FloorsScreen
 import com.keeththigan.elyra.feature.floors.FloorDetailScreen
 import com.keeththigan.elyra.feature.floors.EditFloorScreen
@@ -86,6 +87,7 @@ const val EDIT_ROOM = "edit_room/{roomId}"
 const val EDIT_DEVICE = "edit_device/{deviceId}"
     const val APPEARANCE = "appearance"
     const val ABOUT = "about"
+    const val PROFILE = "profile"
 }
 
 /**
@@ -162,17 +164,18 @@ fun AppNavigation(
         currentDestination?.route
 
     /*
-     * Bottom navigation is only visible
-     * on the three main application screens.
+     * Bottom navigation stays visible while browsing — the tabs, plus the
+     * detail screens you reach from them — so you can always jump sections.
      *
-     * Device Detail gets its own screen
-     * without the bottom navigation.
+     * It is hidden only on focused create/edit flows, where the task should
+     * be finished or cancelled rather than abandoned sideways.
      */
-    val showBottomBar =
-        currentRoute == AppRoutes.HOME ||
-        currentRoute == AppRoutes.DEVICES ||
-        currentRoute == AppRoutes.FLOORS ||
-        currentRoute == AppRoutes.SETTINGS
+    val isFocusedTask =
+        currentRoute?.let { route ->
+            route.startsWith("add_") || route.startsWith("edit_")
+        } ?: false
+
+    val showBottomBar = !isFocusedTask
 
     Scaffold(
 
@@ -632,6 +635,9 @@ composable(AppRoutes.ADD_FLOOR) {
             composable(AppRoutes.SETTINGS) {
 
 SettingsScreen(
+    onProfileClick = {
+        navigateTo(AppRoutes.PROFILE)
+    },
     onAppearanceClick = {
         navigateTo(AppRoutes.APPEARANCE)
     },
@@ -644,6 +650,19 @@ SettingsScreen(
 )         
 }
 
+
+            composable(AppRoutes.PROFILE) {
+
+    ProfileScreen(
+        authViewModel = authViewModel,
+        deviceViewModel = deviceViewModel,
+        floorViewModel = floorViewModel,
+        roomViewModel = roomViewModel,
+        onBack = {
+            navController.popBackStack()
+        }
+    )
+}
 
             composable(AppRoutes.APPEARANCE) {
 

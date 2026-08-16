@@ -35,6 +35,7 @@ import com.keeththigan.elyra.feature.auth.AuthViewModel
 @Composable
 fun SettingsScreen(
     authViewModel: AuthViewModel,
+    onProfileClick: () -> Unit = {},
     onAppearanceClick: () -> Unit = {},
     onAboutClick: () -> Unit = {}
 ) {
@@ -98,7 +99,7 @@ fun SettingsScreen(
                 icon = Icons.Outlined.Person,
                 title = "Profile",
                 subtitle = "Manage your account",
-                onClick = {}
+                onClick = onProfileClick
             )
 
             Divider()

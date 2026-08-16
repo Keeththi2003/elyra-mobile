@@ -266,12 +266,7 @@ fun DeviceDetailScreen(
             // CONNECTIVITY
             // ================================================================
 
-            ConnectivityCard(
-                device = device,
-                onSimulateConnectivity = {
-                    deviceViewModel.setConnectivity(deviceId, it)
-                }
-            )
+            ConnectivityCard(device = device)
 
             Spacer(modifier = Modifier.height(28.dp))
 
@@ -1103,11 +1098,8 @@ private fun UsageStat(
 
 @Composable
 private fun ConnectivityCard(
-    device: Device,
-    onSimulateConnectivity: (DeviceConnectivity) -> Unit
+    device: Device
 ) {
-
-    var showSimulator by remember(device.id) { mutableStateOf(false) }
 
     val dotColor = when (device.connectivity) {
         DeviceConnectivity.ONLINE -> ElyraTheme.colors.success
@@ -1151,68 +1143,12 @@ private fun ConnectivityCard(
                     color = ElyraTheme.colors.textSecondary
                 )
             }
-        }
-
-        Spacer(modifier = Modifier.height(14.dp))
-
-        Text(
-            text = if (showSimulator) "Hide simulator" else "Simulate device report",
-            modifier = Modifier.clickable { showSimulator = !showSimulator },
-            style = ElyraTheme.typography.labelMedium,
-            color = ElyraTheme.colors.textSecondary
-        )
-
-        if (showSimulator) {
-
-            Spacer(modifier = Modifier.height(12.dp))
 
             Text(
-                text = "Connectivity is reported by the hardware, not chosen " +
-                    "by you. These controls stand in for the device while " +
-                    "there is no physical unit attached.",
-                style = ElyraTheme.typography.bodySmall,
-                color = ElyraTheme.colors.textTertiary
+                text = device.connectivity.label(),
+                style = ElyraTheme.typography.labelMedium,
+                color = ElyraTheme.colors.textSecondary
             )
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-
-                DeviceConnectivity.entries.forEach { option ->
-
-                    val selected = option == device.connectivity
-
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                            .height(38.dp)
-                            .clip(RoundedCornerShape(11.dp))
-                            .background(
-                                if (selected) {
-                                    ElyraTheme.colors.primary
-                                } else {
-                                    ElyraTheme.colors.surfaceSecondary
-                                }
-                            )
-                            .clickable { onSimulateConnectivity(option) },
-                        contentAlignment = Alignment.Center
-                    ) {
-
-                        Text(
-                            text = option.label(),
-                            style = ElyraTheme.typography.labelMedium,
-                            color = if (selected) {
-                                ElyraTheme.colors.onPrimary
-                            } else {
-                                ElyraTheme.colors.textSecondary
-                            }
-                        )
-                    }
-                }
-            }
         }
     }
 }

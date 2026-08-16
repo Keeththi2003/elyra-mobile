@@ -234,18 +234,36 @@ fun HomeScreen(
 
             } else {
 
+                // Four most recent devices, laid out 2x2. Built from plain
+                // rows rather than a nested lazy grid so it measures cleanly
+                // inside this LazyColumn.
                 items(
-                    items = devices.take(5),
-                    key = { it.id }
-                ) { device ->
+                    items = devices.take(4).chunked(2),
+                    key = { row -> row.first().id }
+                ) { row ->
 
-                    QuickControlRow(
-                        device = device,
-                        onClick = { onDeviceClick(device.id) },
-                        onToggle = {
-                            deviceViewModel.toggleDevice(device.id, it)
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+
+                        row.forEach { device ->
+
+                            QuickControlTile(
+                                device = device,
+                                modifier = Modifier.weight(1f),
+                                onClick = { onDeviceClick(device.id) },
+                                onToggle = {
+                                    deviceViewModel.toggleDevice(device.id, it)
+                                }
+                            )
                         }
-                    )
+
+                        // Keeps a lone tile at half width on an odd last row.
+                        if (row.size == 1) {
+                            Spacer(modifier = Modifier.weight(1f))
+                        }
+                    }
                 }
             }
 
@@ -422,79 +440,84 @@ private fun SectionHeader(
 // ============================================================================
 
 @Composable
-private fun QuickControlRow(
+private fun QuickControlTile(
     device: Device,
+    modifier: Modifier = Modifier,
     onClick: () -> Unit,
     onToggle: (Boolean) -> Unit
 ) {
 
     val isOn = device.status == DeviceStatus.ON
 
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(18.dp))
+    Column(
+        modifier = modifier
+            .clip(RoundedCornerShape(20.dp))
             .background(ElyraTheme.colors.surface)
             .border(
                 width = 1.dp,
                 color = ElyraTheme.colors.borderSubtle,
-                shape = RoundedCornerShape(18.dp)
+                shape = RoundedCornerShape(20.dp)
             )
             .clickable(onClick = onClick)
-            .padding(horizontal = 14.dp, vertical = 14.dp),
-        verticalAlignment = Alignment.CenterVertically
+            .padding(16.dp)
     ) {
 
-        Box(
-            modifier = Modifier
-                .size(42.dp)
-                .clip(RoundedCornerShape(13.dp))
-                .background(ElyraTheme.colors.surfaceSecondary),
-            contentAlignment = Alignment.Center
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
         ) {
 
-            Icon(
-                imageVector = homeDeviceIcon(device.type),
-                contentDescription = null,
-                modifier = Modifier.size(20.dp),
-                tint = if (isOn) {
-                    ElyraTheme.colors.textPrimary
-                } else {
-                    ElyraTheme.colors.textTertiary
-                }
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .clip(RoundedCornerShape(13.dp))
+                    .background(ElyraTheme.colors.surfaceSecondary),
+                contentAlignment = Alignment.Center
+            ) {
+
+                Icon(
+                    imageVector = homeDeviceIcon(device.type),
+                    contentDescription = null,
+                    modifier = Modifier.size(19.dp),
+                    tint = if (isOn) {
+                        ElyraTheme.colors.textPrimary
+                    } else {
+                        ElyraTheme.colors.textTertiary
+                    }
+                )
+            }
+
+            Spacer(modifier = Modifier.weight(1f))
+
+            Switch(
+                checked = isOn,
+                onCheckedChange = onToggle,
+                enabled = device.isControllable,
+                colors = SwitchDefaults.colors(
+                    checkedThumbColor = ElyraTheme.colors.onPrimary,
+                    checkedTrackColor = ElyraTheme.colors.primary,
+                    uncheckedThumbColor = ElyraTheme.colors.textTertiary,
+                    uncheckedTrackColor = ElyraTheme.colors.surfaceInteractive
+                )
             )
         }
 
-        Spacer(modifier = Modifier.width(13.dp))
+        Spacer(modifier = Modifier.height(14.dp))
 
-        Column(modifier = Modifier.weight(1f)) {
+        Text(
+            text = device.name,
+            style = ElyraTheme.typography.bodyLarge,
+            color = ElyraTheme.colors.textPrimary,
+            maxLines = 1
+        )
 
-            Text(
-                text = device.name,
-                style = ElyraTheme.typography.bodyLarge,
-                color = ElyraTheme.colors.textPrimary,
-                maxLines = 1
-            )
+        Spacer(modifier = Modifier.height(2.dp))
 
-            Spacer(modifier = Modifier.height(2.dp))
-
-            Text(
-                text = device.status.homeLabel(),
-                style = ElyraTheme.typography.bodySmall,
-                color = ElyraTheme.colors.textSecondary
-            )
-        }
-
-        Switch(
-            checked = isOn,
-            onCheckedChange = onToggle,
-            enabled = device.isControllable,
-            colors = SwitchDefaults.colors(
-                checkedThumbColor = ElyraTheme.colors.onPrimary,
-                checkedTrackColor = ElyraTheme.colors.primary,
-                uncheckedThumbColor = ElyraTheme.colors.textTertiary,
-                uncheckedTrackColor = ElyraTheme.colors.surfaceInteractive
-            )
+        Text(
+            text = device.status.homeLabel(),
+            style = ElyraTheme.typography.bodySmall,
+            color = ElyraTheme.colors.textSecondary,
+            maxLines = 1
         )
     }
 }

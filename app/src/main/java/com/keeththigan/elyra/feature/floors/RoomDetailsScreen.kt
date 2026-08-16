@@ -39,6 +39,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.keeththigan.elyra.core.designsystem.ElyraTheme
+import com.keeththigan.elyra.core.designsystem.components.topbar.ElyraDetailTopBar
 import com.keeththigan.elyra.data.model.Device
 import com.keeththigan.elyra.data.model.DeviceStatus
 import com.keeththigan.elyra.data.model.DeviceType
@@ -91,67 +92,21 @@ fun RoomDetailsScreen(
         // TOP BAR
         // ====================================================================
 
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(
-                    horizontal = 20.dp,
-                    vertical = 12.dp
-                ),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-
-            IconButton(
-                onClick = onBack,
-                modifier = Modifier
-                    .size(44.dp)
-                    .clip(
-                        RoundedCornerShape(14.dp)
+        ElyraDetailTopBar(
+            title = roomName.ifBlank { "Room" },
+            subtitle = floorName.ifBlank { null },
+            onBack = onBack,
+            actions = {
+                IconButton(onClick = onEditRoom) {
+                    Icon(
+                        imageVector = Icons.Outlined.Edit,
+                        contentDescription = "Edit room",
+                        modifier = Modifier.size(20.dp),
+                        tint = ElyraTheme.colors.textSecondary
                     )
-                    .background(
-                        ElyraTheme.colors.surface
-                    )
-            ) {
-
-                Icon(
-                    imageVector = Icons.Outlined.ArrowBack,
-                    contentDescription = "Back",
-                    tint = ElyraTheme.colors.textPrimary
-                )
+                }
             }
-
-            Spacer(
-                modifier = Modifier.width(12.dp)
-            )
-
-            Column(
-                modifier = Modifier.weight(1f)
-            ) {
-
-                Text(
-                    text = roomName,
-                    style = ElyraTheme.typography.titleLarge,
-                    color = ElyraTheme.colors.textPrimary
-                )
-
-                Text(
-                    text = floorName,
-                    style = ElyraTheme.typography.bodySmall,
-                    color = ElyraTheme.colors.textSecondary
-                )
-            }
-            IconButton(
-                onClick = onEditRoom
-            ) {
-
-                Icon(
-                    imageVector = Icons.Outlined.Edit,
-                    contentDescription = "Edit room",
-                    modifier = Modifier.size(21.dp),
-                    tint = ElyraTheme.colors.textSecondary
-                )
-            }
-        }
+        )
 
         // ====================================================================
         // CONTENT

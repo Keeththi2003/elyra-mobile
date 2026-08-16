@@ -246,6 +246,51 @@ class DeviceViewModel(
     }
 
     /**
+     * Applies a control change to local state immediately, then persists it.
+     *
+     * Without the optimistic step the switch stays in its old position until
+     * Firestore acknowledges the write, which reads as the toggle flicking
+     * back off. On failure the previous value is restored and the error shown.
+     */
+    private fun applyControlChange(
+        previous: Device,
+        updated: Device
+    ) {
+
+        patchLocal(updated)
+
+        viewModelScope.launch {
+
+            repository.updateDevice(updated)
+                .onFailure { exception ->
+
+                    patchLocal(previous)
+
+                    _state.value =
+                        _state.value.copy(
+                            error = exception.message
+                                ?: "Failed to update device."
+                        )
+                }
+        }
+    }
+
+    private fun patchLocal(
+        device: Device
+    ) {
+        _state.value =
+            _state.value.copy(
+                devices = _state.value.devices.map {
+                    if (it.id == device.id) device else it
+                },
+                selectedDevice = _state.value.selectedDevice
+                    ?.takeIf { it.id == device.id }
+                    ?.let { device }
+                    ?: _state.value.selectedDevice
+            )
+    }
+
+    /**
      * Powers a device on or off, stamping the ON time for the safety cutoff
      * and folding the completed run into accumulated usage on the way off.
      */
@@ -262,15 +307,15 @@ class DeviceViewModel(
         val elapsedSeconds =
             if (!isOn) elapsedOnSeconds(device) else 0L
 
-        updateDevice(
-            device.copy(
+        applyControlChange(
+            previous = device,
+            updated = device.copy(
                 isOn = isOn,
                 // Powering the whole unit drives every channel with it.
                 switches = device.switches.map { it.copy(isOn = isOn) },
                 lastOnAt = if (isOn) Timestamp.now() else null,
                 totalOnSeconds = device.totalOnSeconds + elapsedSeconds
-            ),
-            signalSaved = false
+            )
         )
     }
 
@@ -297,13 +342,13 @@ class DeviceViewModel(
         // The unit reads as ON while any single channel is live.
         val anyOn = updatedChannels.any { it.isOn }
 
-        updateDevice(
-            device.copy(
+        applyControlChange(
+            previous = device,
+            updated = device.copy(
                 switches = updatedChannels,
                 isOn = anyOn,
                 lastOnAt = if (anyOn) device.lastOnAt ?: Timestamp.now() else null
-            ),
-            signalSaved = false
+            )
         )
     }
 
@@ -313,9 +358,9 @@ class DeviceViewModel(
     ) {
         val device = findDevice(deviceId) ?: return
 
-        updateDevice(
-            device.copy(brightness = brightness.coerceIn(0, 100)),
-            signalSaved = false
+        applyControlChange(
+            previous = device,
+            updated = device.copy(brightness = brightness.coerceIn(0, 100))
         )
     }
 
@@ -327,13 +372,13 @@ class DeviceViewModel(
     ) {
         val device = findDevice(deviceId) ?: return
 
-        updateDevice(
-            device.copy(
+        applyControlChange(
+            previous = device,
+            updated = device.copy(
                 scheduleEnabled = enabled,
                 scheduleStart = start,
                 scheduleEnd = end
-            ),
-            signalSaved = false
+            )
         )
     }
 
@@ -343,9 +388,9 @@ class DeviceViewModel(
     ) {
         val device = findDevice(deviceId) ?: return
 
-        updateDevice(
-            device.copy(maxOnDurationMinutes = minutes.coerceAtLeast(1)),
-            signalSaved = false
+        applyControlChange(
+            previous = device,
+            updated = device.copy(maxOnDurationMinutes = minutes.coerceAtLeast(1))
         )
     }
 
@@ -362,9 +407,9 @@ class DeviceViewModel(
     ) {
         val device = findDevice(deviceId) ?: return
 
-        updateDevice(
-            device.copy(connectivity = connectivity),
-            signalSaved = false
+        applyControlChange(
+            previous = device,
+            updated = device.copy(connectivity = connectivity)
         )
     }
 
@@ -376,8 +421,9 @@ class DeviceViewModel(
     ) {
         val device = findDevice(deviceId) ?: return
 
-        updateDevice(
-            device.copy(
+        applyControlChange(
+            previous = device,
+            updated = device.copy(
                 switches = device.switches.map { channel ->
                     if (channel.index == channelIndex) {
                         channel.copy(name = name)
@@ -385,8 +431,7 @@ class DeviceViewModel(
                         channel
                     }
                 }
-            ),
-            signalSaved = false
+            )
         )
     }
 

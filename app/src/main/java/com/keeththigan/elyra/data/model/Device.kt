@@ -2,6 +2,7 @@ package com.keeththigan.elyra.data.model
 
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.Exclude
+import com.google.firebase.firestore.PropertyName
 import com.google.firebase.firestore.ServerTimestamp
 
 data class Device(
@@ -13,8 +14,18 @@ data class Device(
     val roomId: String = "",
     val floorId: String = "",
 
-    /** Power state — this is what the user actually controls. */
-    val isOn: Boolean = false,
+    /**
+     * Power state — this is what the user actually controls.
+     *
+     * The explicit @PropertyName is required. Kotlin compiles a Boolean
+     * property named `isOn` to an `isOn()` getter, and Firestore's mapper
+     * strips the `is` prefix when deriving a field name — so it would write
+     * `on` but read back `isOn`, silently deserialising to false and making
+     * every toggle snap back off.
+     */
+    @get:PropertyName("isOn")
+    @set:PropertyName("isOn")
+    var isOn: Boolean = false,
 
     /** Link health — reported by the device, never set by the user. */
     val connectivity: DeviceConnectivity = DeviceConnectivity.ONLINE,

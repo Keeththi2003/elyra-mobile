@@ -37,8 +37,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.keeththigan.elyra.core.designsystem.ElyraTheme
+import com.keeththigan.elyra.core.designsystem.components.topbar.ElyraDetailTopBar
 import com.keeththigan.elyra.data.model.DeviceStatus
 import com.keeththigan.elyra.feature.devices.DeviceViewModel
+import com.keeththigan.elyra.feature.floors.components.FloorPlanGrid
 
 // ============================================================================
 // ROOM MODEL
@@ -120,68 +122,26 @@ fun FloorDetailScreen(
         // TOP BAR
         // ====================================================================
 
-        Spacer(
-            modifier = Modifier.height(12.dp)
+        ElyraDetailTopBar(
+            title = floorName.ifBlank { "Floor" },
+            subtitle = "Floor overview",
+            onBack = onBack,
+            // The screen's Column already insets content by 20.dp.
+            horizontalPadding = 0.dp,
+            actions = {
+                IconButton(onClick = onEditFloor) {
+                    Icon(
+                        imageVector = Icons.Outlined.Edit,
+                        contentDescription = "Edit floor",
+                        modifier = Modifier.size(20.dp),
+                        tint = ElyraTheme.colors.textSecondary
+                    )
+                }
+            }
         )
 
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-
-            IconButton(
-                onClick = onBack,
-                modifier = Modifier
-                    .size(44.dp)
-                    .clip(CircleShape)
-                    .background(
-                        ElyraTheme.colors.surface
-                    )
-            ) {
-
-                Icon(
-                    imageVector = Icons.Outlined.ArrowBack,
-                    contentDescription = "Back",
-                    tint = ElyraTheme.colors.textPrimary
-                )
-            }
-
-            Spacer(
-                modifier = Modifier.size(12.dp)
-            )
-
-            Column(
-                modifier = Modifier.weight(1f)
-            ) {
-
-                Text(
-                    text = floorName,
-                    style = ElyraTheme.typography.titleLarge,
-                    color = ElyraTheme.colors.textPrimary
-                )
-
-                Text(
-                    text = "Floor overview",
-                    style = ElyraTheme.typography.bodySmall,
-                    color = ElyraTheme.colors.textSecondary
-                )
-            }
-
-            IconButton(
-                onClick = onEditFloor
-            ) {
-
-                Icon(
-                    imageVector = Icons.Outlined.Edit,
-                    contentDescription = "Edit floor",
-                    modifier = Modifier.size(21.dp),
-                    tint = ElyraTheme.colors.textSecondary
-                )
-            }
-        }
-
         Spacer(
-            modifier = Modifier.height(24.dp)
+            modifier = Modifier.height(16.dp)
         )
 
         if (floorState.error != null || roomState.error != null || deviceState.error != null) {
@@ -229,6 +189,44 @@ fun FloorDetailScreen(
         Spacer(
             modifier = Modifier.height(28.dp)
         )
+
+
+        // ====================================================================
+        // FLOOR PLAN
+        // ====================================================================
+
+        if (roomState.rooms.any { it.floorId == floorId }) {
+
+            Text(
+                text = "Floor plan",
+                style = ElyraTheme.typography.titleMedium,
+                color = ElyraTheme.colors.textPrimary
+            )
+
+            Spacer(
+                modifier = Modifier.height(3.dp)
+            )
+
+            Text(
+                text = "Live layout of this floor",
+                style = ElyraTheme.typography.bodySmall,
+                color = ElyraTheme.colors.textSecondary
+            )
+
+            Spacer(
+                modifier = Modifier.height(12.dp)
+            )
+
+            FloorPlanGrid(
+                rooms = roomState.rooms.filter { it.floorId == floorId },
+                devices = deviceState.devices,
+                onRoomClick = onRoomClick
+            )
+
+            Spacer(
+                modifier = Modifier.height(20.dp)
+            )
+        }
 
 
         // ====================================================================
