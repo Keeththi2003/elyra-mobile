@@ -78,6 +78,7 @@ fun DeviceDetailScreen(
     roomViewModel: RoomViewModel,
     onEditDevice: () -> Unit,
     onRemoveDevice: () -> Unit,
+    onViewReport: () -> Unit = {},
     onBack: () -> Unit
 ) {
 
@@ -227,7 +228,7 @@ fun DeviceDetailScreen(
 
                 DeviceType.OUTLET -> {
 
-                    UsageCard(device = device)
+                    UsageCard(device = device, onViewReport = onViewReport)
                 }
 
                 DeviceType.MULTI_SWITCH -> {
@@ -259,7 +260,7 @@ fun DeviceDetailScreen(
 
                     Spacer(modifier = Modifier.height(14.dp))
 
-                    UsageCard(device = device)
+                    UsageCard(device = device, onViewReport = onViewReport)
                 }
 
                 DeviceType.SECURITY_CAMERA -> {
@@ -1026,7 +1027,8 @@ private fun CameraCard(
 
 @Composable
 private fun UsageCard(
-    device: Device
+    device: Device,
+    onViewReport: () -> Unit = {}
 ) {
 
     var nowSeconds by remember { mutableLongStateOf(Timestamp.now().seconds) }
@@ -1076,6 +1078,31 @@ private fun UsageCard(
                     device.totalOnSeconds + currentSessionSeconds
                 ),
                 modifier = Modifier.weight(1f)
+            )
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(12.dp))
+                .clickable(onClick = onViewReport)
+                .padding(vertical = 10.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+
+            Text(
+                text = "View full report",
+                modifier = Modifier.weight(1f),
+                style = ElyraTheme.typography.labelMedium,
+                color = ElyraTheme.colors.textPrimary
+            )
+
+            Text(
+                text = "›",
+                style = ElyraTheme.typography.titleMedium,
+                color = ElyraTheme.colors.textSecondary
             )
         }
     }

@@ -69,6 +69,7 @@ import com.keeththigan.elyra.feature.floors.RoomViewModel
 import com.keeththigan.elyra.feature.settings.appearance.ThemeViewModel
 import com.keeththigan.elyra.feature.notifications.NotificationViewModel
 import com.keeththigan.elyra.feature.notifications.NotificationsScreen
+import com.keeththigan.elyra.feature.reports.ReportsScreen
 
 
 private object AppRoutes {
@@ -91,6 +92,7 @@ const val EDIT_DEVICE = "edit_device/{deviceId}"
     const val ABOUT = "about"
     const val PROFILE = "profile"
     const val NOTIFICATIONS = "notifications"
+    const val REPORTS = "reports"
 }
 
 /**
@@ -345,7 +347,10 @@ fun AppNavigation(
         },
          onRemoveDevice = {
         deviceViewModel.deleteDevice(deviceId)
-    }
+    },
+        onViewReport = {
+            navigateTo(AppRoutes.REPORTS)
+        }
     )
 }
 
@@ -650,6 +655,9 @@ SettingsScreen(
     onAlertsClick = {
         navigateTo(AppRoutes.NOTIFICATIONS)
     },
+    onReportsClick = {
+        navigateTo(AppRoutes.REPORTS)
+    },
     onProfileClick = {
         navigateTo(AppRoutes.PROFILE)
     },
@@ -665,6 +673,20 @@ SettingsScreen(
 )         
 }
 
+
+            composable(AppRoutes.REPORTS) {
+
+    ReportsScreen(
+        deviceViewModel = deviceViewModel,
+        roomViewModel = roomViewModel,
+        onDeviceClick = { deviceId ->
+            navigateTo("device_detail/$deviceId")
+        },
+        onBack = {
+            navController.popBackStack()
+        }
+    )
+}
 
             composable(AppRoutes.NOTIFICATIONS) {
 

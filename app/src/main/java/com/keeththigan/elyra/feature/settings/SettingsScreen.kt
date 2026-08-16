@@ -20,6 +20,7 @@ import androidx.compose.material.icons.outlined.DarkMode
 import androidx.compose.material.icons.outlined.NotificationsActive
 import androidx.compose.material.icons.outlined.NotificationsNone
 import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material.icons.outlined.InsertChartOutlined
 import androidx.compose.material.icons.outlined.Logout
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material3.Icon
@@ -42,6 +43,7 @@ fun SettingsScreen(
     notificationsEnabled: Boolean = true,
     onNotificationsEnabledChange: (Boolean) -> Unit = {},
     onAlertsClick: () -> Unit = {},
+    onReportsClick: () -> Unit = {},
     onProfileClick: () -> Unit = {},
     onAppearanceClick: () -> Unit = {},
     onAboutClick: () -> Unit = {}
@@ -158,6 +160,15 @@ fun SettingsScreen(
                 subtitle = "Notify me when a safety cutoff fires",
                 checked = notificationsEnabled,
                 onCheckedChange = onNotificationsEnabledChange
+            )
+
+            Divider()
+
+            SettingsItem(
+                icon = Icons.Outlined.InsertChartOutlined,
+                title = "Usage reports",
+                subtitle = "Runtime across your devices",
+                onClick = onReportsClick
             )
 
             Divider()
