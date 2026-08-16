@@ -33,6 +33,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -44,7 +45,6 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.keeththigan.elyra.core.designsystem.ElyraTheme
-import com.keeththigan.elyra.data.model.DeviceStatus
 import com.keeththigan.elyra.data.model.DeviceType
 
 @Composable
@@ -73,8 +73,13 @@ fun AddDeviceScreen(
         mutableStateOf<DeviceType?>(null)
     }
 
-    var selectedStatus by remember {
-        mutableStateOf(DeviceStatus.OFF)
+    var startsOn by remember {
+        mutableStateOf(false)
+    }
+
+    // Per-channel names for a multi-switch gang box, e.g. "Ceiling Fan".
+    val switchNames = remember {
+        mutableStateListOf("", "", "", "", "", "", "", "")
     }
 
     var brightness by remember {
@@ -414,6 +419,48 @@ fun AddDeviceScreen(
                             },
                             placeholder = "Number of switches"
                         )
+
+                        val channelCount =
+                            (switchCount.toIntOrNull() ?: 0).coerceIn(0, 8)
+
+                        if (channelCount > 0) {
+
+                            Spacer(
+                                modifier = Modifier.height(20.dp)
+                            )
+
+                            Text(
+                                text = "Name each switch",
+                                style = ElyraTheme.typography.titleMedium,
+                                color = ElyraTheme.colors.textPrimary
+                            )
+
+                            Spacer(
+                                modifier = Modifier.height(6.dp)
+                            )
+
+                            Text(
+                                text = "Names make the gang box usable — " +
+                                    "\"Ceiling Fan\" beats \"Switch 2\".",
+                                style = ElyraTheme.typography.bodySmall,
+                                color = ElyraTheme.colors.textSecondary
+                            )
+
+                            repeat(channelCount) { index ->
+
+                                Spacer(
+                                    modifier = Modifier.height(10.dp)
+                                )
+
+                                AddDeviceTextField(
+                                    value = switchNames[index],
+                                    onValueChange = {
+                                        switchNames[index] = it
+                                    },
+                                    placeholder = "Switch ${index + 1} name"
+                                )
+                            }
+                        }
                     }
 
                     DeviceType.SAFETY_APPLIANCE -> {
@@ -507,20 +554,20 @@ fun AddDeviceScreen(
 
                     StateOption(
                         title = "OFF",
-                        selected = selectedStatus == DeviceStatus.OFF,
+                        selected = !startsOn,
                         color = ElyraTheme.colors.textSecondary,
                         modifier = Modifier.weight(1f)
                     ) {
-                        selectedStatus = DeviceStatus.OFF
+                        startsOn = false
                     }
 
                     StateOption(
                         title = "ON",
-                        selected = selectedStatus == DeviceStatus.ON,
+                        selected = startsOn,
                         color = Color(0xFF22C55E),
                         modifier = Modifier.weight(1f)
                     ) {
-                        selectedStatus = DeviceStatus.ON
+                        startsOn = true
                     }
                 }
             }
@@ -582,9 +629,10 @@ fun AddDeviceScreen(
                             type = selectedType!!,
                             floorId = floorId,
                             roomId = roomId,
-                            status = selectedStatus,
+                            isOn = startsOn,
                             brightness = brightness.toIntOrNull(),
                             switchCount = switchCount.toIntOrNull(),
+                            switchNames = switchNames.toList(),
                             maxOnDurationMinutes = maxOnDuration.toIntOrNull(),
                             cameraUri = cameraUri.ifBlank { null }
                         )

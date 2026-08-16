@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.Timestamp
 import com.keeththigan.elyra.data.model.Device
-import com.keeththigan.elyra.data.model.DeviceStatus
+import com.keeththigan.elyra.data.model.DeviceConnectivity
 import com.keeththigan.elyra.data.model.DeviceType
 import com.keeththigan.elyra.data.model.SwitchChannel
 import com.keeththigan.elyra.data.repository.DeviceRepository
@@ -144,9 +144,10 @@ class DeviceViewModel(
         type: DeviceType,
         floorId: String = "",
         roomId: String = "",
-        status: DeviceStatus = DeviceStatus.OFF,
+        isOn: Boolean = false,
         brightness: Int? = null,
         switchCount: Int? = null,
+        switchNames: List<String> = emptyList(),
         maxOnDurationMinutes: Int? = null,
         cameraUri: String? = null
     ) {
@@ -166,10 +167,12 @@ class DeviceViewModel(
             val channels =
                 if (type == DeviceType.MULTI_SWITCH) {
                     val count = (switchCount ?: 2).coerceIn(1, 8)
-                    (1..count).map {
+                    (1..count).map { index ->
                         SwitchChannel(
-                            index = it,
-                            name = "Switch $it",
+                            index = index,
+                            name = switchNames.getOrNull(index - 1)
+                                ?.takeIf { it.isNotBlank() }
+                                ?: "Switch $index",
                             isOn = false
                         )
                     }
@@ -182,13 +185,12 @@ class DeviceViewModel(
                 type = type,
                 floorId = floorId,
                 roomId = roomId,
-                status = status,
+                isOn = isOn,
                 brightness = brightness,
-                switchCount = switchCount,
                 switches = channels,
                 maxOnDurationMinutes = maxOnDurationMinutes,
                 cameraUri = cameraUri,
-                lastOnAt = if (status == DeviceStatus.ON) Timestamp.now() else null
+                lastOnAt = if (isOn) Timestamp.now() else null
             )
 
             repository.createDevice(device)
@@ -254,12 +256,17 @@ class DeviceViewModel(
 
         val device = findDevice(deviceId) ?: return
 
+        // An unreachable device cannot be operated.
+        if (!device.isControllable) return
+
         val elapsedSeconds =
             if (!isOn) elapsedOnSeconds(device) else 0L
 
         updateDevice(
             device.copy(
-                status = if (isOn) DeviceStatus.ON else DeviceStatus.OFF,
+                isOn = isOn,
+                // Powering the whole unit drives every channel with it.
+                switches = device.switches.map { it.copy(isOn = isOn) },
                 lastOnAt = if (isOn) Timestamp.now() else null,
                 totalOnSeconds = device.totalOnSeconds + elapsedSeconds
             ),
@@ -276,6 +283,8 @@ class DeviceViewModel(
 
         val device = findDevice(deviceId) ?: return
 
+        if (!device.isControllable) return
+
         val updatedChannels =
             device.switches.map { channel ->
                 if (channel.index == channelIndex) {
@@ -291,7 +300,7 @@ class DeviceViewModel(
         updateDevice(
             device.copy(
                 switches = updatedChannels,
-                status = if (anyOn) DeviceStatus.ON else DeviceStatus.OFF,
+                isOn = anyOn,
                 lastOnAt = if (anyOn) device.lastOnAt ?: Timestamp.now() else null
             ),
             signalSaved = false
@@ -340,13 +349,45 @@ class DeviceViewModel(
         )
     }
 
-    fun setDeviceStatus(
+    /**
+     * Simulates the device/gateway reporting a new link state.
+     *
+     * Real hardware (or the companion simulator) would write this field
+     * directly in Firestore; exposing it here lets the connectivity states
+     * required by the brief be demonstrated without physical devices.
+     */
+    fun setConnectivity(
         deviceId: String,
-        status: DeviceStatus
+        connectivity: DeviceConnectivity
     ) {
         val device = findDevice(deviceId) ?: return
 
-        updateDevice(device.copy(status = status), signalSaved = false)
+        updateDevice(
+            device.copy(connectivity = connectivity),
+            signalSaved = false
+        )
+    }
+
+    /** Renames one channel of a multi-switch unit. */
+    fun renameSwitchChannel(
+        deviceId: String,
+        channelIndex: Int,
+        name: String
+    ) {
+        val device = findDevice(deviceId) ?: return
+
+        updateDevice(
+            device.copy(
+                switches = device.switches.map { channel ->
+                    if (channel.index == channelIndex) {
+                        channel.copy(name = name)
+                    } else {
+                        channel
+                    }
+                }
+            ),
+            signalSaved = false
+        )
     }
 
 
@@ -373,7 +414,7 @@ class DeviceViewModel(
                 val expired =
                     _state.value.devices.filter { device ->
                         device.type == DeviceType.SAFETY_APPLIANCE &&
-                            device.status == DeviceStatus.ON &&
+                            device.isOn &&
                             device.maxOnDurationMinutes != null &&
                             elapsedOnSeconds(device) >=
                             device.maxOnDurationMinutes * 60L
@@ -383,7 +424,7 @@ class DeviceViewModel(
 
                     repository.updateDevice(
                         device.copy(
-                            status = DeviceStatus.OFF,
+                            isOn = false,
                             lastOnAt = null,
                             totalOnSeconds =
                                 device.totalOnSeconds + elapsedOnSeconds(device),
