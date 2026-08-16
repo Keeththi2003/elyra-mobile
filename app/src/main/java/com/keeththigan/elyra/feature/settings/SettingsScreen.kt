@@ -19,17 +19,10 @@ import androidx.compose.material.icons.outlined.ChevronRight
 import androidx.compose.material.icons.outlined.DarkMode
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Logout
-import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material.icons.outlined.Person
-import androidx.compose.material.icons.outlined.Security
 import androidx.compose.material3.Icon
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -45,10 +38,6 @@ fun SettingsScreen(
     onAppearanceClick: () -> Unit = {},
     onAboutClick: () -> Unit = {}
 ) {
-
-    var notificationsEnabled by remember {
-        mutableStateOf(true)
-    }
 
     Column(
         modifier = Modifier
@@ -114,15 +103,6 @@ fun SettingsScreen(
 
             Divider()
 
-            SettingsItem(
-                icon = Icons.Outlined.Security,
-                title = "Security",
-                subtitle = "Password and account security",
-                onClick = {}
-            )
-
-            Divider()
-
             // =====================================================
             // LOGOUT
             // =====================================================
@@ -154,18 +134,6 @@ fun SettingsScreen(
         )
 
         SettingsCard {
-
-            SettingsSwitchItem(
-                icon = Icons.Outlined.Notifications,
-                title = "Notifications",
-                subtitle = "Receive device alerts",
-                checked = notificationsEnabled,
-                onCheckedChange = {
-                    notificationsEnabled = it
-                }
-            )
-
-            Divider()
 
             SettingsItem(
                 icon = Icons.Outlined.DarkMode,
@@ -329,64 +297,6 @@ private fun SettingsItem(
 }
 
 
-// ================================================================
-// SWITCH ITEM
-// ================================================================
-
-@Composable
-private fun SettingsSwitchItem(
-    icon: ImageVector,
-    title: String,
-    subtitle: String,
-    checked: Boolean,
-    onCheckedChange: (Boolean) -> Unit
-) {
-
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(
-                horizontal = 16.dp,
-                vertical = 14.dp
-            ),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-
-        SettingsIcon(
-            icon = icon
-        )
-
-        Spacer(
-            modifier = Modifier.size(14.dp)
-        )
-
-        Column(
-            modifier = Modifier.weight(1f)
-        ) {
-
-            Text(
-                text = title,
-                style = ElyraTheme.typography.bodyMedium,
-                color = ElyraTheme.colors.textPrimary
-            )
-
-            Spacer(
-                modifier = Modifier.height(2.dp)
-            )
-
-            Text(
-                text = subtitle,
-                style = ElyraTheme.typography.bodySmall,
-                color = ElyraTheme.colors.textSecondary
-            )
-        }
-
-        Switch(
-            checked = checked,
-            onCheckedChange = onCheckedChange
-        )
-    }
-}
 
 
 // ================================================================
