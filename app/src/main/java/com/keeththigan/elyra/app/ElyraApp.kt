@@ -9,6 +9,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.keeththigan.elyra.app.navigation.AppNavigation
+import com.keeththigan.elyra.core.connectivity.NetworkMonitor
 import com.keeththigan.elyra.core.designsystem.ElyraTheme
 import com.keeththigan.elyra.data.preferences.ThemePreferences
 import com.keeththigan.elyra.data.repository.AuthRepository
@@ -97,10 +98,15 @@ fun ElyraApp() {
             val uid =
                 authViewModel.getCurrentFirebaseUser()?.uid ?: "pending"
 
+            val networkMonitor = remember {
+                NetworkMonitor(context)
+            }
+
             val deviceViewModel: DeviceViewModel = viewModel(
                 key = "device_$uid",
                 factory = DeviceViewModelFactory(
-                    repository = deviceRepository
+                    repository = deviceRepository,
+                    networkMonitor = networkMonitor
                 )
             )
 

@@ -181,10 +181,18 @@ fun DeviceDetailScreen(
             // POWER
             // ================================================================
 
+            if (!deviceState.isOnline) {
+
+                OfflineBanner()
+
+                Spacer(modifier = Modifier.height(14.dp))
+            }
+
             PowerCard(
                 isOn = isOn,
                 statusLabel = device.status.label(),
-                enabled = device.isControllable,
+                enabled = device.isControllable && deviceState.isOnline,
+                offline = !deviceState.isOnline,
                 onToggle = { deviceViewModel.toggleDevice(deviceId, it) }
             )
 
@@ -357,6 +365,7 @@ private fun PowerCard(
     isOn: Boolean,
     statusLabel: String,
     enabled: Boolean,
+    offline: Boolean = false,
     onToggle: (Boolean) -> Unit
 ) {
 
@@ -379,10 +388,10 @@ private fun PowerCard(
                 Spacer(modifier = Modifier.height(4.dp))
 
                 Text(
-                    text = if (enabled) {
-                        statusLabel
-                    } else {
-                        "Unavailable while the device is unreachable"
+                    text = when {
+                        enabled -> statusLabel
+                        offline -> "Unavailable while you are offline"
+                        else -> "Unavailable while the device is unreachable"
                     },
                     style = ElyraTheme.typography.bodySmall,
                     color = ElyraTheme.colors.textSecondary
@@ -1157,6 +1166,48 @@ private fun ConnectivityCard(
 // ============================================================================
 // SHARED PIECES
 // ============================================================================
+
+@Composable
+private fun OfflineBanner() {
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(16.dp))
+            .background(ElyraTheme.colors.warningContainer)
+            .padding(horizontal = 16.dp, vertical = 14.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+
+        Box(
+            modifier = Modifier
+                .size(8.dp)
+                .clip(CircleShape)
+                .background(ElyraTheme.colors.warning)
+        )
+
+        Spacer(modifier = Modifier.width(12.dp))
+
+        Column {
+
+            Text(
+                text = "You're offline",
+                style = ElyraTheme.typography.titleSmall,
+                color = ElyraTheme.colors.onWarningContainer
+            )
+
+            Spacer(modifier = Modifier.height(2.dp))
+
+            Text(
+                text = "Controls are disabled until the connection returns, " +
+                    "so nothing is changed that the hardware never receives.",
+                style = ElyraTheme.typography.bodySmall,
+                color = ElyraTheme.colors.onWarningContainer
+            )
+        }
+    }
+}
+
 
 @Composable
 private fun ElyraCard(

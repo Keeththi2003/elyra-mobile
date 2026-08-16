@@ -7,6 +7,7 @@ import com.keeththigan.elyra.data.model.Device
 import com.keeththigan.elyra.data.model.DeviceConnectivity
 import com.keeththigan.elyra.data.model.DeviceType
 import com.keeththigan.elyra.data.model.SwitchChannel
+import com.keeththigan.elyra.core.connectivity.NetworkMonitor
 import com.keeththigan.elyra.data.repository.DeviceRepository
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -28,7 +29,9 @@ data class DeviceUiState(
     val isSaved: Boolean = false,
     val isDeleted: Boolean = false,
     /** Set when the safety cutoff forced a device off, for a UI alert. */
-    val safetyAlert: String? = null
+    val safetyAlert: String? = null,
+    /** False when the phone has no usable internet connection. */
+    val isOnline: Boolean = true
 )
 
 
@@ -37,7 +40,8 @@ data class DeviceUiState(
 // ============================================================================
 
 class DeviceViewModel(
-    private val repository: DeviceRepository
+    private val repository: DeviceRepository,
+    private val networkMonitor: NetworkMonitor
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(DeviceUiState())
@@ -48,8 +52,26 @@ class DeviceViewModel(
     private var observeJob: Job? = null
 
     init {
+        observeConnectivity()
         observeDevices()
         startSafetyCutoffWorker()
+    }
+
+
+    // ========================================================================
+    // CONNECTIVITY
+    // ========================================================================
+
+    private fun observeConnectivity() {
+
+        _state.value =
+            _state.value.copy(isOnline = networkMonitor.currentlyOnline())
+
+        viewModelScope.launch {
+            networkMonitor.isOnline.collect { online ->
+                _state.value = _state.value.copy(isOnline = online)
+            }
+        }
     }
 
 
@@ -180,16 +202,25 @@ class DeviceViewModel(
                     emptyList()
                 }
 
+            /*
+             * Only persist the configuration that belongs to this device
+             * type. An iron has no brightness and a light has no stream URI,
+             * so writing those fields would put meaningless data on the
+             * document and make the model impossible to reason about.
+             */
             val device = Device(
                 name = name,
                 type = type,
                 floorId = floorId,
                 roomId = roomId,
                 isOn = isOn,
-                brightness = brightness,
+                brightness = brightness
+                    .takeIf { type == DeviceType.LIGHT },
                 switches = channels,
-                maxOnDurationMinutes = maxOnDurationMinutes,
-                cameraUri = cameraUri,
+                maxOnDurationMinutes = maxOnDurationMinutes
+                    .takeIf { type == DeviceType.SAFETY_APPLIANCE },
+                cameraUri = cameraUri
+                    .takeIf { type == DeviceType.SECURITY_CAMERA },
                 lastOnAt = if (isOn) Timestamp.now() else null
             )
 
@@ -301,8 +332,11 @@ class DeviceViewModel(
 
         val device = findDevice(deviceId) ?: return
 
-        // An unreachable device cannot be operated.
-        if (!device.isControllable) return
+        // An unreachable device cannot be operated, and neither can any
+        // device while the phone itself is offline — Firestore would queue
+        // the write locally and the UI would imply a change that never
+        // reached the hardware.
+        if (!device.isControllable || !_state.value.isOnline) return
 
         val elapsedSeconds =
             if (!isOn) elapsedOnSeconds(device) else 0L
@@ -328,7 +362,7 @@ class DeviceViewModel(
 
         val device = findDevice(deviceId) ?: return
 
-        if (!device.isControllable) return
+        if (!device.isControllable || !_state.value.isOnline) return
 
         val updatedChannels =
             device.switches.map { channel ->
@@ -455,6 +489,13 @@ class DeviceViewModel(
             while (true) {
 
                 delay(SAFETY_CHECK_INTERVAL_MS)
+
+                /*
+                 * Never cut off while offline. The write would only reach the
+                 * local cache, so the app would show the appliance as safely
+                 * off while it is still physically running.
+                 */
+                if (!_state.value.isOnline) continue
 
                 val expired =
                     _state.value.devices.filter { device ->

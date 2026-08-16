@@ -2,10 +2,12 @@ package com.keeththigan.elyra.feature.devices
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import com.keeththigan.elyra.core.connectivity.NetworkMonitor
 import com.keeththigan.elyra.data.repository.DeviceRepository
 
 class DeviceViewModelFactory(
-    private val repository: DeviceRepository
+    private val repository: DeviceRepository,
+    private val networkMonitor: NetworkMonitor
 ) : ViewModelProvider.Factory {
 
     @Suppress("UNCHECKED_CAST")
@@ -14,7 +16,7 @@ class DeviceViewModelFactory(
     ): T {
 
         if (modelClass.isAssignableFrom(DeviceViewModel::class.java)) {
-            return DeviceViewModel(repository) as T
+            return DeviceViewModel(repository, networkMonitor) as T
         }
 
         throw IllegalArgumentException(
