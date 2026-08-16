@@ -86,10 +86,6 @@ fun ProfileScreen(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            // ================================================================
-            // IDENTITY
-            // ================================================================
-
             Column(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally
@@ -151,10 +147,6 @@ fun ProfileScreen(
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            // ================================================================
-            // HOME AT A GLANCE
-            // ================================================================
-
             Text(
                 text = "Your home",
                 style = ElyraTheme.typography.labelLarge,
@@ -191,10 +183,6 @@ fun ProfileScreen(
             }
 
             Spacer(modifier = Modifier.height(28.dp))
-
-            // ================================================================
-            // ACCOUNT DETAILS
-            // ================================================================
 
             Text(
                 text = "Account",
@@ -235,10 +223,6 @@ fun ProfileScreen(
 
             Spacer(modifier = Modifier.height(28.dp))
 
-            // ================================================================
-            // SIGN OUT
-            // ================================================================
-
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -273,7 +257,6 @@ fun ProfileScreen(
         }
     }
 }
-
 
 @Composable
 private fun StatTile(
@@ -318,7 +301,6 @@ private fun StatTile(
     }
 }
 
-
 @Composable
 private fun DetailRow(
     label: String,
@@ -348,7 +330,6 @@ private fun DetailRow(
         )
     }
 }
-
 
 @Composable
 private fun RowDivider() {

@@ -13,11 +13,7 @@ import com.keeththigan.elyra.core.designsystem.ElyraTheme
 import com.keeththigan.elyra.core.designsystem.shape.ElyraShapes
 import com.keeththigan.elyra.core.designsystem.spacing.ElyraSpacing
 
-/**
- * Standard Elyra card.
- *
- * Used for grouped content and interactive surfaces.
- */
+/** Standard surface for grouped content. */
 @Composable
 fun ElyraCard(
     modifier: Modifier = Modifier,

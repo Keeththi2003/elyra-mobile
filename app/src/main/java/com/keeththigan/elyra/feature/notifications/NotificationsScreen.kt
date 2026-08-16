@@ -127,7 +127,6 @@ fun NotificationsScreen(
     }
 }
 
-
 @Composable
 private fun NotificationRow(
     notification: AppNotification,
@@ -223,7 +222,6 @@ private fun NotificationRow(
     }
 }
 
-
 @Composable
 private fun EmptyAlerts() {
 
@@ -274,7 +272,6 @@ private fun EmptyAlerts() {
         )
     }
 }
-
 
 private fun NotificationType.icon(): ImageVector =
     when (this) {

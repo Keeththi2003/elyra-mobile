@@ -49,7 +49,6 @@ import com.keeththigan.elyra.data.model.Device
 import com.keeththigan.elyra.data.model.DeviceStatus
 import com.keeththigan.elyra.data.model.DeviceType
 
-
 @Composable
 fun DevicesScreen(
     deviceViewModel: DeviceViewModel,
@@ -82,10 +81,6 @@ fun DevicesScreen(
             .fillMaxSize()
             .background(ElyraTheme.colors.background)
     ) {
-
-        // ================================================================
-        // HEADER
-        // ================================================================
 
         Row(
             modifier = Modifier
@@ -130,10 +125,6 @@ fun DevicesScreen(
             }
         }
 
-        // ================================================================
-        // FILTERS
-        // ================================================================
-
         if (devices.isNotEmpty()) {
 
             Row(
@@ -155,10 +146,6 @@ fun DevicesScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
         }
-
-        // ================================================================
-        // LIST
-        // ================================================================
 
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
@@ -217,13 +204,11 @@ fun DevicesScreen(
     }
 }
 
-
 private enum class DeviceFilter(val label: String) {
     ALL("All"),
     ON("On"),
     ISSUES("Issues")
 }
-
 
 @Composable
 private fun FilterChip(
@@ -266,7 +251,6 @@ private fun FilterChip(
         )
     }
 }
-
 
 @Composable
 private fun DeviceRow(
@@ -354,7 +338,6 @@ private fun DeviceRow(
     }
 }
 
-
 @Composable
 private fun StatusDot(
     status: DeviceStatus
@@ -374,7 +357,6 @@ private fun StatusDot(
             .background(color)
     )
 }
-
 
 @Composable
 private fun EmptyDevices(
@@ -447,11 +429,6 @@ private fun EmptyDevices(
     }
 }
 
-
-// ============================================================================
-// DISPLAY HELPERS
-// ============================================================================
-
 private fun Device.statusLine(): String {
 
     val typeLabel = type.label()
@@ -469,7 +446,6 @@ private fun Device.statusLine(): String {
     }
 }
 
-
 private fun DeviceType.icon(): ImageVector =
     when (this) {
         DeviceType.LIGHT -> Icons.Outlined.Lightbulb
@@ -478,7 +454,6 @@ private fun DeviceType.icon(): ImageVector =
         DeviceType.SAFETY_APPLIANCE -> Icons.Outlined.Security
         DeviceType.SECURITY_CAMERA -> Icons.Outlined.CameraAlt
     }
-
 
 private fun DeviceType.label(): String =
     when (this) {

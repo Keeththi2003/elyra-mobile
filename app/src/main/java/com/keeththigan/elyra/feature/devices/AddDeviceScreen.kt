@@ -110,10 +110,6 @@ fun AddDeviceScreen(
             )
     ) {
 
-        // ============================================================
-        // TOP BAR
-        // ============================================================
-
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -161,10 +157,6 @@ fun AddDeviceScreen(
             }
         }
 
-        // ============================================================
-        // CONTENT
-        // ============================================================
-
         Column(
             modifier = Modifier
                 .weight(1f)
@@ -179,10 +171,6 @@ fun AddDeviceScreen(
             Spacer(
                 modifier = Modifier.height(12.dp)
             )
-
-            // ========================================================
-            // INTRO
-            // ========================================================
 
             Text(
                 text = "Let's add your device",
@@ -203,10 +191,6 @@ fun AddDeviceScreen(
             Spacer(
                 modifier = Modifier.height(28.dp)
             )
-
-            // ========================================================
-            // NAME
-            // ========================================================
 
             Text(
                 text = "Device name",
@@ -239,10 +223,6 @@ fun AddDeviceScreen(
             Spacer(
                 modifier = Modifier.height(28.dp)
             )
-
-            // ========================================================
-            // DEVICE TYPE
-            // ========================================================
 
             Row(
                 verticalAlignment = Alignment.CenterVertically
@@ -277,10 +257,6 @@ fun AddDeviceScreen(
             Spacer(
                 modifier = Modifier.height(12.dp)
             )
-
-            // ========================================================
-            // DEVICE TYPES
-            // ========================================================
 
             DeviceTypeCard(
                 type = DeviceType.LIGHT,
@@ -337,10 +313,6 @@ fun AddDeviceScreen(
                     selectedType = DeviceType.SECURITY_CAMERA
                 }
             )
-
-            // ========================================================
-            // TYPE-SPECIFIC SETTINGS
-            // ========================================================
 
             if (selectedType != null) {
 
@@ -523,10 +495,6 @@ fun AddDeviceScreen(
                     modifier = Modifier.height(28.dp)
                 )
 
-                // ====================================================
-                // INITIAL STATE
-                // ====================================================
-
                 Text(
                     text = "Initial state",
                     style = ElyraTheme.typography.titleMedium,
@@ -576,10 +544,6 @@ fun AddDeviceScreen(
                 modifier = Modifier.height(24.dp)
             )
         }
-
-        // ============================================================
-        // BOTTOM ACTION
-        // ============================================================
 
         Column(
             modifier = Modifier
@@ -658,11 +622,6 @@ fun AddDeviceScreen(
         }
     }
 }
-
-
-// ============================================================================
-// DEVICE TYPE CARD
-// ============================================================================
 
 @Composable
 private fun DeviceTypeCard(
@@ -844,11 +803,6 @@ private fun DeviceTypeCard(
     }
 }
 
-
-// ============================================================================
-// INFO CARD
-// ============================================================================
-
 @Composable
 private fun DeviceInfoCard(
     icon: ImageVector,
@@ -926,11 +880,6 @@ private fun DeviceInfoCard(
     }
 }
 
-
-// ============================================================================
-// STATE OPTION
-// ============================================================================
-
 @Composable
 private fun StateOption(
     title: String,
@@ -985,11 +934,6 @@ private fun StateOption(
         )
     }
 }
-
-
-// ============================================================================
-// TEXT FIELD
-// ============================================================================
 
 @Composable
 private fun AddDeviceTextField(

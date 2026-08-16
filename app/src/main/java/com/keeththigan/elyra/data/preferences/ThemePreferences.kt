@@ -35,10 +35,6 @@ class ThemePreferences(
             .apply()
     }
 
-    // ------------------------------------------------------------------
-    // NOTIFICATIONS
-    // ------------------------------------------------------------------
-
     fun areNotificationsEnabled(): Boolean =
         prefs.getBoolean(KEY_NOTIFICATIONS, true)
 

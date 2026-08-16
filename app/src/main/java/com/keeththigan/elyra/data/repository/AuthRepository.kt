@@ -21,19 +21,9 @@ class AuthRepository {
     private val usersCollection =
         firestore.collection("users")
 
-
-    // ========================================================================
-    // CURRENT USER
-    // ========================================================================
-
     fun getCurrentUser(): FirebaseUser? {
         return auth.currentUser
     }
-
-
-    // ========================================================================
-    // SIGN UP
-    // ========================================================================
 
     suspend fun signUp(
         name: String,
@@ -42,10 +32,6 @@ class AuthRepository {
     ): Result<User> {
 
         return try {
-
-            // ------------------------------------------------------------
-            // Create Firebase Authentication account
-            // ------------------------------------------------------------
 
             val authResult =
                 auth.createUserWithEmailAndPassword(
@@ -59,19 +45,11 @@ class AuthRepository {
                         Exception("Failed to create user account.")
                     )
 
-            // ------------------------------------------------------------
-            // Create application user
-            // ------------------------------------------------------------
-
             val user = User(
                 id = firebaseUser.uid,
                 name = name.trim(),
                 email = email.trim()
             )
-
-            // ------------------------------------------------------------
-            // Save user profile in Firestore
-            // ------------------------------------------------------------
 
             usersCollection
                 .document(firebaseUser.uid)
@@ -94,21 +72,12 @@ class AuthRepository {
         }
     }
 
-
-    // ========================================================================
-    // SIGN IN
-    // ========================================================================
-
     suspend fun signIn(
         email: String,
         password: String
     ): Result<User> {
 
         return try {
-
-            // ------------------------------------------------------------
-            // Firebase Authentication
-            // ------------------------------------------------------------
 
             val authResult =
                 auth.signInWithEmailAndPassword(
@@ -121,14 +90,6 @@ class AuthRepository {
                     ?: return Result.failure(
                         Exception("Failed to sign in.")
                     )
-
-            // ------------------------------------------------------------
-            // Get application user from Firestore
-            //
-            // Auth already succeeded at this point, so a Firestore read
-            // failure (offline, rules, etc.) must not fail the whole sign-in
-            // and leave the app out of sync with FirebaseAuth's own state.
-            // ------------------------------------------------------------
 
             val user = try {
                 usersCollection
@@ -168,11 +129,6 @@ class AuthRepository {
         }
     }
 
-
-    // ========================================================================
-    // PASSWORD RESET
-    // ========================================================================
-
     suspend fun sendPasswordResetEmail(
         email: String
     ): Result<Unit> {
@@ -191,19 +147,9 @@ class AuthRepository {
         }
     }
 
-
-    // ========================================================================
-    // SIGN OUT
-    // ========================================================================
-
     fun signOut() {
         auth.signOut()
     }
-
-
-    // ========================================================================
-    // GET USER PROFILE
-    // ========================================================================
 
     suspend fun getUserProfile(
         uid: String

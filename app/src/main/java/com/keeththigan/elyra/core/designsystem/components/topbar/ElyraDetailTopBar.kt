@@ -25,11 +25,8 @@ import androidx.compose.ui.unit.dp
 import com.keeththigan.elyra.core.designsystem.ElyraTheme
 
 /**
- * Shared header for pushed screens: back affordance, title, optional
- * subtitle and trailing actions.
- *
- * Every detail screen uses this so titles and back buttons stay in the
- * same place and at the same weight across the app.
+ * Shared header for pushed screens, so titles and back buttons sit in the
+ * same place on every detail screen.
  */
 @Composable
 fun ElyraDetailTopBar(

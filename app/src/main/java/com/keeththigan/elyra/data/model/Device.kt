@@ -15,13 +15,11 @@ data class Device(
     val floorId: String = "",
 
     /**
-     * Power state — this is what the user actually controls.
+     * Power state, the one field the user controls directly.
      *
-     * The explicit @PropertyName is required. Kotlin compiles a Boolean
-     * property named `isOn` to an `isOn()` getter, and Firestore's mapper
-     * strips the `is` prefix when deriving a field name — so it would write
-     * `on` but read back `isOn`, silently deserialising to false and making
-     * every toggle snap back off.
+     * @PropertyName is required: Firestore's mapper strips the `is` prefix
+     * from the generated `isOn()` getter, so it would write `on` but read
+     * back `isOn` and silently deserialise every device to off.
      */
     @get:PropertyName("isOn")
     @set:PropertyName("isOn")
@@ -30,21 +28,18 @@ data class Device(
     /** Link health — reported by the device, never set by the user. */
     val connectivity: DeviceConnectivity = DeviceConnectivity.ONLINE,
 
-    // ---- Light ----------------------------------------------------------
+    // Light only.
     val brightness: Int? = null,
 
-    // ---- Multi-switch ---------------------------------------------------
-    /** Each channel is named and addressed independently. */
+    /** Multi-switch only — each channel is named and addressed independently. */
     val switches: List<SwitchChannel> = emptyList(),
 
-    // ---- Safety appliance -----------------------------------------------
-    /** Maximum permissible active duration before the safety cutoff fires. */
+    /** Safety appliance only — how long it may run before the cutoff fires. */
     val maxOnDurationMinutes: Int? = null,
 
-    // ---- Security camera ------------------------------------------------
+    // Security camera only.
     val cameraUri: String? = null,
 
-    // ---- Scheduling -----------------------------------------------------
     val scheduleEnabled: Boolean = false,
     val scheduleStart: String? = null,
     val scheduleEnd: String? = null,

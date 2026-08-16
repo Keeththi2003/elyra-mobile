@@ -14,10 +14,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-// ============================================================================
-// AUTH STATE
-// ============================================================================
-
 data class AuthState(
     val isLoading: Boolean = false,
     val isAuthenticated: Boolean = false,
@@ -25,11 +21,6 @@ data class AuthState(
     val error: String? = null,
     val message: String? = null
 )
-
-
-// ============================================================================
-// AUTH VIEW MODEL
-// ============================================================================
 
 class AuthViewModel(
     private val repository: AuthRepository
@@ -43,11 +34,6 @@ class AuthViewModel(
 
     val authState: StateFlow<AuthState> =
         _authState.asStateFlow()
-
-
-    // ========================================================================
-    // SIGN UP
-    // ========================================================================
 
     fun signUp(
         name: String,
@@ -119,11 +105,6 @@ class AuthViewModel(
         }
     }
 
-
-    // ========================================================================
-    // SIGN IN
-    // ========================================================================
-
     fun signIn(
         email: String,
         password: String
@@ -178,11 +159,6 @@ class AuthViewModel(
         }
     }
 
-
-    // ========================================================================
-    // PASSWORD RESET
-    // ========================================================================
-
     fun sendPasswordResetEmail(
         email: String
     ) {
@@ -225,11 +201,6 @@ class AuthViewModel(
         }
     }
 
-
-    // ========================================================================
-    // SIGN OUT
-    // ========================================================================
-
     fun signOut() {
 
         repository.signOut()
@@ -240,11 +211,6 @@ class AuthViewModel(
         )
     }
 
-
-    // ========================================================================
-    // CLEAR ERROR
-    // ========================================================================
-
     fun clearError() {
 
         _authState.value =
@@ -253,7 +219,6 @@ class AuthViewModel(
             )
     }
 
-
     fun clearMessage() {
 
         _authState.value = _authState.value.copy(
@@ -261,19 +226,9 @@ class AuthViewModel(
         )
     }
 
-
-    // ========================================================================
-    // CURRENT USER
-    // ========================================================================
-
     fun getCurrentFirebaseUser(): FirebaseUser? {
         return repository.getCurrentUser()
     }
-
-
-    // ========================================================================
-    // LOAD USER PROFILE
-    // ========================================================================
 
     fun loadUserProfile() {
 
@@ -317,11 +272,6 @@ class AuthViewModel(
                 }
         }
     }
-
-
-    // ========================================================================
-    // FIREBASE ERROR MESSAGES
-    // ========================================================================
 
     private fun getFirebaseErrorMessage(
         exception: Throwable

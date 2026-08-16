@@ -19,11 +19,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-
-// ============================================================================
-// DEVICE STATE
-// ============================================================================
-
 data class DeviceUiState(
     val isLoading: Boolean = false,
     val devices: List<Device> = emptyList(),
@@ -36,11 +31,6 @@ data class DeviceUiState(
     /** False when the phone has no usable internet connection. */
     val isOnline: Boolean = true
 )
-
-
-// ============================================================================
-// DEVICE VIEW MODEL
-// ============================================================================
 
 class DeviceViewModel(
     private val repository: DeviceRepository,
@@ -61,11 +51,6 @@ class DeviceViewModel(
         startSafetyCutoffWorker()
     }
 
-
-    // ========================================================================
-    // CONNECTIVITY
-    // ========================================================================
-
     private fun observeConnectivity() {
 
         _state.value =
@@ -77,11 +62,6 @@ class DeviceViewModel(
             }
         }
     }
-
-
-    // ========================================================================
-    // REALTIME OBSERVATION
-    // ========================================================================
 
     private fun observeDevices() {
 
@@ -160,11 +140,6 @@ class DeviceViewModel(
         }
     }
 
-
-    // ========================================================================
-    // CREATE
-    // ========================================================================
-
     fun createDevice(
         name: String,
         type: DeviceType,
@@ -206,12 +181,8 @@ class DeviceViewModel(
                     emptyList()
                 }
 
-            /*
-             * Only persist the configuration that belongs to this device
-             * type. An iron has no brightness and a light has no stream URI,
-             * so writing those fields would put meaningless data on the
-             * document and make the model impossible to reason about.
-             */
+            // Only persist the fields that belong to this device type — an
+            // iron has no brightness, a light has no stream URI.
             val device = Device(
                 name = name,
                 type = type,
@@ -243,11 +214,6 @@ class DeviceViewModel(
                 }
         }
     }
-
-
-    // ========================================================================
-    // UPDATE
-    // ========================================================================
 
     fun updateDevice(
         device: Device,
@@ -281,11 +247,9 @@ class DeviceViewModel(
     }
 
     /**
-     * Applies a control change to local state immediately, then persists it.
-     *
-     * Without the optimistic step the switch stays in its old position until
-     * Firestore acknowledges the write, which reads as the toggle flicking
-     * back off. On failure the previous value is restored and the error shown.
+     * Applies a control change optimistically, then persists it. Without the
+     * local-first step the toggle visibly snaps back until Firestore
+     * acknowledges the write. Reverts to [previous] on failure.
      */
     private fun applyControlChange(
         previous: Device,
@@ -336,10 +300,8 @@ class DeviceViewModel(
 
         val device = findDevice(deviceId) ?: return
 
-        // An unreachable device cannot be operated, and neither can any
-        // device while the phone itself is offline — Firestore would queue
-        // the write locally and the UI would imply a change that never
-        // reached the hardware.
+        // Offline writes only reach the local cache, so the UI would imply a
+        // change that never got to the hardware.
         if (!device.isControllable || !_state.value.isOnline) return
 
         val elapsedSeconds =
@@ -433,11 +395,8 @@ class DeviceViewModel(
     }
 
     /**
-     * Simulates the device/gateway reporting a new link state.
-     *
-     * Real hardware (or the companion simulator) would write this field
-     * directly in Firestore; exposing it here lets the connectivity states
-     * required by the brief be demonstrated without physical devices.
+     * Simulates the gateway reporting a new link state. Real hardware writes
+     * this field directly; exposing it here allows demoing without devices.
      */
     fun setConnectivity(
         deviceId: String,
@@ -473,19 +432,6 @@ class DeviceViewModel(
         )
     }
 
-
-    // ========================================================================
-    // SAFETY CUTOFF
-    //
-    // Watches safety-critical devices and forces them OFF once they exceed
-    // their configured maximum ON duration.
-    //
-    // NOTE: the brief describes this running as a backend listener/worker.
-    // Cloud Functions require the Blaze plan, so this project runs the same
-    // rule as an in-app worker writing the OFF state back to Firestore, where
-    // every other client picks it up through the realtime listeners.
-    // ========================================================================
-
     private fun startSafetyCutoffWorker() {
 
         viewModelScope.launch {
@@ -494,11 +440,8 @@ class DeviceViewModel(
 
                 delay(SAFETY_CHECK_INTERVAL_MS)
 
-                /*
-                 * Never cut off while offline. The write would only reach the
-                 * local cache, so the app would show the appliance as safely
-                 * off while it is still physically running.
-                 */
+                // Never cut off while offline: the app would show the appliance
+                // as safely off while it is still physically running.
                 if (!_state.value.isOnline) continue
 
                 val expired =
@@ -545,11 +488,6 @@ class DeviceViewModel(
         }
     }
 
-
-    // ========================================================================
-    // DELETE
-    // ========================================================================
-
     fun deleteDevice(
         deviceId: String
     ) {
@@ -579,11 +517,6 @@ class DeviceViewModel(
         }
     }
 
-
-    // ========================================================================
-    // HELPERS
-    // ========================================================================
-
     private fun findDevice(
         deviceId: String
     ): Device? =
@@ -598,11 +531,6 @@ class DeviceViewModel(
         val elapsed = Timestamp.now().seconds - startedAt.seconds
         return elapsed.coerceAtLeast(0L)
     }
-
-
-    // ========================================================================
-    // ONE-SHOT SIGNAL CONSUMPTION
-    // ========================================================================
 
     fun consumeSaved() {
         _state.value = _state.value.copy(isSaved = false)
@@ -621,11 +549,7 @@ class DeviceViewModel(
     }
 
     private companion object {
-        /*
-         * Polled once a second so the cutoff lands within ~1s of the limit.
-         * At the previous 10s interval a 1-minute limit could overrun to
-         * 1m10s, which looks broken for a safety feature.
-         */
+        // Polled every second so the cutoff lands within ~1s of the limit.
         const val SAFETY_CHECK_INTERVAL_MS = 1_000L
     }
 }

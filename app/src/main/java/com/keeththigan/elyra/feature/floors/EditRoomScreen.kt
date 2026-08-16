@@ -42,11 +42,6 @@ import com.keeththigan.elyra.data.model.DeviceStatus
 import com.keeththigan.elyra.data.model.DeviceType
 import com.keeththigan.elyra.feature.devices.DeviceViewModel
 
-
-// ============================================================================
-// EDIT ROOM SCREEN
-// ============================================================================
-
 @Composable
 fun EditRoomScreen(
     roomId: String,
@@ -89,15 +84,10 @@ fun EditRoomScreen(
         }
     }
 
-    // ------------------------------------------------------------
-    // Devices currently assigned to this room
-    // ------------------------------------------------------------
-
     val devices =
         deviceState.devices.filter {
             it.roomId == roomId
         }
-
 
     Column(
         modifier = Modifier
@@ -106,10 +96,6 @@ fun EditRoomScreen(
                 ElyraTheme.colors.background
             )
     ) {
-
-        // ================================================================
-        // TOP BAR
-        // ================================================================
 
         Row(
             modifier = Modifier
@@ -160,21 +146,12 @@ fun EditRoomScreen(
             }
         }
 
-
-        // ================================================================
-        // CONTENT
-        // ================================================================
-
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(horizontal = 20.dp),
             verticalArrangement = Arrangement.spacedBy(18.dp)
         ) {
-
-            // =============================================================
-            // ROOM INFORMATION
-            // =============================================================
 
             item {
 
@@ -194,11 +171,6 @@ fun EditRoomScreen(
                     }
                 )
             }
-
-
-            // =============================================================
-            // ROOM ID
-            // =============================================================
 
             item {
 
@@ -269,11 +241,6 @@ fun EditRoomScreen(
                 }
             }
 
-
-            // =============================================================
-            // DEVICES
-            // =============================================================
-
             item {
 
                 SectionTitle(
@@ -310,11 +277,6 @@ fun EditRoomScreen(
                 }
             }
 
-
-            // =============================================================
-            // SAVE
-            // =============================================================
-
             item {
 
                 Spacer(
@@ -342,11 +304,6 @@ fun EditRoomScreen(
                 )
             }
 
-
-            // =============================================================
-            // DELETE ROOM
-            // =============================================================
-
             item {
 
                 DeleteRoomButton(
@@ -362,11 +319,6 @@ fun EditRoomScreen(
         }
     }
 }
-
-
-// ============================================================================
-// SECTION TITLE
-// ============================================================================
 
 @Composable
 private fun SectionTitle(
@@ -393,11 +345,6 @@ private fun SectionTitle(
         )
     }
 }
-
-
-// ============================================================================
-// ROOM NAME FIELD
-// ============================================================================
 
 @Composable
 private fun RoomNameField(
@@ -445,11 +392,6 @@ private fun RoomNameField(
     )
 }
 
-
-// ============================================================================
-// DEVICE CARD
-// ============================================================================
-
 @Composable
 private fun RoomDeviceCard(
     device: Device,
@@ -473,10 +415,6 @@ private fun RoomDeviceCard(
             ),
         verticalAlignment = Alignment.CenterVertically
     ) {
-
-        // ------------------------------------------------------------
-        // ICON
-        // ------------------------------------------------------------
 
         Box(
             modifier = Modifier
@@ -510,11 +448,6 @@ private fun RoomDeviceCard(
         Spacer(
             modifier = Modifier.size(12.dp)
         )
-
-
-        // ------------------------------------------------------------
-        // DEVICE INFORMATION
-        // ------------------------------------------------------------
 
         Column(
             modifier = Modifier.weight(1f)
@@ -581,11 +514,6 @@ private fun RoomDeviceCard(
             }
         }
 
-
-        // ------------------------------------------------------------
-        // REMOVE DEVICE
-        // ------------------------------------------------------------
-
         IconButton(
             onClick = onRemove
         ) {
@@ -598,11 +526,6 @@ private fun RoomDeviceCard(
         }
     }
 }
-
-
-// ============================================================================
-// EMPTY DEVICES
-// ============================================================================
 
 @Composable
 private fun EmptyDevicesCard() {
@@ -649,11 +572,6 @@ private fun EmptyDevicesCard() {
     }
 }
 
-
-// ============================================================================
-// SAVE BUTTON
-// ============================================================================
-
 @Composable
 private fun SaveButton(
     enabled: Boolean,
@@ -693,11 +611,6 @@ private fun SaveButton(
         )
     }
 }
-
-
-// ============================================================================
-// DELETE ROOM
-// ============================================================================
 
 @Composable
 private fun DeleteRoomButton(
@@ -740,11 +653,6 @@ private fun DeleteRoomButton(
         )
     }
 }
-
-
-// ============================================================================
-// DISPLAY HELPERS
-// ============================================================================
 
 private fun DeviceType.editRoomDisplayName(): String {
 

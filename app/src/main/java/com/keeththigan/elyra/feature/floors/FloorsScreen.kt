@@ -45,11 +45,6 @@ import com.keeththigan.elyra.core.designsystem.ElyraTheme
 import com.keeththigan.elyra.data.model.DeviceStatus
 import com.keeththigan.elyra.feature.devices.DeviceViewModel
 
-
-// ============================================================================
-// FLOOR MODEL
-// ============================================================================
-
 private data class ElyraFloor(
     val id: String,
     val name: String,
@@ -57,11 +52,6 @@ private data class ElyraFloor(
     val deviceCount: Int,
     val activeDeviceCount: Int
 )
-
-
-// ============================================================================
-// FLOORS SCREEN
-// ============================================================================
 
 @Composable
 fun FloorsScreen(
@@ -132,10 +122,6 @@ fun FloorsScreen(
             )
     ) {
 
-        // ====================================================================
-        // HEADER
-        // ====================================================================
-
         Spacer(
             modifier = Modifier.height(18.dp)
         )
@@ -166,11 +152,6 @@ fun FloorsScreen(
                 )
             }
 
-
-            // ================================================================
-            // ADD FLOOR
-            // ================================================================
-
             IconButton(
                 onClick = onAddFloor,
                 modifier = Modifier
@@ -193,11 +174,6 @@ fun FloorsScreen(
             modifier = Modifier.height(20.dp)
         )
 
-
-        // ====================================================================
-        // SEARCH
-        // ====================================================================
-
         FloorSearchField(
             value = searchQuery,
             onValueChange = {
@@ -209,11 +185,6 @@ fun FloorsScreen(
             modifier = Modifier.height(22.dp)
         )
 
-
-        // ====================================================================
-        // SECTION TITLE
-        // ====================================================================
-
         Text(
             text = "Your floors",
             style = ElyraTheme.typography.titleMedium,
@@ -223,11 +194,6 @@ fun FloorsScreen(
         Spacer(
             modifier = Modifier.height(10.dp)
         )
-
-
-        // ====================================================================
-        // FLOOR LIST
-        // ====================================================================
 
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
@@ -268,11 +234,6 @@ fun FloorsScreen(
                 )
             }
 
-
-            // ================================================================
-            // EMPTY STATE
-            // ================================================================
-
             if (filteredFloors.isEmpty()) {
 
                 item {
@@ -280,7 +241,6 @@ fun FloorsScreen(
                     EmptyFloorsState()
                 }
             }
-
 
             item {
 
@@ -291,11 +251,6 @@ fun FloorsScreen(
         }
     }
 }
-
-
-// ============================================================================
-// SEARCH FIELD
-// ============================================================================
 
 @Composable
 private fun FloorSearchField(
@@ -360,11 +315,6 @@ private fun FloorSearchField(
     }
 }
 
-
-// ============================================================================
-// FLOOR CARD
-// ============================================================================
-
 @Composable
 private fun FloorCard(
     floor: ElyraFloor,
@@ -391,10 +341,6 @@ private fun FloorCard(
         verticalAlignment = Alignment.CenterVertically
     ) {
 
-        // ====================================================================
-        // FLOOR ICON
-        // ====================================================================
-
         Box(
             modifier = Modifier
                 .size(54.dp)
@@ -418,11 +364,6 @@ private fun FloorCard(
         Spacer(
             modifier = Modifier.size(14.dp)
         )
-
-
-        // ====================================================================
-        // FLOOR INFORMATION
-        // ====================================================================
 
         Column(
             modifier = Modifier.weight(1f)
@@ -448,11 +389,6 @@ private fun FloorCard(
             Spacer(
                 modifier = Modifier.height(8.dp)
             )
-
-
-            // ================================================================
-            // ACTIVE DEVICE STATUS
-            // ================================================================
 
             Row(
                 verticalAlignment = Alignment.CenterVertically
@@ -480,14 +416,6 @@ private fun FloorCard(
             }
         }
 
-
-        
-
-
-        // ====================================================================
-        // OPEN
-        // ====================================================================
-
         Icon(
             imageVector = Icons.Outlined.ArrowForwardIos,
             contentDescription = "Open ${floor.name}",
@@ -496,11 +424,6 @@ private fun FloorCard(
         )
     }
 }
-
-
-// ============================================================================
-// EMPTY STATE
-// ============================================================================
 
 @Composable
 private fun EmptyFloorsState() {

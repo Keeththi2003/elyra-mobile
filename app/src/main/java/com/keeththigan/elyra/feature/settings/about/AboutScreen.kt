@@ -47,10 +47,6 @@ fun AboutScreen(
             modifier = Modifier.height(16.dp)
         )
 
-        // =========================================================
-        // TOP BAR
-        // =========================================================
-
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
@@ -92,10 +88,6 @@ fun AboutScreen(
         Spacer(
             modifier = Modifier.height(40.dp)
         )
-
-        // =========================================================
-        // BRAND
-        // =========================================================
 
         Column(
             modifier = Modifier.fillMaxWidth(),
@@ -157,16 +149,10 @@ fun AboutScreen(
             modifier = Modifier.height(40.dp)
         )
 
-        // =========================================================
-        // INFORMATION
-        // =========================================================
-
         AboutItem(
             icon = Icons.Outlined.Description,
             title = "Terms of Service",
-            onClick = {
-                // Later
-            }
+            onClick = { /* TODO: open the hosted document */ }
         )
 
         AboutDivider()
@@ -174,9 +160,7 @@ fun AboutScreen(
         AboutItem(
             icon = Icons.Outlined.PrivacyTip,
             title = "Privacy Policy",
-            onClick = {
-                // Later
-            }
+            onClick = { /* TODO: open the hosted document */ }
         )
 
         AboutDivider()
@@ -184,17 +168,10 @@ fun AboutScreen(
         AboutItem(
             icon = Icons.Outlined.Security,
             title = "Open source licenses",
-            onClick = {
-                // Later
-            }
+            onClick = { /* TODO: open the hosted document */ }
         )
     }
 }
-
-
-// ================================================================
-// ABOUT ITEM
-// ================================================================
 
 @Composable
 private fun AboutItem(
@@ -259,11 +236,6 @@ private fun AboutItem(
         )
     }
 }
-
-
-// ================================================================
-// DIVIDER
-// ================================================================
 
 @Composable
 private fun AboutDivider() {

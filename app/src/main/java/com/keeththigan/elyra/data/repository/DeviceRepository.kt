@@ -19,11 +19,6 @@ class DeviceRepository {
     private val devicesCollection =
         firestore.collection("devices")
 
-
-    // ========================================================================
-    // CREATE
-    // ========================================================================
-
     suspend fun createDevice(
         device: Device
     ): Result<Device> {
@@ -57,15 +52,6 @@ class DeviceRepository {
         }
     }
 
-
-    // ========================================================================
-    // OBSERVE (realtime)
-    //
-    // Emits on every change to this user's devices, whether the write came
-    // from this app or from anywhere else (console, simulator, another
-    // device), so the UI stays in sync without manual refreshes.
-    // ========================================================================
-
     fun observeDevices(): Flow<Result<List<Device>>> = callbackFlow {
 
         val uid = auth.currentUser?.uid
@@ -98,11 +84,6 @@ class DeviceRepository {
 
         awaitClose { registration.remove() }
     }
-
-
-    // ========================================================================
-    // READ
-    // ========================================================================
 
     suspend fun getDevice(
         deviceId: String
@@ -171,18 +152,10 @@ class DeviceRepository {
         }
     }
 
-
-    // ========================================================================
-    // UPDATE
-    // ========================================================================
-
     /**
-     * Writes the device straight through — no read-before-write.
-     *
-     * Ownership is enforced by the Firestore security rules (which check both
-     * the existing and incoming userId), so a client-side pre-fetch adds no
-     * safety, only a full network round trip on every toggle. createdAt is
-     * carried on the object we already hold, so there is nothing to re-read.
+     * Writes straight through without a read-before-write: ownership is
+     * enforced by the Firestore security rules, so a pre-fetch would only add
+     * a round trip to every toggle.
      */
     suspend fun updateDevice(
         device: Device
@@ -214,11 +187,6 @@ class DeviceRepository {
             Result.failure(e)
         }
     }
-
-
-    // ========================================================================
-    // DELETE
-    // ========================================================================
 
     suspend fun deleteDevice(
         deviceId: String
@@ -260,11 +228,6 @@ class DeviceRepository {
             Result.failure(e)
         }
     }
-
-
-    // ========================================================================
-    // CASCADE HELPERS (used by FloorRepository / RoomRepository)
-    // ========================================================================
 
     suspend fun unassignDevicesFromRoom(
         roomId: String

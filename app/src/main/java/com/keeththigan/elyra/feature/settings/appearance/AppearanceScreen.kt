@@ -58,10 +58,6 @@ fun AppearanceScreen(
             modifier = Modifier.height(16.dp)
         )
 
-        // =========================================================
-        // TOP BAR
-        // =========================================================
-
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
@@ -103,10 +99,6 @@ fun AppearanceScreen(
             modifier = Modifier.height(32.dp)
         )
 
-        // =========================================================
-        // HEADER
-        // =========================================================
-
         Text(
             text = "Choose your look",
             style = ElyraTheme.typography.headlineMedium,
@@ -126,10 +118,6 @@ fun AppearanceScreen(
         Spacer(
             modifier = Modifier.height(28.dp)
         )
-
-        // =========================================================
-        // OPTIONS
-        // =========================================================
 
         AppearanceOptionCard(
             icon = Icons.Outlined.SettingsBrightness,
@@ -176,11 +164,6 @@ fun AppearanceScreen(
         )
     }
 }
-
-
-// ================================================================
-// APPEARANCE OPTION
-// ================================================================
 
 @Composable
 private fun AppearanceOptionCard(

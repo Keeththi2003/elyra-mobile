@@ -56,10 +56,6 @@ fun SignUpScreen(
     showBackButton: Boolean = true
 ) {
 
-    // ========================================================
-    // FORM STATE
-    // ========================================================
-
     var name by remember {
         mutableStateOf("")
     }
@@ -84,15 +80,7 @@ fun SignUpScreen(
         mutableStateOf(false)
     }
 
-    // ========================================================
-    // AUTH STATE
-    // ========================================================
-
     val authState by authViewModel.authState.collectAsStateWithLifecycle()
-
-    // ========================================================
-    // PASSWORD VALIDATION
-    // ========================================================
 
     val passwordsMatch =
         password == confirmPassword
@@ -103,10 +91,6 @@ fun SignUpScreen(
         password.isNotBlank() &&
         confirmPassword.isNotBlank() &&
         passwordsMatch
-
-    // ========================================================
-    // AUTH SUCCESS
-    // ========================================================
 
     LaunchedEffect(authState.isAuthenticated) {
 
@@ -124,10 +108,6 @@ fun SignUpScreen(
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 24.dp)
     ) {
-
-        // ========================================================
-        // TOP BAR
-        // ========================================================
 
         Box(
             modifier = Modifier
@@ -163,10 +143,6 @@ fun SignUpScreen(
             modifier = Modifier.height(30.dp)
         )
 
-        // ========================================================
-        // HEADER
-        // ========================================================
-
         Text(
             text = "Create your account",
             style = ElyraTheme.typography.displaySmall,
@@ -186,10 +162,6 @@ fun SignUpScreen(
         Spacer(
             modifier = Modifier.height(36.dp)
         )
-
-        // ========================================================
-        // FORM
-        // ========================================================
 
         Column(
             modifier = Modifier.fillMaxWidth(),
@@ -267,10 +239,6 @@ fun SignUpScreen(
             )
         }
 
-        // ========================================================
-        // PASSWORD VALIDATION
-        // ========================================================
-
         if (
             confirmPassword.isNotEmpty() &&
             !passwordsMatch
@@ -286,10 +254,6 @@ fun SignUpScreen(
                 color = ElyraTheme.colors.error
             )
         }
-
-        // ========================================================
-        // FIREBASE ERROR
-        // ========================================================
 
         authState.error?.let { error ->
 
@@ -308,10 +272,6 @@ fun SignUpScreen(
             modifier = Modifier.height(28.dp)
         )
 
-        // ========================================================
-        // CREATE ACCOUNT
-        // ========================================================
-
         ElyraCreateAccountButton(
             enabled = canCreateAccount && !authState.isLoading,
             isLoading = authState.isLoading,
@@ -329,10 +289,6 @@ fun SignUpScreen(
             modifier = Modifier.height(18.dp)
         )
 
-        // ========================================================
-        // TERMS
-        // ========================================================
-
         Text(
             text = "By creating an account, you agree to our Terms of Service and Privacy Policy.",
             modifier = Modifier.fillMaxWidth(),
@@ -343,10 +299,6 @@ fun SignUpScreen(
         Spacer(
             modifier = Modifier.height(32.dp)
         )
-
-        // ========================================================
-        // SIGN IN
-        // ========================================================
 
         Row(
             modifier = Modifier
@@ -378,11 +330,6 @@ fun SignUpScreen(
         }
     }
 }
-
-
-// =================================================================
-// SIGN UP FIELD
-// =================================================================
 
 @Composable
 private fun ElyraSignUpField(
@@ -510,11 +457,6 @@ private fun ElyraSignUpField(
         )
     }
 }
-
-
-// =================================================================
-// CREATE ACCOUNT BUTTON
-// =================================================================
 
 @Composable
 private fun ElyraCreateAccountButton(

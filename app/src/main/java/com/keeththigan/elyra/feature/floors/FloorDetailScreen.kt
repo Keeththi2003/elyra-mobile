@@ -45,21 +45,12 @@ import com.keeththigan.elyra.data.model.DeviceStatus
 import com.keeththigan.elyra.feature.devices.DeviceViewModel
 import com.keeththigan.elyra.feature.floors.components.FloorPlanGrid
 
-// ============================================================================
-// ROOM MODEL
-// ============================================================================
-
 private data class ElyraRoom(
     val id: String,
     val name: String,
     val deviceCount: Int,
     val activeDeviceCount: Int
 )
-
-
-// ============================================================================
-// FLOOR DETAIL SCREEN
-// ============================================================================
 
 @Composable
 fun FloorDetailScreen(
@@ -123,10 +114,6 @@ fun FloorDetailScreen(
             )
     ) {
 
-        // ====================================================================
-        // TOP BAR
-        // ====================================================================
-
         ElyraDetailTopBar(
             title = floorName.ifBlank { "Floor" },
             subtitle = "Floor overview",
@@ -162,11 +149,6 @@ fun FloorDetailScreen(
             )
         }
 
-
-        // ====================================================================
-        // FLOOR SUMMARY
-        // ====================================================================
-
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(10.dp)
@@ -194,14 +176,6 @@ fun FloorDetailScreen(
         Spacer(
             modifier = Modifier.height(28.dp)
         )
-
-
-        // ====================================================================
-        // FLOOR PLAN
-        //
-        // The plan is the only room listing on this screen — a separate list
-        // below it showed exactly the same rooms twice.
-        // ====================================================================
 
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -263,11 +237,6 @@ fun FloorDetailScreen(
     }
 }
 
-
-// ============================================================================
-// DELETE FLOOR
-// ============================================================================
-
 @Composable
 private fun DeleteFloorButton(
     onClick: () -> Unit
@@ -313,11 +282,6 @@ private fun DeleteFloorButton(
     }
 }
 
-
-// ============================================================================
-// FLOOR STAT CARD
-// ============================================================================
-
 @Composable
 private fun FloorStatCard(
     value: String,
@@ -358,11 +322,6 @@ private fun FloorStatCard(
     }
 }
 
-
-// ============================================================================
-// ROOM CARD
-// ============================================================================
-
 @Composable
 private fun RoomCard(
     room: ElyraRoom,
@@ -388,10 +347,6 @@ private fun RoomCard(
         verticalAlignment = Alignment.CenterVertically
     ) {
 
-        // ====================================================================
-        // ROOM ICON
-        // ====================================================================
-
         Box(
             modifier = Modifier
                 .size(52.dp)
@@ -415,11 +370,6 @@ private fun RoomCard(
         Spacer(
             modifier = Modifier.size(14.dp)
         )
-
-
-        // ====================================================================
-        // ROOM INFO
-        // ====================================================================
 
         Column(
             modifier = Modifier.weight(1f)
@@ -469,11 +419,6 @@ private fun RoomCard(
                 )
             }
         }
-
-
-        // ====================================================================
-        // ARROW
-        // ====================================================================
 
         Icon(
             imageVector = Icons.Outlined.ArrowForwardIos,

@@ -51,11 +51,6 @@ import com.keeththigan.elyra.feature.devices.DeviceViewModel
 import com.keeththigan.elyra.feature.floors.FloorViewModel
 import com.keeththigan.elyra.feature.floors.RoomViewModel
 
-
-// ============================================================================
-// HOME SCREEN
-// ============================================================================
-
 @Composable
 fun HomeScreen(
     deviceViewModel: DeviceViewModel,
@@ -99,10 +94,6 @@ fun HomeScreen(
             .fillMaxSize()
             .background(ElyraTheme.colors.background)
     ) {
-
-        // ====================================================================
-        // GREETING
-        // ====================================================================
 
         Row(
             modifier = Modifier
@@ -213,10 +204,6 @@ fun HomeScreen(
                 }
             }
 
-            // ================================================================
-            // AT-A-GLANCE SUMMARY
-            // ================================================================
-
             item {
 
                 Row(
@@ -244,10 +231,6 @@ fun HomeScreen(
                     )
                 }
             }
-
-            // ================================================================
-            // QUICK CONTROLS
-            // ================================================================
 
             item {
 
@@ -312,10 +295,6 @@ fun HomeScreen(
                 }
             }
 
-            // ================================================================
-            // FLOORS
-            // ================================================================
-
             item {
 
                 SectionHeader(
@@ -366,11 +345,6 @@ fun HomeScreen(
     }
 }
 
-
-// ============================================================================
-// SUMMARY TILE
-// ============================================================================
-
 @Composable
 private fun SummaryTile(
     value: String,
@@ -411,11 +385,6 @@ private fun SummaryTile(
         )
     }
 }
-
-
-// ============================================================================
-// SECTION HEADER
-// ============================================================================
 
 @Composable
 private fun SectionHeader(
@@ -478,11 +447,6 @@ private fun SectionHeader(
         }
     }
 }
-
-
-// ============================================================================
-// QUICK CONTROL ROW
-// ============================================================================
 
 @Composable
 private fun QuickControlTile(
@@ -568,11 +532,6 @@ private fun QuickControlTile(
     }
 }
 
-
-// ============================================================================
-// FLOOR ROW
-// ============================================================================
-
 @Composable
 private fun FloorRow(
     name: String,
@@ -640,11 +599,6 @@ private fun FloorRow(
         )
     }
 }
-
-
-// ============================================================================
-// EMPTY STATE
-// ============================================================================
 
 @Composable
 private fun EmptyState(
@@ -720,11 +674,6 @@ private fun EmptyState(
     }
 }
 
-
-// ============================================================================
-// HELPERS
-// ============================================================================
-
 private fun greeting(): String {
 
     val hour =
@@ -739,7 +688,6 @@ private fun greeting(): String {
     }
 }
 
-
 private fun DeviceStatus.homeLabel(): String =
     when (this) {
         DeviceStatus.ON -> "On"
@@ -747,7 +695,6 @@ private fun DeviceStatus.homeLabel(): String =
         DeviceStatus.ERROR -> "Error reported"
         DeviceStatus.DISCONNECTED -> "Disconnected"
     }
-
 
 private fun homeDeviceIcon(
     type: DeviceType

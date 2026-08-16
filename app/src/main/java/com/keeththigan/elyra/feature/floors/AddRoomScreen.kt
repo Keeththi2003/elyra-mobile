@@ -76,10 +76,6 @@ fun AddRoomScreen(
             )
     ) {
 
-        // ================================================================
-        // TOP BAR
-        // ================================================================
-
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -127,10 +123,6 @@ fun AddRoomScreen(
             }
         }
 
-        // ================================================================
-        // CONTENT
-        // ================================================================
-
         Column(
             modifier = Modifier
                 .weight(1f)
@@ -140,10 +132,6 @@ fun AddRoomScreen(
             Spacer(
                 modifier = Modifier.height(18.dp)
             )
-
-            // ============================================================
-            // ROOM PREVIEW
-            // ============================================================
 
             Box(
                 modifier = Modifier
@@ -220,10 +208,6 @@ fun AddRoomScreen(
                 modifier = Modifier.height(28.dp)
             )
 
-            // ============================================================
-            // ROOM INFORMATION
-            // ============================================================
-
             Text(
                 text = "Room information",
                 style = ElyraTheme.typography.titleMedium,
@@ -243,10 +227,6 @@ fun AddRoomScreen(
             Spacer(
                 modifier = Modifier.height(14.dp)
             )
-
-            // ============================================================
-            // ROOM NAME
-            // ============================================================
 
             Text(
                 text = "Room name",
@@ -270,10 +250,6 @@ fun AddRoomScreen(
                 modifier = Modifier.height(18.dp)
             )
 
-            // ============================================================
-            // DESCRIPTION
-            // ============================================================
-
             Text(
                 text = "Description",
                 style = ElyraTheme.typography.labelLarge,
@@ -295,10 +271,6 @@ fun AddRoomScreen(
             Spacer(
                 modifier = Modifier.height(22.dp)
             )
-
-            // ============================================================
-            // INFO CARD
-            // ============================================================
 
             Row(
                 modifier = Modifier
@@ -354,10 +326,6 @@ fun AddRoomScreen(
             }
         }
 
-        // ================================================================
-        // ERROR
-        // ================================================================
-
         if (state.error != null) {
 
             Text(
@@ -367,10 +335,6 @@ fun AddRoomScreen(
                 color = ElyraTheme.colors.error
             )
         }
-
-        // ================================================================
-        // CREATE BUTTON
-        // ================================================================
 
         Box(
             modifier = Modifier
@@ -432,11 +396,6 @@ fun AddRoomScreen(
         }
     }
 }
-
-
-// ============================================================================
-// TEXT FIELD
-// ============================================================================
 
 @Composable
 private fun RoomTextField(

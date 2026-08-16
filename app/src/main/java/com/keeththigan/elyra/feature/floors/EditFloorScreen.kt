@@ -39,20 +39,11 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.keeththigan.elyra.core.designsystem.ElyraTheme
 import com.keeththigan.elyra.feature.devices.DeviceViewModel
 
-// ============================================================================
-// TEMPORARY ROOM MODEL
-// ============================================================================
-
 private data class EditRoomUi(
     val id: String,
     val name: String,
     val deviceCount: Int
 )
-
-
-// ============================================================================
-// EDIT FLOOR SCREEN
-// ============================================================================
 
 @Composable
 fun EditFloorScreen(
@@ -113,10 +104,6 @@ fun EditFloorScreen(
             )
     ) {
 
-        // ====================================================================
-        // TOP BAR
-        // ====================================================================
-
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -166,11 +153,6 @@ fun EditFloorScreen(
             }
         }
 
-
-        // ====================================================================
-        // CONTENT
-        // ====================================================================
-
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
@@ -179,10 +161,6 @@ fun EditFloorScreen(
                 ),
             verticalArrangement = Arrangement.spacedBy(18.dp)
         ) {
-
-            // =================================================================
-            // FLOOR INFORMATION
-            // =================================================================
 
             item {
 
@@ -202,11 +180,6 @@ fun EditFloorScreen(
                     }
                 )
             }
-
-
-            // =================================================================
-            // ROOMS
-            // =================================================================
 
             item {
 
@@ -247,11 +220,6 @@ fun EditFloorScreen(
                     onClick = onAddRoom
                 )
             }
-
-
-            // =================================================================
-            // SAVE
-            // =================================================================
 
             if (floorState.error != null) {
 
@@ -316,11 +284,6 @@ fun EditFloorScreen(
     }
 }
 
-
-// ============================================================================
-// SECTION HEADER
-// ============================================================================
-
 @Composable
 private fun SectionHeader(
     title: String,
@@ -346,11 +309,6 @@ private fun SectionHeader(
         )
     }
 }
-
-
-// ============================================================================
-// FLOOR NAME FIELD
-// ============================================================================
 
 @Composable
 private fun FloorNameField(
@@ -399,11 +357,6 @@ private fun FloorNameField(
         }
     )
 }
-
-
-// ============================================================================
-// ROOM CARD
-// ============================================================================
 
 @Composable
 private fun EditRoomCard(
@@ -495,11 +448,6 @@ private fun EditRoomCard(
         )
     }
 }
-
-
-// ============================================================================
-// ADD ROOM BUTTON
-// ============================================================================
 
 @Composable
 private fun AddRoomButton(

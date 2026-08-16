@@ -66,10 +66,6 @@ import com.keeththigan.elyra.feature.floors.FloorViewModel
 import com.keeththigan.elyra.feature.floors.RoomViewModel
 import kotlinx.coroutines.delay
 
-// ============================================================================
-// DEVICE DETAIL SCREEN
-// ============================================================================
-
 @Composable
 fun DeviceDetailScreen(
     deviceId: String,
@@ -139,10 +135,6 @@ fun DeviceDetailScreen(
             .background(ElyraTheme.colors.background)
     ) {
 
-        // ====================================================================
-        // TOP BAR
-        // ====================================================================
-
         ElyraDetailTopBar(
             title = device.name,
             subtitle = location,
@@ -166,10 +158,6 @@ fun DeviceDetailScreen(
                 .padding(horizontal = 24.dp)
         ) {
 
-            // ================================================================
-            // HERO
-            // ================================================================
-
             DeviceHero(
                 device = device,
                 location = location,
@@ -177,10 +165,6 @@ fun DeviceDetailScreen(
             )
 
             Spacer(modifier = Modifier.height(28.dp))
-
-            // ================================================================
-            // POWER
-            // ================================================================
 
             if (!deviceState.isOnline) {
 
@@ -198,10 +182,6 @@ fun DeviceDetailScreen(
             )
 
             Spacer(modifier = Modifier.height(14.dp))
-
-            // ================================================================
-            // TYPE-SPECIFIC CONTROLS
-            // ================================================================
 
             when (device.type) {
 
@@ -271,10 +251,6 @@ fun DeviceDetailScreen(
 
             Spacer(modifier = Modifier.height(14.dp))
 
-            // ================================================================
-            // CONNECTIVITY
-            // ================================================================
-
             ConnectivityCard(device = device)
 
             Spacer(modifier = Modifier.height(28.dp))
@@ -285,11 +261,6 @@ fun DeviceDetailScreen(
         }
     }
 }
-
-
-// ============================================================================
-// HERO
-// ============================================================================
 
 @Composable
 private fun DeviceHero(
@@ -356,11 +327,6 @@ private fun DeviceHero(
     }
 }
 
-
-// ============================================================================
-// POWER
-// ============================================================================
-
 @Composable
 private fun PowerCard(
     isOn: Boolean,
@@ -414,11 +380,6 @@ private fun PowerCard(
     }
 }
 
-
-// ============================================================================
-// LIGHT — BRIGHTNESS
-// ============================================================================
-
 @Composable
 private fun BrightnessCard(
     device: Device,
@@ -459,11 +420,6 @@ private fun BrightnessCard(
         )
     }
 }
-
-
-// ============================================================================
-// SCHEDULE
-// ============================================================================
 
 @Composable
 private fun ScheduleCard(
@@ -555,7 +511,6 @@ private fun ScheduleCard(
     }
 }
 
-
 @Composable
 private fun TimeField(
     label: String,
@@ -603,11 +558,6 @@ private fun TimeField(
         )
     }
 }
-
-
-// ============================================================================
-// MULTI-SWITCH — individually addressable channels
-// ============================================================================
 
 @Composable
 private fun MultiSwitchCard(
@@ -715,7 +665,6 @@ private fun MultiSwitchCard(
     }
 }
 
-
 @Composable
 private fun ChannelRenameRow(
     initialName: String,
@@ -772,11 +721,6 @@ private fun ChannelRenameRow(
         )
     }
 }
-
-
-// ============================================================================
-// SAFETY APPLIANCE — max ON duration + live countdown
-// ============================================================================
 
 @Composable
 private fun SafetyCard(
@@ -886,7 +830,6 @@ private fun SafetyCard(
     }
 }
 
-
 /**
  * Free-text minutes entry — a stepper made setting anything other than a
  * multiple of five tedious.
@@ -937,11 +880,6 @@ private fun DurationField(
         )
     }
 }
-
-
-// ============================================================================
-// CAMERA
-// ============================================================================
 
 @Composable
 private fun CameraCard(
@@ -1019,11 +957,6 @@ private fun CameraCard(
         }
     }
 }
-
-
-// ============================================================================
-// USAGE REPORTING
-// ============================================================================
 
 @Composable
 private fun UsageCard(
@@ -1108,7 +1041,6 @@ private fun UsageCard(
     }
 }
 
-
 @Composable
 private fun UsageStat(
     label: String,
@@ -1133,11 +1065,6 @@ private fun UsageStat(
         )
     }
 }
-
-
-// ============================================================================
-// STATUS
-// ============================================================================
 
 @Composable
 private fun ConnectivityCard(
@@ -1196,11 +1123,6 @@ private fun ConnectivityCard(
     }
 }
 
-
-// ============================================================================
-// SHARED PIECES
-// ============================================================================
-
 @Composable
 private fun OfflineBanner() {
 
@@ -1242,7 +1164,6 @@ private fun OfflineBanner() {
     }
 }
 
-
 @Composable
 private fun ElyraCard(
     content: @Composable () -> Unit
@@ -1263,7 +1184,6 @@ private fun ElyraCard(
         content()
     }
 }
-
 
 @Composable
 private fun CardHeader(
@@ -1289,7 +1209,6 @@ private fun CardHeader(
         )
     }
 }
-
 
 @Composable
 private fun RemoveDeviceButton(
@@ -1327,11 +1246,6 @@ private fun RemoveDeviceButton(
     }
 }
 
-
-// ============================================================================
-// FORMATTING
-// ============================================================================
-
 private fun formatDuration(
     seconds: Long
 ): String {
@@ -1347,7 +1261,6 @@ private fun formatDuration(
     }
 }
 
-
 private fun DeviceType.icon(): ImageVector =
     when (this) {
         DeviceType.LIGHT -> Icons.Outlined.Lightbulb
@@ -1356,7 +1269,6 @@ private fun DeviceType.icon(): ImageVector =
         DeviceType.SAFETY_APPLIANCE -> Icons.Outlined.Security
         DeviceType.SECURITY_CAMERA -> Icons.Outlined.CameraAlt
     }
-
 
 private fun DeviceType.label(): String =
     when (this) {
@@ -1367,7 +1279,6 @@ private fun DeviceType.label(): String =
         DeviceType.SECURITY_CAMERA -> "Security camera"
     }
 
-
 private fun DeviceStatus.label(): String =
     when (this) {
         DeviceStatus.ON -> "Currently on"
@@ -1375,7 +1286,6 @@ private fun DeviceStatus.label(): String =
         DeviceStatus.ERROR -> "Reporting an error"
         DeviceStatus.DISCONNECTED -> "Disconnected"
     }
-
 
 private fun DeviceConnectivity.label(): String =
     when (this) {
