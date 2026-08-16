@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -17,36 +16,46 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.MeetingRoom
+import androidx.compose.material.icons.outlined.Add
+import androidx.compose.material.icons.outlined.CameraAlt
+import androidx.compose.material.icons.outlined.ChevronRight
+import androidx.compose.material.icons.outlined.Lightbulb
+import androidx.compose.material.icons.outlined.Power
+import androidx.compose.material.icons.outlined.Security
+import androidx.compose.material.icons.outlined.Tune
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import com.keeththigan.elyra.core.designsystem.ElyraTheme
 import com.keeththigan.elyra.data.model.Device
 import com.keeththigan.elyra.data.model.DeviceStatus
+import com.keeththigan.elyra.data.model.DeviceType
 import com.keeththigan.elyra.data.model.Room
 
 /**
- * Abstract grid mapping of a floor.
+ * Abstract floor plan.
  *
- * Rooms are laid out on a simple two-column grid rather than a true
- * architectural plan: it gives the spatial overview the brief asks for while
- * staying readable on a phone and needing no per-home floor-plan asset. Each
- * cell reflects live device state, so the plan doubles as a status overview.
+ * Rooms are drawn as zones on a two-column plan rather than a true
+ * architectural layout: it needs no per-home floor-plan asset, stays legible
+ * on a phone, and every zone carries live state — the devices inside it, how
+ * many are running, and whether anything needs attention. That makes the plan
+ * the primary way to work with a floor rather than a decorative diagram, so
+ * it replaces the separate room list entirely.
  */
 @Composable
 fun FloorPlanGrid(
     rooms: List<Room>,
     devices: List<Device>,
     modifier: Modifier = Modifier,
-    onRoomClick: (String) -> Unit = {}
+    onRoomClick: (String) -> Unit = {},
+    onDeviceClick: (String) -> Unit = {},
+    onAddRoom: () -> Unit = {}
 ) {
-
-    if (rooms.isEmpty()) return
 
     Column(modifier = modifier.fillMaxWidth()) {
 
@@ -59,52 +68,70 @@ fun FloorPlanGrid(
 
                 rowRooms.forEach { room ->
 
-                    val roomDevices =
-                        devices.filter { it.roomId == room.id }
-
-                    FloorPlanCell(
-                        name = room.name,
-                        deviceCount = roomDevices.size,
-                        activeCount = roomDevices.count {
-                            it.status == DeviceStatus.ON
-                        },
-                        hasFault = roomDevices.any {
-                            it.status == DeviceStatus.ERROR ||
-                                it.status == DeviceStatus.DISCONNECTED
-                        },
+                    RoomZone(
+                        room = room,
+                        devices = devices.filter { it.roomId == room.id },
                         modifier = Modifier.weight(1f),
-                        onClick = { onRoomClick(room.id) }
+                        onClick = { onRoomClick(room.id) },
+                        onDeviceClick = onDeviceClick
                     )
                 }
 
-                // Keeps a lone room at half width so the grid stays square.
+                // Keeps a lone zone at half width so the plan stays gridded.
                 if (rowRooms.size == 1) {
-                    Spacer(modifier = Modifier.weight(1f))
+                    AddZone(
+                        modifier = Modifier.weight(1f),
+                        onClick = onAddRoom
+                    )
                 }
             }
 
             Spacer(modifier = Modifier.height(10.dp))
+        }
+
+        // A full row of rooms still needs somewhere to add the next one.
+        if (rooms.isEmpty() || rooms.size % 2 == 0) {
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+
+                AddZone(
+                    modifier = Modifier.weight(1f),
+                    onClick = onAddRoom
+                )
+
+                Spacer(modifier = Modifier.weight(1f))
+            }
         }
     }
 }
 
 
 @Composable
-private fun FloorPlanCell(
-    name: String,
-    deviceCount: Int,
-    activeCount: Int,
-    hasFault: Boolean,
+private fun RoomZone(
+    room: Room,
+    devices: List<Device>,
     modifier: Modifier = Modifier,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    onDeviceClick: (String) -> Unit
 ) {
+
+    val activeCount = devices.count { it.status == DeviceStatus.ON }
+
+    val faultCount =
+        devices.count {
+            it.status == DeviceStatus.ERROR ||
+                it.status == DeviceStatus.DISCONNECTED
+        }
 
     val isLive = activeCount > 0
 
     Column(
         modifier = modifier
-            .aspectRatio(1.25f)
-            .clip(RoundedCornerShape(18.dp))
+            .height(168.dp)
+            .clip(RoundedCornerShape(20.dp))
             .background(
                 if (isLive) {
                     ElyraTheme.colors.surfaceSecondary
@@ -114,71 +141,192 @@ private fun FloorPlanCell(
             )
             .border(
                 width = if (isLive) 1.5.dp else 1.dp,
-                color = if (isLive) {
-                    ElyraTheme.colors.textPrimary
-                } else {
-                    ElyraTheme.colors.borderSubtle
+                color = when {
+                    faultCount > 0 -> ElyraTheme.colors.error
+                    isLive -> ElyraTheme.colors.textPrimary
+                    else -> ElyraTheme.colors.borderSubtle
                 },
-                shape = RoundedCornerShape(18.dp)
+                shape = RoundedCornerShape(20.dp)
             )
             .clickable(onClick = onClick)
             .padding(14.dp)
     ) {
+
+        // ---- Zone header -------------------------------------------------
 
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
 
-            Icon(
-                imageVector = Icons.Outlined.MeetingRoom,
-                contentDescription = null,
-                modifier = Modifier.size(18.dp),
-                tint = ElyraTheme.colors.textSecondary
+            Text(
+                text = room.name,
+                modifier = Modifier.weight(1f),
+                style = ElyraTheme.typography.titleSmall,
+                color = ElyraTheme.colors.textPrimary,
+                maxLines = 1
             )
 
-            Spacer(modifier = Modifier.weight(1f))
-
-            if (hasFault) {
-
-                Box(
-                    modifier = Modifier
-                        .size(8.dp)
-                        .clip(CircleShape)
-                        .background(ElyraTheme.colors.error)
-                )
-
-            } else if (isLive) {
-
-                Box(
-                    modifier = Modifier
-                        .size(8.dp)
-                        .clip(CircleShape)
-                        .background(ElyraTheme.colors.success)
-                )
-            }
+            Icon(
+                imageVector = Icons.Outlined.ChevronRight,
+                contentDescription = null,
+                modifier = Modifier.size(15.dp),
+                tint = ElyraTheme.colors.textTertiary
+            )
         }
-
-        Spacer(modifier = Modifier.weight(1f))
-
-        Text(
-            text = name,
-            style = ElyraTheme.typography.titleSmall,
-            color = ElyraTheme.colors.textPrimary,
-            maxLines = 1
-        )
 
         Spacer(modifier = Modifier.height(3.dp))
 
         Text(
-            text = if (deviceCount == 0) {
-                "No devices"
-            } else {
-                "$activeCount of $deviceCount on"
+            text = when {
+                devices.isEmpty() -> "Empty room"
+                faultCount > 0 -> "$faultCount need attention"
+                else -> "$activeCount of ${devices.size} on"
             },
             style = ElyraTheme.typography.bodySmall,
-            color = ElyraTheme.colors.textSecondary,
+            color = if (faultCount > 0) {
+                ElyraTheme.colors.error
+            } else {
+                ElyraTheme.colors.textSecondary
+            },
             maxLines = 1
+        )
+
+        Spacer(modifier = Modifier.weight(1f))
+
+        // ---- Devices placed inside the zone ------------------------------
+
+        if (devices.isEmpty()) {
+
+            Text(
+                text = "Tap to add devices",
+                style = ElyraTheme.typography.labelSmall,
+                color = ElyraTheme.colors.textTertiary
+            )
+
+        } else {
+
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+
+                devices.take(4).forEach { device ->
+
+                    DeviceChip(
+                        device = device,
+                        onClick = { onDeviceClick(device.id) }
+                    )
+                }
+
+                if (devices.size > 4) {
+
+                    Text(
+                        text = "+${devices.size - 4}",
+                        style = ElyraTheme.typography.labelSmall,
+                        color = ElyraTheme.colors.textSecondary
+                    )
+                }
+            }
+        }
+    }
+}
+
+
+@Composable
+private fun DeviceChip(
+    device: Device,
+    onClick: () -> Unit
+) {
+
+    val on = device.status == DeviceStatus.ON
+
+    val faulted =
+        device.status == DeviceStatus.ERROR ||
+            device.status == DeviceStatus.DISCONNECTED
+
+    Box(
+        modifier = Modifier
+            .size(30.dp)
+            .clip(RoundedCornerShape(10.dp))
+            .background(
+                when {
+                    faulted -> ElyraTheme.colors.errorContainer
+                    on -> ElyraTheme.colors.primary
+                    else -> ElyraTheme.colors.surfaceInteractive
+                }
+            )
+            .clickable(onClick = onClick),
+        contentAlignment = Alignment.Center
+    ) {
+
+        Icon(
+            imageVector = device.type.planIcon(),
+            contentDescription = device.name,
+            modifier = Modifier.size(15.dp),
+            tint = when {
+                faulted -> ElyraTheme.colors.error
+                on -> ElyraTheme.colors.onPrimary
+                else -> ElyraTheme.colors.textSecondary
+            }
         )
     }
 }
+
+
+@Composable
+private fun AddZone(
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit
+) {
+
+    Column(
+        modifier = modifier
+            .height(168.dp)
+            .clip(RoundedCornerShape(20.dp))
+            .border(
+                width = 1.dp,
+                color = ElyraTheme.colors.border,
+                shape = RoundedCornerShape(20.dp)
+            )
+            .clickable(onClick = onClick)
+            .padding(14.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+
+        Box(
+            modifier = Modifier
+                .size(34.dp)
+                .clip(CircleShape)
+                .background(ElyraTheme.colors.surfaceSecondary),
+            contentAlignment = Alignment.Center
+        ) {
+
+            Icon(
+                imageVector = Icons.Outlined.Add,
+                contentDescription = "Add room",
+                modifier = Modifier.size(17.dp),
+                tint = ElyraTheme.colors.textPrimary
+            )
+        }
+
+        Spacer(modifier = Modifier.height(10.dp))
+
+        Text(
+            text = "Add room",
+            style = ElyraTheme.typography.labelMedium,
+            color = ElyraTheme.colors.textSecondary
+        )
+    }
+}
+
+
+private fun DeviceType.planIcon(): ImageVector =
+    when (this) {
+        DeviceType.LIGHT -> Icons.Outlined.Lightbulb
+        DeviceType.OUTLET -> Icons.Outlined.Power
+        DeviceType.MULTI_SWITCH -> Icons.Outlined.Tune
+        DeviceType.SAFETY_APPLIANCE -> Icons.Outlined.Security
+        DeviceType.SECURITY_CAMERA -> Icons.Outlined.CameraAlt
+    }

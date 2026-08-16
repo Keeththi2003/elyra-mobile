@@ -92,7 +92,7 @@ const val EDIT_DEVICE = "edit_device/{deviceId}"
     const val ABOUT = "about"
     const val PROFILE = "profile"
     const val NOTIFICATIONS = "notifications"
-    const val REPORTS = "reports"
+    const val REPORTS = "reports?deviceId={deviceId}"
 }
 
 /**
@@ -349,7 +349,7 @@ fun AppNavigation(
         deviceViewModel.deleteDevice(deviceId)
     },
         onViewReport = {
-            navigateTo(AppRoutes.REPORTS)
+            navigateTo("reports?deviceId=$deviceId")
         }
     )
 }
@@ -567,6 +567,15 @@ composable(
     )
 },
 
+        onDeviceClick = { deviceId ->
+            navigateTo("device_detail/$deviceId")
+        },
+
+        onDeleteFloor = {
+            floorViewModel.deleteFloor(floorId)
+            navController.popBackStack()
+        },
+
         onAddRoom = {
     navigateTo("add_room/$floorId")
 },
@@ -656,7 +665,7 @@ SettingsScreen(
         navigateTo(AppRoutes.NOTIFICATIONS)
     },
     onReportsClick = {
-        navigateTo(AppRoutes.REPORTS)
+        navigateTo("reports?deviceId=")
     },
     onProfileClick = {
         navigateTo(AppRoutes.PROFILE)
@@ -674,9 +683,19 @@ SettingsScreen(
 }
 
 
-            composable(AppRoutes.REPORTS) {
+            composable(
+    route = AppRoutes.REPORTS,
+    arguments = listOf(
+        navArgument("deviceId") {
+            type = NavType.StringType
+            defaultValue = ""
+        }
+    )
+) { backStackEntry ->
 
     ReportsScreen(
+        deviceId = backStackEntry.arguments
+            ?.getString("deviceId").orEmpty(),
         deviceViewModel = deviceViewModel,
         roomViewModel = roomViewModel,
         onDeviceClick = { deviceId ->

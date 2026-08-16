@@ -621,6 +621,11 @@ class DeviceViewModel(
     }
 
     private companion object {
-        const val SAFETY_CHECK_INTERVAL_MS = 10_000L
+        /*
+         * Polled once a second so the cutoff lands within ~1s of the limit.
+         * At the previous 10s interval a 1-minute limit could overrun to
+         * 1m10s, which looks broken for a safety feature.
+         */
+        const val SAFETY_CHECK_INTERVAL_MS = 1_000L
     }
 }

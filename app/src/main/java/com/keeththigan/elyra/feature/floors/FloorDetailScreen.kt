@@ -1,6 +1,7 @@
 package com.keeththigan.elyra.feature.floors
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -12,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
@@ -20,6 +22,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.ArrowForwardIos
+import androidx.compose.material.icons.outlined.DeleteOutline
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.HomeWork
 import androidx.compose.material.icons.outlined.Lightbulb
@@ -66,8 +69,10 @@ fun FloorDetailScreen(
     deviceViewModel: DeviceViewModel,
     onBack: () -> Unit,
     onRoomClick: (String) -> Unit,
+    onDeviceClick: (String) -> Unit = {},
     onAddRoom: () -> Unit,
-    onEditFloor: () -> Unit
+    onEditFloor: () -> Unit,
+    onDeleteFloor: () -> Unit = {}
 ) {
 
     val floorState by floorViewModel.state.collectAsStateWithLifecycle()
@@ -193,44 +198,9 @@ fun FloorDetailScreen(
 
         // ====================================================================
         // FLOOR PLAN
-        // ====================================================================
-
-        if (roomState.rooms.any { it.floorId == floorId }) {
-
-            Text(
-                text = "Floor plan",
-                style = ElyraTheme.typography.titleMedium,
-                color = ElyraTheme.colors.textPrimary
-            )
-
-            Spacer(
-                modifier = Modifier.height(3.dp)
-            )
-
-            Text(
-                text = "Live layout of this floor",
-                style = ElyraTheme.typography.bodySmall,
-                color = ElyraTheme.colors.textSecondary
-            )
-
-            Spacer(
-                modifier = Modifier.height(12.dp)
-            )
-
-            FloorPlanGrid(
-                rooms = roomState.rooms.filter { it.floorId == floorId },
-                devices = deviceState.devices,
-                onRoomClick = onRoomClick
-            )
-
-            Spacer(
-                modifier = Modifier.height(20.dp)
-            )
-        }
-
-
-        // ====================================================================
-        // ROOMS HEADER
+        //
+        // The plan is the only room listing on this screen — a separate list
+        // below it showed exactly the same rooms twice.
         // ====================================================================
 
         Row(
@@ -238,12 +208,10 @@ fun FloorDetailScreen(
             verticalAlignment = Alignment.CenterVertically
         ) {
 
-            Column(
-                modifier = Modifier.weight(1f)
-            ) {
+            Column(modifier = Modifier.weight(1f)) {
 
                 Text(
-                    text = "Rooms",
+                    text = "Floor plan",
                     style = ElyraTheme.typography.titleMedium,
                     color = ElyraTheme.colors.textPrimary
                 )
@@ -253,65 +221,94 @@ fun FloorDetailScreen(
                 )
 
                 Text(
-                    text = "Devices organized by room",
+                    text = "Tap a room to open it, or a device to control it",
                     style = ElyraTheme.typography.bodySmall,
                     color = ElyraTheme.colors.textSecondary
-                )
-            }
-
-            IconButton(
-                onClick = onAddRoom,
-                modifier = Modifier
-                    .size(42.dp)
-                    .clip(CircleShape)
-                    .background(
-                        ElyraTheme.colors.primary
-                    )
-            ) {
-
-                Icon(
-                    imageVector = Icons.Outlined.Add,
-                    contentDescription = "Add room",
-                    tint = ElyraTheme.colors.onPrimary
                 )
             }
         }
 
         Spacer(
-            modifier = Modifier.height(12.dp)
+            modifier = Modifier.height(14.dp)
         )
 
-
-        // ====================================================================
-        // ROOM LIST
-        // ====================================================================
-
         LazyColumn(
-            modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.spacedBy(10.dp)
+            modifier = Modifier.fillMaxSize()
         ) {
 
-            items(
-                items = rooms,
-                key = {
-                    it.id
-                }
-            ) { room ->
+            item {
 
-                RoomCard(
-                    room = room,
-                    onClick = {
-                        onRoomClick(room.id)
-                    }
+                FloorPlanGrid(
+                    rooms = roomState.rooms.filter { it.floorId == floorId },
+                    devices = deviceState.devices,
+                    onRoomClick = onRoomClick,
+                    onDeviceClick = onDeviceClick,
+                    onAddRoom = onAddRoom
                 )
             }
 
             item {
 
                 Spacer(
-                    modifier = Modifier.height(24.dp)
+                    modifier = Modifier.height(28.dp)
+                )
+
+                DeleteFloorButton(onClick = onDeleteFloor)
+
+                Spacer(
+                    modifier = Modifier.height(28.dp)
                 )
             }
+        }
+    }
+}
+
+
+// ============================================================================
+// DELETE FLOOR
+// ============================================================================
+
+@Composable
+private fun DeleteFloorButton(
+    onClick: () -> Unit
+) {
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(16.dp))
+            .border(
+                width = 1.dp,
+                color = ElyraTheme.colors.borderSubtle,
+                shape = RoundedCornerShape(16.dp)
+            )
+            .clickable(onClick = onClick)
+            .padding(horizontal = 18.dp, vertical = 16.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+
+        Icon(
+            imageVector = Icons.Outlined.DeleteOutline,
+            contentDescription = null,
+            modifier = Modifier.size(20.dp),
+            tint = ElyraTheme.colors.error
+        )
+
+        Spacer(modifier = Modifier.width(12.dp))
+
+        Column {
+
+            Text(
+                text = "Delete floor",
+                style = ElyraTheme.typography.labelLarge,
+                color = ElyraTheme.colors.error
+            )
+
+            Text(
+                text = "Removes its rooms; devices become unassigned",
+                style = ElyraTheme.typography.bodySmall,
+                color = ElyraTheme.colors.textSecondary
+            )
         }
     }
 }

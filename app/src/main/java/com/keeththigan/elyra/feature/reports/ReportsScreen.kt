@@ -51,13 +51,22 @@ fun ReportsScreen(
     deviceViewModel: DeviceViewModel,
     roomViewModel: RoomViewModel,
     onDeviceClick: (String) -> Unit,
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    /** When set, the report covers only this device. */
+    deviceId: String = ""
 ) {
 
     val deviceState by deviceViewModel.state.collectAsStateWithLifecycle()
     val roomState by roomViewModel.state.collectAsStateWithLifecycle()
 
-    val devices = deviceState.devices
+    val singleDevice =
+        deviceId.takeIf { it.isNotBlank() }
+            ?.let { id -> deviceState.devices.find { it.id == id } }
+
+    // Scope every figure below to one device when we arrived from its detail
+    // screen, otherwise report across the whole home.
+    val devices =
+        if (singleDevice != null) listOf(singleDevice) else deviceState.devices
 
     val totalRuntime = devices.sumOf { it.totalOnSeconds }
     val activeNow = devices.count { it.status == DeviceStatus.ON }
@@ -79,8 +88,9 @@ fun ReportsScreen(
     ) {
 
         ElyraDetailTopBar(
-            title = "Reports",
-            subtitle = "Device usage across your home",
+            title = singleDevice?.let { "${it.name} report" } ?: "Reports",
+            subtitle = singleDevice?.let { "Usage for this device" }
+                ?: "Device usage across your home",
             onBack = onBack
         )
 
@@ -113,8 +123,18 @@ fun ReportsScreen(
                     )
 
                     MetricTile(
-                        value = devices.size.toString(),
-                        label = "Devices tracked",
+                        value = if (singleDevice != null) {
+                            formatDuration(
+                                devices.firstOrNull()?.totalOnSeconds ?: 0L
+                            )
+                        } else {
+                            devices.size.toString()
+                        },
+                        label = if (singleDevice != null) {
+                            "Recorded runtime"
+                        } else {
+                            "Devices tracked"
+                        },
                         modifier = Modifier.weight(1f)
                     )
 
@@ -132,8 +152,16 @@ fun ReportsScreen(
 
             item {
                 SectionTitle(
-                    title = "Runtime by device",
-                    subtitle = "Longest running first"
+                    title = if (singleDevice != null) {
+                        "Runtime"
+                    } else {
+                        "Runtime by device"
+                    },
+                    subtitle = if (singleDevice != null) {
+                        "Total recorded for this device"
+                    } else {
+                        "Longest running first"
+                    }
                 )
             }
 
@@ -173,7 +201,7 @@ fun ReportsScreen(
             // SHARE OF RUNTIME BY TYPE
             // ============================================================
 
-            if (byType.isNotEmpty()) {
+            if (byType.isNotEmpty() && singleDevice == null) {
 
                 item {
                     SectionTitle(

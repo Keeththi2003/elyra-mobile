@@ -875,7 +875,7 @@ private fun SafetyCard(
 
             Text(
                 text = if (isOn) {
-                    "Auto-off in ${formatDuration(remainingSeconds)}"
+                    "Running · switches off after $maxMinutes min"
                 } else {
                     "Safety cutoff armed"
                 },
