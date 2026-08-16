@@ -52,7 +52,9 @@ fun AuthNavigation(
                 },
 
                 onSignIn = {
-                    navController.navigate(AuthRoutes.SIGN_IN)
+                    navController.navigate(AuthRoutes.SIGN_IN) {
+                        launchSingleTop = true
+                    }
                 },
 
                 onCreateAccount = {
@@ -75,8 +77,17 @@ fun AuthNavigation(
                     navController.popBackStack()
                 },
 
+                /*
+                 * Sign Up is the start destination, so it is always already
+                 * below Sign In on the stack. Popping back to it keeps the
+                 * two screens a simple toggle — navigating instead would push
+                 * a new copy every time and make "back" need several presses.
+                 */
                 onSignUp = {
-                    navController.navigate(AuthRoutes.SIGN_UP)
+                    navController.popBackStack(
+                        AuthRoutes.SIGN_UP,
+                        /* inclusive = */ false
+                    )
                 },
 
                 onLogin = {
@@ -84,7 +95,9 @@ fun AuthNavigation(
                 },
 
                 onForgotPassword = {
-                    navController.navigate(AuthRoutes.FORGOT_PASSWORD)
+                    navController.navigate(AuthRoutes.FORGOT_PASSWORD) {
+                        launchSingleTop = true
+                    }
                 },
 
                 authViewModel = authViewModel

@@ -24,6 +24,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -32,27 +33,52 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.keeththigan.elyra.core.designsystem.ElyraTheme
+import com.keeththigan.elyra.data.model.DeviceType
 
 @Composable
 fun EditDeviceScreen(
     deviceId: String,
+    deviceViewModel: DeviceViewModel,
     onBack: () -> Unit,
     onSave: () -> Unit,
     onDelete: () -> Unit
 ) {
 
-    // Temporary data.
-    // Later load using:
-    //
-    // deviceId -> ViewModel -> Repository -> Database
+    val state by deviceViewModel.state.collectAsStateWithLifecycle()
+
+    LaunchedEffect(deviceId) {
+        deviceViewModel.loadDevice(deviceId)
+    }
 
     var deviceName by remember {
-        mutableStateOf("Living Room Light")
+        mutableStateOf("")
     }
 
     var deviceType by remember {
-        mutableStateOf("Light")
+        mutableStateOf("")
+    }
+
+    LaunchedEffect(state.selectedDevice) {
+        state.selectedDevice?.let {
+            deviceName = it.name
+            deviceType = it.type.editDeviceDisplayName()
+        }
+    }
+
+    LaunchedEffect(state.isSaved) {
+        if (state.isSaved) {
+            onSave()
+            deviceViewModel.consumeSaved()
+        }
+    }
+
+    LaunchedEffect(state.isDeleted) {
+        if (state.isDeleted) {
+            onDelete()
+            deviceViewModel.consumeDeleted()
+        }
     }
 
     Column(
@@ -226,6 +252,22 @@ fun EditDeviceScreen(
             }
 
             // =============================================================
+            // ERROR
+            // =============================================================
+
+            if (state.error != null) {
+
+                item {
+
+                    Text(
+                        text = state.error ?: "",
+                        style = ElyraTheme.typography.bodySmall,
+                        color = ElyraTheme.colors.error
+                    )
+                }
+            }
+
+            // =============================================================
             // SAVE
             // =============================================================
 
@@ -250,14 +292,19 @@ fun EditDeviceScreen(
                             }
                         )
                         .clickable(
-                            enabled = deviceName.isNotBlank(),
-                            onClick = onSave
-                        ),
+                            enabled = deviceName.isNotBlank() && !state.isLoading
+                        ) {
+                            state.selectedDevice?.let { current ->
+                                deviceViewModel.updateDevice(
+                                    current.copy(name = deviceName.trim())
+                                )
+                            }
+                        },
                     contentAlignment = Alignment.Center
                 ) {
 
                     Text(
-                        text = "Save Changes",
+                        text = if (state.isLoading) "Saving…" else "Save Changes",
                         style = ElyraTheme.typography.labelLarge,
                         color =
                             if (deviceName.isNotBlank()) {
@@ -284,9 +331,9 @@ fun EditDeviceScreen(
                         .background(
                             ElyraTheme.colors.surface
                         )
-                        .clickable(
-                            onClick = onDelete
-                        )
+                        .clickable {
+                            deviceViewModel.deleteDevice(deviceId)
+                        }
                         .padding(
                             horizontal = 16.dp,
                             vertical = 15.dp
@@ -469,4 +516,30 @@ private fun FormField(
             }
         }
     )
+}
+
+
+// ============================================================================
+// DISPLAY HELPERS
+// ============================================================================
+
+private fun DeviceType.editDeviceDisplayName(): String {
+
+    return when (this) {
+
+        DeviceType.LIGHT ->
+            "Light"
+
+        DeviceType.OUTLET ->
+            "Electrical Outlet"
+
+        DeviceType.MULTI_SWITCH ->
+            "Multi-Switch"
+
+        DeviceType.SAFETY_APPLIANCE ->
+            "Safety Appliance"
+
+        DeviceType.SECURITY_CAMERA ->
+            "Security Camera"
+    }
 }

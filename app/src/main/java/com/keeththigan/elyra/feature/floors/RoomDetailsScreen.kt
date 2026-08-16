@@ -30,88 +30,55 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.keeththigan.elyra.core.designsystem.ElyraTheme
-
-// ============================================================================
-// TEMPORARY UI MODEL
-// ============================================================================
-// This is only for displaying the UI until the repository/database is connected.
-// Do NOT pass these values through navigation.
-//
-// Later:
-// roomId -> ViewModel -> Repository -> Database
-// ============================================================================
-
-private data class RoomDeviceUi(
-    val id: String,
-    val name: String,
-    val type: String,
-    val isOn: Boolean
-)
+import com.keeththigan.elyra.core.designsystem.components.topbar.ElyraDetailTopBar
+import com.keeththigan.elyra.data.model.Device
+import com.keeththigan.elyra.data.model.DeviceStatus
+import com.keeththigan.elyra.data.model.DeviceType
+import com.keeththigan.elyra.feature.devices.DeviceViewModel
 
 @Composable
 fun RoomDetailsScreen(
     roomId: String,
+    roomViewModel: RoomViewModel,
+    floorViewModel: FloorViewModel,
+    deviceViewModel: DeviceViewModel,
     onBack: () -> Unit,
     onDeviceClick: (String) -> Unit,
     onEditRoom: () -> Unit,
-    onAddDevice: () -> Unit
+    onAddDevice: (floorId: String, roomId: String) -> Unit
 ) {
 
-    /*
-     * Later this data will come from:
-     *
-     * roomId
-     *   ↓
-     * ViewModel
-     *   ↓
-     * Repository
-     *   ↓
-     * Database
-     *
-     * Do not pass roomName/devices through navigation.
-     */
+    val roomState by roomViewModel.state.collectAsStateWithLifecycle()
+    val floorState by floorViewModel.state.collectAsStateWithLifecycle()
+    val deviceState by deviceViewModel.state.collectAsStateWithLifecycle()
 
-    val roomName = remember {
-        "Living Room"
+    LaunchedEffect(roomId) {
+        roomViewModel.loadRoom(roomId)
+        deviceViewModel.loadDevices()
     }
 
-    val floorName = remember {
-        "Ground Floor"
+    LaunchedEffect(roomState.selectedRoom?.floorId) {
+        roomState.selectedRoom?.floorId?.takeIf { it.isNotBlank() }?.let {
+            floorViewModel.loadFloor(it)
+        }
     }
 
-    val devices = remember {
+    val roomName = roomState.selectedRoom?.name ?: ""
+    val floorName = floorState.selectedFloor?.name ?: ""
 
-        listOf(
-
-            RoomDeviceUi(
-                id = "device_001",
-                name = "Living Room Light",
-                type = "Light",
-                isOn = true
-            ),
-
-            RoomDeviceUi(
-                id = "device_002",
-                name = "Smart Outlet",
-                type = "Outlet",
-                isOn = false
-            ),
-
-            RoomDeviceUi(
-                id = "device_003",
-                name = "Ceiling Fan",
-                type = "Multi Switch",
-                isOn = true
-            )
-        )
-    }
+    val devices =
+        deviceState.devices.filter {
+            it.roomId == roomId
+        }
 
     Column(
         modifier = Modifier
@@ -125,67 +92,21 @@ fun RoomDetailsScreen(
         // TOP BAR
         // ====================================================================
 
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(
-                    horizontal = 20.dp,
-                    vertical = 12.dp
-                ),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-
-            IconButton(
-                onClick = onBack,
-                modifier = Modifier
-                    .size(44.dp)
-                    .clip(
-                        RoundedCornerShape(14.dp)
+        ElyraDetailTopBar(
+            title = roomName.ifBlank { "Room" },
+            subtitle = floorName.ifBlank { null },
+            onBack = onBack,
+            actions = {
+                IconButton(onClick = onEditRoom) {
+                    Icon(
+                        imageVector = Icons.Outlined.Edit,
+                        contentDescription = "Edit room",
+                        modifier = Modifier.size(20.dp),
+                        tint = ElyraTheme.colors.textSecondary
                     )
-                    .background(
-                        ElyraTheme.colors.surface
-                    )
-            ) {
-
-                Icon(
-                    imageVector = Icons.Outlined.ArrowBack,
-                    contentDescription = "Back",
-                    tint = ElyraTheme.colors.textPrimary
-                )
+                }
             }
-
-            Spacer(
-                modifier = Modifier.width(12.dp)
-            )
-
-            Column(
-                modifier = Modifier.weight(1f)
-            ) {
-
-                Text(
-                    text = roomName,
-                    style = ElyraTheme.typography.titleLarge,
-                    color = ElyraTheme.colors.textPrimary
-                )
-
-                Text(
-                    text = floorName,
-                    style = ElyraTheme.typography.bodySmall,
-                    color = ElyraTheme.colors.textSecondary
-                )
-            }
-            IconButton(
-                onClick = onEditRoom
-            ) {
-
-                Icon(
-                    imageVector = Icons.Outlined.Edit,
-                    contentDescription = "Edit room",
-                    modifier = Modifier.size(21.dp),
-                    tint = ElyraTheme.colors.textSecondary
-                )
-            }
-        }
+        )
 
         // ====================================================================
         // CONTENT
@@ -203,6 +124,18 @@ fun RoomDetailsScreen(
             // =================================================================
             // ROOM HEADER
             // =================================================================
+
+            if (roomState.error != null || deviceState.error != null) {
+
+                item {
+
+                    Text(
+                        text = roomState.error ?: deviceState.error ?: "",
+                        style = ElyraTheme.typography.bodySmall,
+                        color = ElyraTheme.colors.error
+                    )
+                }
+            }
 
             item {
 
@@ -248,7 +181,12 @@ fun RoomDetailsScreen(
                 item {
 
                     EmptyRoomDevices(
-                        onAddDevice = onAddDevice
+                        onAddDevice = {
+                            onAddDevice(
+                                roomState.selectedRoom?.floorId.orEmpty(),
+                                roomId
+                            )
+                        }
                     )
                 }
 
@@ -271,13 +209,25 @@ fun RoomDetailsScreen(
 
             // =================================================================
             // ADD DEVICE
+            //
+            // Only shown when the room already has devices — the empty state
+            // above carries its own "Add device" action, and rendering both
+            // put two identical cards on screen.
             // =================================================================
 
             item {
 
-                AddDeviceCard(
-                    onClick = onAddDevice
-                )
+                if (devices.isNotEmpty()) {
+
+                    AddDeviceCard(
+                        onClick = {
+                            onAddDevice(
+                                roomState.selectedRoom?.floorId.orEmpty(),
+                                roomId
+                            )
+                        }
+                    )
+                }
 
                 Spacer(
                     modifier = Modifier.height(24.dp)
@@ -376,9 +326,11 @@ private fun RoomSummaryCard(
 
 @Composable
 private fun RoomDeviceCard(
-    device: RoomDeviceUi,
+    device: Device,
     onClick: () -> Unit
 ) {
+
+    val isOn = device.status == DeviceStatus.ON
 
     Row(
         modifier = Modifier
@@ -422,7 +374,7 @@ private fun RoomDeviceCard(
             )
 
             Text(
-                text = device.type,
+                text = device.type.roomDeviceDisplayName(),
                 style = ElyraTheme.typography.bodySmall,
                 color = ElyraTheme.colors.textSecondary
             )
@@ -434,7 +386,7 @@ private fun RoomDeviceCard(
             modifier = Modifier
                 .clip(CircleShape)
                 .background(
-                    if (device.isOn) {
+                    if (isOn) {
                         ElyraTheme.colors.success.copy(
                             alpha = 0.12f
                         )
@@ -449,10 +401,10 @@ private fun RoomDeviceCard(
         ) {
 
             Text(
-                text = if (device.isOn) "ON" else "OFF",
+                text = if (isOn) "ON" else "OFF",
                 style = ElyraTheme.typography.labelSmall,
                 color =
-                    if (device.isOn) {
+                    if (isOn) {
                         ElyraTheme.colors.success
                     } else {
                         ElyraTheme.colors.textSecondary
@@ -480,22 +432,25 @@ private fun RoomDeviceCard(
 
 @Composable
 private fun DeviceIcon(
-    type: String
+    type: DeviceType
 ) {
 
     val icon: ImageVector =
-        when (type.lowercase()) {
+        when (type) {
 
-            "light" ->
+            DeviceType.LIGHT ->
                 Icons.Outlined.Lightbulb
 
-            "outlet" ->
+            DeviceType.OUTLET ->
                 Icons.Outlined.Power
 
-            "multi switch" ->
+            DeviceType.MULTI_SWITCH ->
                 Icons.Outlined.Tune
 
-            else ->
+            DeviceType.SAFETY_APPLIANCE ->
+                Icons.Outlined.Power
+
+            DeviceType.SECURITY_CAMERA ->
                 Icons.Outlined.Power
         }
 
@@ -666,5 +621,31 @@ private fun AddDeviceCard(
             modifier = Modifier.size(19.dp),
             tint = ElyraTheme.colors.textTertiary
         )
+    }
+}
+
+
+// ============================================================================
+// DISPLAY HELPERS
+// ============================================================================
+
+private fun DeviceType.roomDeviceDisplayName(): String {
+
+    return when (this) {
+
+        DeviceType.LIGHT ->
+            "Light"
+
+        DeviceType.OUTLET ->
+            "Outlet"
+
+        DeviceType.MULTI_SWITCH ->
+            "Multi Switch"
+
+        DeviceType.SAFETY_APPLIANCE ->
+            "Safety Appliance"
+
+        DeviceType.SECURITY_CAMERA ->
+            "Security Camera"
     }
 }

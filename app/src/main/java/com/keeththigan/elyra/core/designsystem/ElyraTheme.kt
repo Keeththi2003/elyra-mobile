@@ -25,11 +25,16 @@ private val ElyraLightColors = ElyraSemanticColors(
     // BACKGROUND
     // ------------------------------------------------------------------------
 
-    background = ElyraColors.White,
+    /*
+     * Grouped-background model: the page sits on a soft neutral and cards
+     * are pure white on top of it. Previously both were white, so every
+     * card melted into the page and the light theme read as flat.
+     */
+    background = ElyraColors.Neutral100,
 
-    backgroundSecondary = ElyraColors.Neutral50,
+    backgroundSecondary = ElyraColors.Neutral150,
 
-    backgroundTertiary = ElyraColors.Neutral100,
+    backgroundTertiary = ElyraColors.Neutral200,
 
 
     // ------------------------------------------------------------------------
@@ -40,9 +45,9 @@ private val ElyraLightColors = ElyraSemanticColors(
 
     surfaceElevated = ElyraColors.White,
 
-    surfaceSecondary = ElyraColors.Neutral50,
+    surfaceSecondary = ElyraColors.Neutral150,
 
-    surfaceInteractive = ElyraColors.Neutral100,
+    surfaceInteractive = ElyraColors.Neutral200,
 
     surfaceDisabled = ElyraColors.Neutral150,
 
@@ -199,11 +204,15 @@ private val ElyraDarkColors = ElyraSemanticColors(
     // SURFACES
     // ------------------------------------------------------------------------
 
-    surface = ElyraColors.Neutral950,
+    /*
+     * Lifted one step off pure black so cards separate from the page
+     * instead of merging with it.
+     */
+    surface = ElyraColors.Neutral900,
 
-    surfaceElevated = ElyraColors.Neutral900,
+    surfaceElevated = ElyraColors.Neutral850,
 
-    surfaceSecondary = ElyraColors.Neutral900,
+    surfaceSecondary = ElyraColors.Neutral850,
 
     surfaceInteractive = ElyraColors.Neutral800,
 

@@ -1,6 +1,7 @@
 package com.keeththigan.elyra.feature.home.presentation
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -13,57 +14,42 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.AcUnit
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.Apartment
 import androidx.compose.material.icons.outlined.CameraAlt
+import androidx.compose.material.icons.outlined.ChevronRight
 import androidx.compose.material.icons.outlined.Devices
 import androidx.compose.material.icons.outlined.Lightbulb
-import androidx.compose.material.icons.outlined.PersonOutline
+import androidx.compose.material.icons.outlined.NotificationsNone
 import androidx.compose.material.icons.outlined.Power
-import androidx.compose.material.icons.outlined.ChevronRight
+import androidx.compose.material.icons.outlined.Security
+import androidx.compose.material.icons.outlined.Tune
 import androidx.compose.material3.Icon
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.keeththigan.elyra.core.designsystem.ElyraTheme
-
-
-// ============================================================================
-// HOME DEVICE
-// ============================================================================
-
-private data class HomeDevice(
-    val id: String,
-    val name: String,
-    val type: String,
-    val isOn: Boolean
-)
-
-
-// ============================================================================
-// HOME FLOOR
-// ============================================================================
-
-private data class HomeFloor(
-    val id: String,
-    val name: String,
-    val roomCount: Int,
-    val deviceCount: Int
-)
+import com.keeththigan.elyra.data.model.Device
+import com.keeththigan.elyra.data.model.DeviceStatus
+import com.keeththigan.elyra.data.model.DeviceType
+import com.keeththigan.elyra.feature.devices.DeviceViewModel
+import com.keeththigan.elyra.feature.floors.FloorViewModel
+import com.keeththigan.elyra.feature.floors.RoomViewModel
 
 
 // ============================================================================
@@ -72,223 +58,357 @@ private data class HomeFloor(
 
 @Composable
 fun HomeScreen(
+    deviceViewModel: DeviceViewModel,
+    floorViewModel: FloorViewModel,
+    roomViewModel: RoomViewModel,
+    userName: String = "",
+    unreadAlertCount: Int = 0,
     onFloorClick: (String) -> Unit,
     onDeviceClick: (String) -> Unit,
     onAddFloor: () -> Unit,
     onAddDevice: () -> Unit,
-    onProfileClick: () -> Unit
+    onAlertsClick: () -> Unit
 ) {
 
-    val devices = remember {
+    val deviceState by deviceViewModel.state.collectAsStateWithLifecycle()
+    val floorState by floorViewModel.state.collectAsStateWithLifecycle()
+    val roomState by roomViewModel.state.collectAsStateWithLifecycle()
 
-        listOf(
-            HomeDevice(
-                id = "living_room_light",
-                name = "Living Room Light",
-                type = "Light",
-                isOn = true
-            ),
-
-            HomeDevice(
-                id = "kitchen_outlet",
-                name = "Kitchen Outlet",
-                type = "Outlet",
-                isOn = false
-            ),
-
-            HomeDevice(
-                id = "kitchen_switch",
-                name = "Kitchen Switch",
-                type = "Switch",
-                isOn = true
-            ),
-
-            HomeDevice(
-                id = "bedroom_ac",
-                name = "Bedroom AC",
-                type = "AC",
-                isOn = false
-            )
-        )
+    LaunchedEffect(Unit) {
+        deviceViewModel.loadDevices()
+        floorViewModel.loadFloors()
+        roomViewModel.loadRooms()
     }
 
-    val floors = remember {
+    val devices = deviceState.devices
+    val floors = floorState.floors
 
-        listOf(
-            HomeFloor(
-                id = "ground",
-                name = "Ground Floor",
-                roomCount = 3,
-                deviceCount = 5
-            ),
+    val activeCount = devices.count { it.status == DeviceStatus.ON }
 
-            HomeFloor(
-                id = "first",
-                name = "First Floor",
-                roomCount = 2,
-                deviceCount = 4
-            )
-        )
-    }
+    val attentionCount =
+        devices.count {
+            it.status == DeviceStatus.ERROR ||
+                it.status == DeviceStatus.DISCONNECTED
+        }
 
+    val error =
+        deviceState.error ?: floorState.error ?: roomState.error
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(
-                ElyraTheme.colors.background
-            )
+            .background(ElyraTheme.colors.background)
     ) {
 
         // ====================================================================
-        // TOP BAR
+        // GREETING
         // ====================================================================
 
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(
-                    horizontal = 20.dp,
-                    vertical = 16.dp
-                ),
+                .padding(start = 20.dp, end = 20.dp, top = 20.dp, bottom = 8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
 
-            Column(
-                modifier = Modifier.weight(1f)
-            ) {
+            Column(modifier = Modifier.weight(1f)) {
 
                 Text(
-                    text = "Good evening",
+                    text = greeting(),
                     style = ElyraTheme.typography.bodyMedium,
                     color = ElyraTheme.colors.textSecondary
                 )
 
-                Spacer(
-                    modifier = Modifier.height(3.dp)
-                )
+                Spacer(modifier = Modifier.height(4.dp))
 
                 Text(
-                    text = "Welcome to Elyra",
-                    style = ElyraTheme.typography.titleLarge,
+                    text = userName.takeIf { it.isNotBlank() }
+                        ?.let { "$it's home" }
+                        ?: "Your home",
+                    style = ElyraTheme.typography.displaySmall,
                     color = ElyraTheme.colors.textPrimary
                 )
             }
 
-            // Profile button
             Box(
                 modifier = Modifier
                     .size(44.dp)
                     .clip(CircleShape)
-                    .background(
-                        ElyraTheme.colors.surface
-                    )
-                    .clickable(
-                        onClick = onProfileClick
-                    ),
+                    .background(ElyraTheme.colors.surface)
+                    .clickable(onClick = onAlertsClick),
                 contentAlignment = Alignment.Center
             ) {
 
                 Icon(
-                    imageVector = Icons.Outlined.PersonOutline,
-                    contentDescription = "Profile",
-                    modifier = Modifier.size(22.dp),
+                    imageVector = Icons.Outlined.NotificationsNone,
+                    contentDescription = "Alerts",
+                    modifier = Modifier.size(21.dp),
                     tint = ElyraTheme.colors.textPrimary
                 )
+
+                if (unreadAlertCount > 0) {
+
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.TopEnd)
+                            .padding(top = 9.dp, end = 9.dp)
+                            .size(9.dp)
+                            .clip(CircleShape)
+                            .background(ElyraTheme.colors.error)
+                    )
+                }
             }
         }
-
-
-        // ====================================================================
-        // MAIN CONTENT
-        // ====================================================================
 
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(
                 start = 20.dp,
                 end = 20.dp,
-                bottom = 30.dp
+                top = 12.dp,
+                bottom = 32.dp
             ),
-            verticalArrangement = Arrangement.spacedBy(24.dp)
+            verticalArrangement = Arrangement.spacedBy(28.dp)
         ) {
 
-            // =================================================================
-            // DEVICES SECTION
-            // =================================================================
+            if (!deviceState.isOnline) {
 
-            item {
+                item {
 
-                SectionHeader(
-                    title = "Devices",
-                    subtitle = "Your recently added devices",
-                    onAddClick = onAddDevice
-                )
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(16.dp))
+                            .background(ElyraTheme.colors.warningContainer)
+                            .padding(horizontal = 16.dp, vertical = 14.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
 
-                Spacer(
-                    modifier = Modifier.height(12.dp)
-                )
+                        Box(
+                            modifier = Modifier
+                                .size(8.dp)
+                                .clip(CircleShape)
+                                .background(ElyraTheme.colors.warning)
+                        )
 
-                LazyVerticalGrid(
-                    columns = GridCells.Fixed(2),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(310.dp),
-                    horizontalArrangement = Arrangement.spacedBy(10.dp),
-                    verticalArrangement = Arrangement.spacedBy(10.dp),
-                    userScrollEnabled = false
-                ) {
+                        Spacer(modifier = Modifier.width(12.dp))
 
-                    items(
-                        items = devices.take(4),
-                        key = {
-                            it.id
-                        }
-                    ) { device ->
-
-                        DeviceCard(
-                            device = device,
-                            onClick = {
-                                onDeviceClick(device.id)
-                            }
+                        Text(
+                            text = "You're offline — controls are disabled",
+                            style = ElyraTheme.typography.bodyMedium,
+                            color = ElyraTheme.colors.onWarningContainer
                         )
                     }
                 }
             }
 
+            if (error != null) {
 
-            // =================================================================
-            // FLOORS SECTION
-            // =================================================================
+                item {
+                    Text(
+                        text = error,
+                        style = ElyraTheme.typography.bodyMedium,
+                        color = ElyraTheme.colors.error
+                    )
+                }
+            }
+
+            // ================================================================
+            // AT-A-GLANCE SUMMARY
+            // ================================================================
+
+            item {
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+
+                    SummaryTile(
+                        value = activeCount.toString(),
+                        label = if (activeCount == 1) "Device on" else "Devices on",
+                        modifier = Modifier.weight(1f)
+                    )
+
+                    SummaryTile(
+                        value = devices.size.toString(),
+                        label = "Total",
+                        modifier = Modifier.weight(1f)
+                    )
+
+                    SummaryTile(
+                        value = attentionCount.toString(),
+                        label = "Need attention",
+                        emphasise = attentionCount > 0,
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+            }
+
+            // ================================================================
+            // QUICK CONTROLS
+            // ================================================================
+
+            item {
+
+                SectionHeader(
+                    title = "Quick controls",
+                    subtitle = if (devices.isEmpty()) {
+                        "Add a device to get started"
+                    } else {
+                        "Toggle without leaving home"
+                    },
+                    actionLabel = "Add",
+                    onActionClick = onAddDevice
+                )
+            }
+
+            if (devices.isEmpty()) {
+
+                item {
+                    EmptyState(
+                        icon = Icons.Outlined.Devices,
+                        title = "No devices yet",
+                        message = "Add your first device to start controlling " +
+                            "your home from here.",
+                        actionLabel = "Add device",
+                        onAction = onAddDevice
+                    )
+                }
+
+            } else {
+
+                // Four most recent devices, laid out 2x2. Built from plain
+                // rows rather than a nested lazy grid so it measures cleanly
+                // inside this LazyColumn.
+                items(
+                    items = devices.take(4).chunked(2),
+                    key = { row -> row.first().id }
+                ) { row ->
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+
+                        row.forEach { device ->
+
+                            QuickControlTile(
+                                device = device,
+                                isOnline = deviceState.isOnline,
+                                modifier = Modifier.weight(1f),
+                                onClick = { onDeviceClick(device.id) },
+                                onToggle = {
+                                    deviceViewModel.toggleDevice(device.id, it)
+                                }
+                            )
+                        }
+
+                        // Keeps a lone tile at half width on an odd last row.
+                        if (row.size == 1) {
+                            Spacer(modifier = Modifier.weight(1f))
+                        }
+                    }
+                }
+            }
+
+            // ================================================================
+            // FLOORS
+            // ================================================================
 
             item {
 
                 SectionHeader(
                     title = "Floors",
-                    subtitle = "Manage your home spaces",
-                    onAddClick = onAddFloor
+                    subtitle = if (floors.isEmpty()) {
+                        "Organise your home by floor"
+                    } else {
+                        "${floors.size} floor${if (floors.size == 1) "" else "s"}"
+                    },
+                    actionLabel = "Add",
+                    onActionClick = onAddFloor
                 )
+            }
 
-                Spacer(
-                    modifier = Modifier.height(12.dp)
-                )
+            if (floors.isEmpty()) {
 
-                Column(
-                    verticalArrangement = Arrangement.spacedBy(10.dp)
-                ) {
+                item {
+                    EmptyState(
+                        icon = Icons.Outlined.Apartment,
+                        title = "No floors yet",
+                        message = "Create a floor, then add rooms and devices " +
+                            "inside it.",
+                        actionLabel = "Add floor",
+                        onAction = onAddFloor
+                    )
+                }
 
-                    floors.forEach { floor ->
+            } else {
 
-                        FloorCard(
-                            floor = floor,
-                            onClick = {
-                                onFloorClick(floor.id)
-                            }
-                        )
-                    }
+                items(
+                    items = floors,
+                    key = { it.id }
+                ) { floor ->
+
+                    FloorRow(
+                        name = floor.name,
+                        roomCount = roomState.rooms.count {
+                            it.floorId == floor.id
+                        },
+                        deviceCount = devices.count {
+                            it.floorId == floor.id
+                        },
+                        onClick = { onFloorClick(floor.id) }
+                    )
                 }
             }
         }
+    }
+}
+
+
+// ============================================================================
+// SUMMARY TILE
+// ============================================================================
+
+@Composable
+private fun SummaryTile(
+    value: String,
+    label: String,
+    modifier: Modifier = Modifier,
+    emphasise: Boolean = false
+) {
+
+    Column(
+        modifier = modifier
+            .clip(RoundedCornerShape(18.dp))
+            .background(ElyraTheme.colors.surface)
+            .border(
+                width = 1.dp,
+                color = ElyraTheme.colors.borderSubtle,
+                shape = RoundedCornerShape(18.dp)
+            )
+            .padding(horizontal = 14.dp, vertical = 16.dp)
+    ) {
+
+        Text(
+            text = value,
+            style = ElyraTheme.typography.headlineMedium,
+            color = if (emphasise) {
+                ElyraTheme.colors.error
+            } else {
+                ElyraTheme.colors.textPrimary
+            }
+        )
+
+        Spacer(modifier = Modifier.height(4.dp))
+
+        Text(
+            text = label,
+            style = ElyraTheme.typography.bodySmall,
+            color = ElyraTheme.colors.textSecondary,
+            maxLines = 2
+        )
     }
 }
 
@@ -301,7 +421,8 @@ fun HomeScreen(
 private fun SectionHeader(
     title: String,
     subtitle: String,
-    onAddClick: () -> Unit
+    actionLabel: String,
+    onActionClick: () -> Unit
 ) {
 
     Row(
@@ -309,19 +430,15 @@ private fun SectionHeader(
         verticalAlignment = Alignment.CenterVertically
     ) {
 
-        Column(
-            modifier = Modifier.weight(1f)
-        ) {
+        Column(modifier = Modifier.weight(1f)) {
 
             Text(
                 text = title,
-                style = ElyraTheme.typography.titleMedium,
+                style = ElyraTheme.typography.titleLarge,
                 color = ElyraTheme.colors.textPrimary
             )
 
-            Spacer(
-                modifier = Modifier.height(3.dp)
-            )
+            Spacer(modifier = Modifier.height(3.dp))
 
             Text(
                 text = subtitle,
@@ -330,29 +447,33 @@ private fun SectionHeader(
             )
         }
 
-
-        // ================================================================
-        // ADD BUTTON
-        // ================================================================
-
-        Box(
+        Row(
             modifier = Modifier
-                .size(40.dp)
-                .clip(CircleShape)
-                .background(
-                    ElyraTheme.colors.primary
+                .clip(RoundedCornerShape(20.dp))
+                .background(ElyraTheme.colors.surface)
+                .border(
+                    width = 1.dp,
+                    color = ElyraTheme.colors.borderSubtle,
+                    shape = RoundedCornerShape(20.dp)
                 )
-                .clickable(
-                    onClick = onAddClick
-                ),
-            contentAlignment = Alignment.Center
+                .clickable(onClick = onActionClick)
+                .padding(horizontal = 14.dp, vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
 
             Icon(
                 imageVector = Icons.Outlined.Add,
-                contentDescription = "Add $title",
-                modifier = Modifier.size(21.dp),
-                tint = ElyraTheme.colors.onPrimary
+                contentDescription = null,
+                modifier = Modifier.size(16.dp),
+                tint = ElyraTheme.colors.textPrimary
+            )
+
+            Spacer(modifier = Modifier.width(6.dp))
+
+            Text(
+                text = actionLabel,
+                style = ElyraTheme.typography.labelMedium,
+                color = ElyraTheme.colors.textPrimary
             )
         }
     }
@@ -360,38 +481,31 @@ private fun SectionHeader(
 
 
 // ============================================================================
-// DEVICE CARD
+// QUICK CONTROL ROW
 // ============================================================================
 
 @Composable
-private fun DeviceCard(
-    device: HomeDevice,
-    onClick: () -> Unit
+private fun QuickControlTile(
+    device: Device,
+    isOnline: Boolean,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit,
+    onToggle: (Boolean) -> Unit
 ) {
 
-    val activeColor = Color(0xFF22C55E)
-
-    val iconColor =
-        if (device.isOn) {
-            activeColor
-        } else {
-            ElyraTheme.colors.textSecondary
-        }
+    val isOn = device.status == DeviceStatus.ON
 
     Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(145.dp)
-            .clip(
-                RoundedCornerShape(20.dp)
+        modifier = modifier
+            .clip(RoundedCornerShape(20.dp))
+            .background(ElyraTheme.colors.surface)
+            .border(
+                width = 1.dp,
+                color = ElyraTheme.colors.borderSubtle,
+                shape = RoundedCornerShape(20.dp)
             )
-            .background(
-                ElyraTheme.colors.surface
-            )
-            .clickable(
-                onClick = onClick
-            )
-            .padding(14.dp)
+            .clickable(onClick = onClick)
+            .padding(16.dp)
     ) {
 
         Row(
@@ -401,142 +515,118 @@ private fun DeviceCard(
 
             Box(
                 modifier = Modifier
-                    .size(42.dp)
-                    .clip(
-                        RoundedCornerShape(13.dp)
-                    )
-                    .background(
-                        iconColor.copy(alpha = 0.10f)
-                    ),
+                    .size(40.dp)
+                    .clip(RoundedCornerShape(13.dp))
+                    .background(ElyraTheme.colors.surfaceSecondary),
                 contentAlignment = Alignment.Center
             ) {
 
                 Icon(
                     imageVector = homeDeviceIcon(device.type),
                     contentDescription = null,
-                    modifier = Modifier.size(21.dp),
-                    tint = iconColor
+                    modifier = Modifier.size(19.dp),
+                    tint = if (isOn) {
+                        ElyraTheme.colors.textPrimary
+                    } else {
+                        ElyraTheme.colors.textTertiary
+                    }
                 )
             }
 
+            Spacer(modifier = Modifier.weight(1f))
 
-            Spacer(
-                modifier = Modifier.weight(1f)
-            )
-
-
-            Box(
-                modifier = Modifier
-                    .size(8.dp)
-                    .clip(CircleShape)
-                    .background(
-                        if (device.isOn) {
-                            activeColor
-                        } else {
-                            ElyraTheme.colors.textTertiary
-                        }
-                    )
+            Switch(
+                checked = isOn,
+                onCheckedChange = onToggle,
+                enabled = device.isControllable && isOnline,
+                colors = SwitchDefaults.colors(
+                    checkedThumbColor = ElyraTheme.colors.onPrimary,
+                    checkedTrackColor = ElyraTheme.colors.primary,
+                    uncheckedThumbColor = ElyraTheme.colors.textTertiary,
+                    uncheckedTrackColor = ElyraTheme.colors.surfaceInteractive
+                )
             )
         }
 
-        Spacer(
-            modifier = Modifier.height(13.dp)
-        )
+        Spacer(modifier = Modifier.height(14.dp))
 
         Text(
             text = device.name,
-            style = ElyraTheme.typography.titleSmall,
+            style = ElyraTheme.typography.bodyLarge,
             color = ElyraTheme.colors.textPrimary,
             maxLines = 1
         )
 
-        Spacer(
-            modifier = Modifier.height(4.dp)
-        )
+        Spacer(modifier = Modifier.height(2.dp))
 
         Text(
-            text = if (device.isOn) "On" else "Off",
+            text = device.status.homeLabel(),
             style = ElyraTheme.typography.bodySmall,
-            color =
-                if (device.isOn) {
-                    activeColor
-                } else {
-                    ElyraTheme.colors.textSecondary
-                }
+            color = ElyraTheme.colors.textSecondary,
+            maxLines = 1
         )
     }
 }
 
 
 // ============================================================================
-// FLOOR CARD
+// FLOOR ROW
 // ============================================================================
 
 @Composable
-private fun FloorCard(
-    floor: HomeFloor,
+private fun FloorRow(
+    name: String,
+    roomCount: Int,
+    deviceCount: Int,
     onClick: () -> Unit
 ) {
 
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(
-                RoundedCornerShape(20.dp)
+            .clip(RoundedCornerShape(18.dp))
+            .background(ElyraTheme.colors.surface)
+            .border(
+                width = 1.dp,
+                color = ElyraTheme.colors.borderSubtle,
+                shape = RoundedCornerShape(18.dp)
             )
-            .background(
-                ElyraTheme.colors.surface
-            )
-            .clickable(
-                onClick = onClick
-            )
-            .padding(
-                horizontal = 16.dp,
-                vertical = 15.dp
-            ),
+            .clickable(onClick = onClick)
+            .padding(horizontal = 16.dp, vertical = 16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
 
         Box(
             modifier = Modifier
-                .size(48.dp)
-                .clip(
-                    RoundedCornerShape(15.dp)
-                )
-                .background(
-                    ElyraTheme.colors.surfaceSecondary
-                ),
+                .size(44.dp)
+                .clip(RoundedCornerShape(14.dp))
+                .background(ElyraTheme.colors.surfaceSecondary),
             contentAlignment = Alignment.Center
         ) {
 
             Icon(
                 imageVector = Icons.Outlined.Apartment,
                 contentDescription = null,
-                modifier = Modifier.size(24.dp),
+                modifier = Modifier.size(21.dp),
                 tint = ElyraTheme.colors.textPrimary
             )
         }
 
-        Spacer(
-            modifier = Modifier.size(13.dp)
-        )
+        Spacer(modifier = Modifier.width(13.dp))
 
-        Column(
-            modifier = Modifier.weight(1f)
-        ) {
+        Column(modifier = Modifier.weight(1f)) {
 
             Text(
-                text = floor.name,
-                style = ElyraTheme.typography.titleSmall,
+                text = name,
+                style = ElyraTheme.typography.bodyLarge,
                 color = ElyraTheme.colors.textPrimary
             )
 
-            Spacer(
-                modifier = Modifier.height(4.dp)
-            )
+            Spacer(modifier = Modifier.height(2.dp))
 
             Text(
-                text = "${floor.roomCount} rooms · ${floor.deviceCount} devices",
+                text = "$roomCount room${if (roomCount == 1) "" else "s"} · " +
+                    "$deviceCount device${if (deviceCount == 1) "" else "s"}",
                 style = ElyraTheme.typography.bodySmall,
                 color = ElyraTheme.colors.textSecondary
             )
@@ -544,8 +634,8 @@ private fun FloorCard(
 
         Icon(
             imageVector = Icons.Outlined.ChevronRight,
-            contentDescription = "Open ${floor.name}",
-            modifier = Modifier.size(19.dp),
+            contentDescription = null,
+            modifier = Modifier.size(18.dp),
             tint = ElyraTheme.colors.textTertiary
         )
     }
@@ -553,31 +643,119 @@ private fun FloorCard(
 
 
 // ============================================================================
-// DEVICE ICON
+// EMPTY STATE
 // ============================================================================
 
-private fun homeDeviceIcon(
-    type: String
-): ImageVector {
+@Composable
+private fun EmptyState(
+    icon: ImageVector,
+    title: String,
+    message: String,
+    actionLabel: String,
+    onAction: () -> Unit
+) {
 
-    return when (type) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(20.dp))
+            .background(ElyraTheme.colors.surface)
+            .border(
+                width = 1.dp,
+                color = ElyraTheme.colors.borderSubtle,
+                shape = RoundedCornerShape(20.dp)
+            )
+            .padding(24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
 
-        "Light" ->
-            Icons.Outlined.Lightbulb
+        Box(
+            modifier = Modifier
+                .size(48.dp)
+                .clip(RoundedCornerShape(15.dp))
+                .background(ElyraTheme.colors.surfaceSecondary),
+            contentAlignment = Alignment.Center
+        ) {
 
-        "Outlet" ->
-            Icons.Outlined.Power
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                modifier = Modifier.size(22.dp),
+                tint = ElyraTheme.colors.textSecondary
+            )
+        }
 
-        "Switch" ->
-            Icons.Outlined.Devices
+        Spacer(modifier = Modifier.height(14.dp))
 
-        "AC" ->
-            Icons.Outlined.AcUnit
+        Text(
+            text = title,
+            style = ElyraTheme.typography.titleMedium,
+            color = ElyraTheme.colors.textPrimary
+        )
 
-        "Camera" ->
-            Icons.Outlined.CameraAlt
+        Spacer(modifier = Modifier.height(6.dp))
 
-        else ->
-            Icons.Outlined.Devices
+        Text(
+            text = message,
+            style = ElyraTheme.typography.bodySmall,
+            color = ElyraTheme.colors.textSecondary
+        )
+
+        Spacer(modifier = Modifier.height(18.dp))
+
+        Box(
+            modifier = Modifier
+                .clip(RoundedCornerShape(14.dp))
+                .background(ElyraTheme.colors.primary)
+                .clickable(onClick = onAction)
+                .padding(horizontal = 22.dp, vertical = 12.dp)
+        ) {
+
+            Text(
+                text = actionLabel,
+                style = ElyraTheme.typography.labelLarge,
+                color = ElyraTheme.colors.onPrimary
+            )
+        }
     }
 }
+
+
+// ============================================================================
+// HELPERS
+// ============================================================================
+
+private fun greeting(): String {
+
+    val hour =
+        java.util.Calendar.getInstance()
+            .get(java.util.Calendar.HOUR_OF_DAY)
+
+    return when (hour) {
+        in 5..11 -> "Good morning"
+        in 12..16 -> "Good afternoon"
+        in 17..21 -> "Good evening"
+        else -> "Good night"
+    }
+}
+
+
+private fun DeviceStatus.homeLabel(): String =
+    when (this) {
+        DeviceStatus.ON -> "On"
+        DeviceStatus.OFF -> "Off"
+        DeviceStatus.ERROR -> "Error reported"
+        DeviceStatus.DISCONNECTED -> "Disconnected"
+    }
+
+
+private fun homeDeviceIcon(
+    type: DeviceType
+): ImageVector =
+    when (type) {
+        DeviceType.LIGHT -> Icons.Outlined.Lightbulb
+        DeviceType.OUTLET -> Icons.Outlined.Power
+        DeviceType.MULTI_SWITCH -> Icons.Outlined.Tune
+        DeviceType.SAFETY_APPLIANCE -> Icons.Outlined.Security
+        DeviceType.SECURITY_CAMERA -> Icons.Outlined.CameraAlt
+    }

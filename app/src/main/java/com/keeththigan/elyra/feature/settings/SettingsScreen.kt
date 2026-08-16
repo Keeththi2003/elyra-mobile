@@ -17,19 +17,17 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ChevronRight
 import androidx.compose.material.icons.outlined.DarkMode
+import androidx.compose.material.icons.outlined.NotificationsActive
+import androidx.compose.material.icons.outlined.NotificationsNone
 import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material.icons.outlined.InsertChartOutlined
 import androidx.compose.material.icons.outlined.Logout
-import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material.icons.outlined.Person
-import androidx.compose.material.icons.outlined.Security
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -42,13 +40,14 @@ import com.keeththigan.elyra.feature.auth.AuthViewModel
 @Composable
 fun SettingsScreen(
     authViewModel: AuthViewModel,
+    notificationsEnabled: Boolean = true,
+    onNotificationsEnabledChange: (Boolean) -> Unit = {},
+    onAlertsClick: () -> Unit = {},
+    onReportsClick: () -> Unit = {},
+    onProfileClick: () -> Unit = {},
     onAppearanceClick: () -> Unit = {},
     onAboutClick: () -> Unit = {}
 ) {
-
-    var notificationsEnabled by remember {
-        mutableStateOf(true)
-    }
 
     Column(
         modifier = Modifier
@@ -109,16 +108,7 @@ fun SettingsScreen(
                 icon = Icons.Outlined.Person,
                 title = "Profile",
                 subtitle = "Manage your account",
-                onClick = {}
-            )
-
-            Divider()
-
-            SettingsItem(
-                icon = Icons.Outlined.Security,
-                title = "Security",
-                subtitle = "Password and account security",
-                onClick = {}
+                onClick = onProfileClick
             )
 
             Divider()
@@ -155,14 +145,30 @@ fun SettingsScreen(
 
         SettingsCard {
 
-            SettingsSwitchItem(
-                icon = Icons.Outlined.Notifications,
-                title = "Notifications",
-                subtitle = "Receive device alerts",
+            SettingsItem(
+                icon = Icons.Outlined.NotificationsNone,
+                title = "Alerts",
+                subtitle = "Safety cutoffs and device faults",
+                onClick = onAlertsClick
+            )
+
+            Divider()
+
+            SettingsToggleItem(
+                icon = Icons.Outlined.NotificationsActive,
+                title = "Push alerts",
+                subtitle = "Notify me when a safety cutoff fires",
                 checked = notificationsEnabled,
-                onCheckedChange = {
-                    notificationsEnabled = it
-                }
+                onCheckedChange = onNotificationsEnabledChange
+            )
+
+            Divider()
+
+            SettingsItem(
+                icon = Icons.Outlined.InsertChartOutlined,
+                title = "Usage reports",
+                subtitle = "Runtime across your devices",
+                onClick = onReportsClick
             )
 
             Divider()
@@ -329,64 +335,6 @@ private fun SettingsItem(
 }
 
 
-// ================================================================
-// SWITCH ITEM
-// ================================================================
-
-@Composable
-private fun SettingsSwitchItem(
-    icon: ImageVector,
-    title: String,
-    subtitle: String,
-    checked: Boolean,
-    onCheckedChange: (Boolean) -> Unit
-) {
-
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(
-                horizontal = 16.dp,
-                vertical = 14.dp
-            ),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-
-        SettingsIcon(
-            icon = icon
-        )
-
-        Spacer(
-            modifier = Modifier.size(14.dp)
-        )
-
-        Column(
-            modifier = Modifier.weight(1f)
-        ) {
-
-            Text(
-                text = title,
-                style = ElyraTheme.typography.bodyMedium,
-                color = ElyraTheme.colors.textPrimary
-            )
-
-            Spacer(
-                modifier = Modifier.height(2.dp)
-            )
-
-            Text(
-                text = subtitle,
-                style = ElyraTheme.typography.bodySmall,
-                color = ElyraTheme.colors.textSecondary
-            )
-        }
-
-        Switch(
-            checked = checked,
-            onCheckedChange = onCheckedChange
-        )
-    }
-}
 
 
 // ================================================================
@@ -439,4 +387,59 @@ private fun Divider() {
                 horizontal = 16.dp
             )
     )
+}
+
+
+// ================================================================
+// TOGGLE ITEM
+// ================================================================
+
+@Composable
+private fun SettingsToggleItem(
+    icon: ImageVector,
+    title: String,
+    subtitle: String,
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit
+) {
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 14.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+
+        SettingsIcon(icon = icon)
+
+        Spacer(modifier = Modifier.size(14.dp))
+
+        Column(modifier = Modifier.weight(1f)) {
+
+            Text(
+                text = title,
+                style = ElyraTheme.typography.bodyMedium,
+                color = ElyraTheme.colors.textPrimary
+            )
+
+            Spacer(modifier = Modifier.height(2.dp))
+
+            Text(
+                text = subtitle,
+                style = ElyraTheme.typography.bodySmall,
+                color = ElyraTheme.colors.textSecondary
+            )
+        }
+
+        Switch(
+            checked = checked,
+            onCheckedChange = onCheckedChange,
+            colors = SwitchDefaults.colors(
+                checkedThumbColor = ElyraTheme.colors.onPrimary,
+                checkedTrackColor = ElyraTheme.colors.primary,
+                uncheckedThumbColor = ElyraTheme.colors.textTertiary,
+                uncheckedTrackColor = ElyraTheme.colors.surfaceInteractive
+            )
+        )
+    }
 }

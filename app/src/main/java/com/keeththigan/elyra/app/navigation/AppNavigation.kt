@@ -35,13 +35,16 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.NavType
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.keeththigan.elyra.feature.devices.DeviceDetailScreen
 import com.keeththigan.elyra.feature.devices.DevicesScreen
 import com.keeththigan.elyra.feature.devices.AddDeviceScreen
@@ -49,6 +52,7 @@ import com.keeththigan.elyra.feature.home.presentation.HomeScreen
 import com.keeththigan.elyra.feature.settings.SettingsScreen
 import com.keeththigan.elyra.feature.settings.appearance.AppearanceScreen
 import com.keeththigan.elyra.feature.settings.about.AboutScreen
+import com.keeththigan.elyra.feature.settings.profile.ProfileScreen
 import com.keeththigan.elyra.feature.floors.FloorsScreen
 import com.keeththigan.elyra.feature.floors.FloorDetailScreen
 import com.keeththigan.elyra.feature.floors.EditFloorScreen
@@ -59,6 +63,13 @@ import com.keeththigan.elyra.feature.floors.AddRoomScreen
 import com.keeththigan.elyra.feature.floors.AddFloorScreen
 import com.keeththigan.elyra.core.designsystem.ElyraTheme
 import com.keeththigan.elyra.feature.auth.AuthViewModel
+import com.keeththigan.elyra.feature.devices.DeviceViewModel
+import com.keeththigan.elyra.feature.floors.FloorViewModel
+import com.keeththigan.elyra.feature.floors.RoomViewModel
+import com.keeththigan.elyra.feature.settings.appearance.ThemeViewModel
+import com.keeththigan.elyra.feature.notifications.NotificationViewModel
+import com.keeththigan.elyra.feature.notifications.NotificationsScreen
+import com.keeththigan.elyra.feature.reports.ReportsScreen
 
 
 private object AppRoutes {
@@ -71,15 +82,27 @@ private object AppRoutes {
 const val DEVICE_DETAIL = "device_detail/{deviceId}"
 const val FLOOR_DETAIL = "floor_detail/{floorId}"
 const val ADD_FLOOR = "add_floor"
-const val ADD_DEVICE = "add_device"
-const val ADD_ROOM = "add_room"
+const val ADD_DEVICE = "add_device?floorId={floorId}&roomId={roomId}"
+const val ADD_ROOM = "add_room/{floorId}"
 const val ROOM_DETAILS = "room_details/{roomId}"
 const val EDIT_FLOOR = "edit_floor/{floorId}"
 const val EDIT_ROOM = "edit_room/{roomId}"
 const val EDIT_DEVICE = "edit_device/{deviceId}"
     const val APPEARANCE = "appearance"
     const val ABOUT = "about"
+    const val PROFILE = "profile"
+    const val NOTIFICATIONS = "notifications"
+    const val REPORTS = "reports?deviceId={deviceId}"
 }
+
+/**
+ * Builds the "add device" route. Passing a floor/room attaches the new device
+ * to that room; omitting them creates it unassigned.
+ */
+private fun addDeviceRoute(
+    floorId: String = "",
+    roomId: String = ""
+): String = "add_device?floorId=$floorId&roomId=$roomId"
 
 private data class BottomNavItem(
     val route: String,
@@ -116,10 +139,26 @@ private val bottomNavItems = listOf(
 
 @Composable
 fun AppNavigation(
-    authViewModel: AuthViewModel 
+    authViewModel: AuthViewModel,
+    deviceViewModel: DeviceViewModel,
+    floorViewModel: FloorViewModel,
+    roomViewModel: RoomViewModel,
+    themeViewModel: ThemeViewModel,
+    notificationViewModel: NotificationViewModel
 ) {
 
     val navController = rememberNavController()
+
+    /*
+     * All forward navigation goes through this helper so repeated taps can
+     * never stack duplicate copies of the same destination on the back stack
+     * (which is what made "back" require several presses to leave a screen).
+     */
+    fun navigateTo(route: String) {
+        navController.navigate(route) {
+            launchSingleTop = true
+        }
+    }
 
     val navBackStackEntry by
         navController.currentBackStackEntryAsState()
@@ -131,17 +170,18 @@ fun AppNavigation(
         currentDestination?.route
 
     /*
-     * Bottom navigation is only visible
-     * on the three main application screens.
+     * Bottom navigation stays visible while browsing — the tabs, plus the
+     * detail screens you reach from them — so you can always jump sections.
      *
-     * Device Detail gets its own screen
-     * without the bottom navigation.
+     * It is hidden only on focused create/edit flows, where the task should
+     * be finished or cancelled rather than abandoned sideways.
      */
-    val showBottomBar =
-        currentRoute == AppRoutes.HOME ||
-        currentRoute == AppRoutes.DEVICES ||
-        currentRoute == AppRoutes.FLOORS ||
-        currentRoute == AppRoutes.SETTINGS
+    val isFocusedTask =
+        currentRoute?.let { route ->
+            route.startsWith("add_") || route.startsWith("edit_")
+        } ?: false
+
+    val showBottomBar = !isFocusedTask
 
     Scaffold(
 
@@ -210,41 +250,47 @@ fun AppNavigation(
 
             composable(AppRoutes.HOME) {
 
+    val authState by authViewModel.authState.collectAsStateWithLifecycle()
+
+    val notificationState by
+        notificationViewModel.state.collectAsStateWithLifecycle()
+
     HomeScreen(
+
+        deviceViewModel = deviceViewModel,
+        floorViewModel = floorViewModel,
+        roomViewModel = roomViewModel,
+        userName = authState.user?.name.orEmpty(),
+        unreadAlertCount = notificationState.unreadCount,
 
         onFloorClick = { floorId ->
 
-            navController.navigate(
+            navigateTo(
                 "floor_detail/$floorId"
             )
         },
 
         onDeviceClick = { deviceId ->
 
-            navController.navigate(
+            navigateTo(
                 "device_detail/$deviceId"
             )
         },
 
         onAddFloor = {
 
-            navController.navigate(
+            navigateTo(
                 AppRoutes.ADD_FLOOR
             )
         },
 
         onAddDevice = {
 
-            navController.navigate(
-                AppRoutes.ADD_DEVICE
-            )
+            navigateTo(addDeviceRoute())
         },
 
-        onProfileClick = {
-
-            navController.navigate(
-                AppRoutes.SETTINGS
-            )
+        onAlertsClick = {
+            navigateTo(AppRoutes.NOTIFICATIONS)
         }
     )
 }
@@ -256,18 +302,17 @@ fun AppNavigation(
             composable(AppRoutes.DEVICES) {
 
     DevicesScreen(
-       
+
+        deviceViewModel = deviceViewModel,
 
         onDeviceClick = { deviceId ->
 
-            navController.navigate(
+            navigateTo(
                 "device_detail/$deviceId"
             )
         },
         onAddDevice = {
-    navController.navigate(
-        AppRoutes.ADD_DEVICE
-    )
+    navigateTo(addDeviceRoute())
 },
         onSettingsClick = {}
     )
@@ -289,25 +334,51 @@ fun AppNavigation(
 
     DeviceDetailScreen(
         deviceId = deviceId,
+        deviceViewModel = deviceViewModel,
+        floorViewModel = floorViewModel,
+        roomViewModel = roomViewModel,
         onBack = {
             navController.popBackStack()
         },
         onEditDevice = {
-            navController.navigate(
+            navigateTo(
                 "edit_device/$deviceId"
             )
         },
          onRemoveDevice = {
-        // Later:
-        // delete device from repository/database
-        navController.popBackStack()
-    }
+        deviceViewModel.deleteDevice(deviceId)
+    },
+        onViewReport = {
+            navigateTo("reports?deviceId=$deviceId")
+        }
     )
 }
 
-composable(AppRoutes.ADD_DEVICE) {
+composable(
+    route = AppRoutes.ADD_DEVICE,
+    arguments = listOf(
+        navArgument("floorId") {
+            type = NavType.StringType
+            defaultValue = ""
+        },
+        navArgument("roomId") {
+            type = NavType.StringType
+            defaultValue = ""
+        }
+    )
+) { backStackEntry ->
 
     AddDeviceScreen(
+
+        deviceViewModel = deviceViewModel,
+
+        // When "Add device" is opened from inside a room, the new device is
+        // attached to that room instead of being created unassigned.
+        floorId = backStackEntry.arguments
+            ?.getString("floorId").orEmpty(),
+
+        roomId = backStackEntry.arguments
+            ?.getString("roomId").orEmpty(),
 
         onBack = {
             navController.popBackStack()
@@ -324,27 +395,27 @@ composable(AppRoutes.FLOORS) {
 
     FloorsScreen(
 
+        floorViewModel = floorViewModel,
+        roomViewModel = roomViewModel,
+        deviceViewModel = deviceViewModel,
+
         onFloorClick = { floorId ->
 
-            // We will create FloorDetailScreen next.
-            navController.navigate(
+            navigateTo(
                 "floor_detail/$floorId"
             )
         },
 
         onAddFloor = {
 
-            navController.navigate(
+            navigateTo(
         AppRoutes.ADD_FLOOR
     )
         },
 
-        
-
-       
         onDeleteFloor = { floorId ->
 
-            // Delete confirmation later.
+            floorViewModel.deleteFloor(floorId)
         }
     )
 }
@@ -360,18 +431,18 @@ composable(
 
     EditRoomScreen(
         roomId = roomId,
+        roomViewModel = roomViewModel,
+        deviceViewModel = deviceViewModel,
 
         onBack = {
             navController.popBackStack()
         },
 
         onSave = {
-            // Later save through ViewModel/Repository.
             navController.popBackStack()
         },
 
         onDelete = {
-            // Later delete through ViewModel/Repository.
             navController.popBackStack()
         }
     )
@@ -388,26 +459,35 @@ composable(
 
     EditDeviceScreen(
         deviceId = deviceId,
+        deviceViewModel = deviceViewModel,
 
         onBack = {
             navController.popBackStack()
         },
 
         onSave = {
-            // Later save through ViewModel/Repository.
             navController.popBackStack()
         },
 
         onDelete = {
-            // Later delete through ViewModel/Repository.
             navController.popBackStack()
         }
     )
 }
 
-composable(AppRoutes.ADD_ROOM) {
+composable(
+    route = AppRoutes.ADD_ROOM
+) { backStackEntry ->
+
+    val floorId =
+        backStackEntry.arguments
+            ?.getString("floorId")
+            ?: return@composable
 
     AddRoomScreen(
+        floorId = floorId,
+        roomViewModel = roomViewModel,
+
         onBack = {
             navController.popBackStack()
         },
@@ -429,6 +509,9 @@ composable(
 
     RoomDetailsScreen(
         roomId = roomId,
+        roomViewModel = roomViewModel,
+        floorViewModel = floorViewModel,
+        deviceViewModel = deviceViewModel,
 
         onBack = {
             navController.popBackStack()
@@ -436,20 +519,23 @@ composable(
 
         onDeviceClick = { deviceId ->
 
-            navController.navigate(
+            navigateTo(
                 "device_detail/$deviceId"
             )
         },
           onEditRoom = {
-            navController.navigate(
+            navigateTo(
                 "edit_room/$roomId"
             )
         },
 
-        onAddDevice = {
+        onAddDevice = { deviceFloorId, deviceRoomId ->
 
-            navController.navigate(
-                AppRoutes.ADD_DEVICE
+            navigateTo(
+                addDeviceRoute(
+                    floorId = deviceFloorId,
+                    roomId = deviceRoomId
+                )
             )
         }
     )
@@ -466,6 +552,9 @@ composable(
 
     FloorDetailScreen(
         floorId = floorId,
+        floorViewModel = floorViewModel,
+        roomViewModel = roomViewModel,
+        deviceViewModel = deviceViewModel,
 
         onBack = {
             navController.popBackStack()
@@ -473,18 +562,27 @@ composable(
 
       onRoomClick = { roomId ->
 
-    navController.navigate(
+    navigateTo(
         "room_details/$roomId"
     )
 },
 
+        onDeviceClick = { deviceId ->
+            navigateTo("device_detail/$deviceId")
+        },
+
+        onDeleteFloor = {
+            floorViewModel.deleteFloor(floorId)
+            navController.popBackStack()
+        },
+
         onAddRoom = {
-    navController.navigate(AppRoutes.ADD_ROOM)
+    navigateTo("add_room/$floorId")
 },
 
        onEditFloor = {
 
-    navController.navigate(
+    navigateTo(
         "edit_floor/$floorId"
     )
 }
@@ -502,20 +600,23 @@ composable(
 
     EditFloorScreen(
         floorId = floorId,
+        floorViewModel = floorViewModel,
+        roomViewModel = roomViewModel,
+        deviceViewModel = deviceViewModel,
 
         onBack = {
             navController.popBackStack()
         },
 
         onAddRoom = {
-            navController.navigate(
-                AppRoutes.ADD_ROOM
+            navigateTo(
+                "add_room/$floorId"
             )
         },
 
         onRoomClick = { roomId ->
 
-            navController.navigate(
+            navigateTo(
                 "room_details/$roomId"
             )
         },
@@ -530,20 +631,18 @@ composable(AppRoutes.ADD_FLOOR) {
 
     AddFloorScreen(
 
+        floorViewModel = floorViewModel,
+        deviceViewModel = deviceViewModel,
+
         onBack = {
             navController.popBackStack()
         },
 
         onAddDevice = {
-    navController.navigate(
-        AppRoutes.ADD_DEVICE
-    )
+    navigateTo(addDeviceRoute())
 },
 
-        onCreateFloor = { 
-            // Later:
-            // Save floor + rooms + devices to repository/database.
-
+        onCreateFloor = {
             navController.popBackStack()
         }
     )
@@ -554,12 +653,28 @@ composable(AppRoutes.ADD_FLOOR) {
 
             composable(AppRoutes.SETTINGS) {
 
+val notificationState by
+    notificationViewModel.state.collectAsStateWithLifecycle()
+
 SettingsScreen(
+    notificationsEnabled = notificationState.notificationsEnabled,
+    onNotificationsEnabledChange = {
+        notificationViewModel.setNotificationsEnabled(it)
+    },
+    onAlertsClick = {
+        navigateTo(AppRoutes.NOTIFICATIONS)
+    },
+    onReportsClick = {
+        navigateTo("reports?deviceId=")
+    },
+    onProfileClick = {
+        navigateTo(AppRoutes.PROFILE)
+    },
     onAppearanceClick = {
-        navController.navigate(AppRoutes.APPEARANCE)
+        navigateTo(AppRoutes.APPEARANCE)
     },
     onAboutClick = {
-        navController.navigate(AppRoutes.ABOUT)
+        navigateTo(AppRoutes.ABOUT)
     },
      authViewModel = authViewModel
 
@@ -568,9 +683,63 @@ SettingsScreen(
 }
 
 
+            composable(
+    route = AppRoutes.REPORTS,
+    arguments = listOf(
+        navArgument("deviceId") {
+            type = NavType.StringType
+            defaultValue = ""
+        }
+    )
+) { backStackEntry ->
+
+    ReportsScreen(
+        deviceId = backStackEntry.arguments
+            ?.getString("deviceId").orEmpty(),
+        deviceViewModel = deviceViewModel,
+        roomViewModel = roomViewModel,
+        onDeviceClick = { deviceId ->
+            navigateTo("device_detail/$deviceId")
+        },
+        onBack = {
+            navController.popBackStack()
+        }
+    )
+}
+
+            composable(AppRoutes.NOTIFICATIONS) {
+
+    NotificationsScreen(
+        notificationViewModel = notificationViewModel,
+        onBack = {
+            navController.popBackStack()
+        }
+    )
+}
+
+            composable(AppRoutes.PROFILE) {
+
+    ProfileScreen(
+        authViewModel = authViewModel,
+        deviceViewModel = deviceViewModel,
+        floorViewModel = floorViewModel,
+        roomViewModel = roomViewModel,
+        onBack = {
+            navController.popBackStack()
+        }
+    )
+}
+
             composable(AppRoutes.APPEARANCE) {
 
+    val appearance by
+        themeViewModel.appearance.collectAsStateWithLifecycle()
+
     AppearanceScreen(
+        selectedOption = appearance,
+        onOptionSelected = { option ->
+            themeViewModel.setAppearance(option)
+        },
         onBack = {
             navController.popBackStack()
         }

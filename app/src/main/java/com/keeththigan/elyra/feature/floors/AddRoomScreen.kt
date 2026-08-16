@@ -21,6 +21,7 @@ import androidx.compose.material.icons.outlined.Apartment
 import androidx.compose.material.icons.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.Check
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -36,23 +37,36 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import com.keeththigan.elyra.core.designsystem.ElyraTheme
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 @Composable
 fun AddRoomScreen(
+    floorId: String,
+    roomViewModel: RoomViewModel,
     onBack: () -> Unit,
     onRoomCreated: () -> Unit
 ) {
+
+    val state by roomViewModel.state.collectAsStateWithLifecycle()
+
+    LaunchedEffect(state.isSaved) {
+        if (state.isSaved) {
+            onRoomCreated()
+            roomViewModel.consumeSaved()
+        }
+    }
 
     var roomName by remember {
         mutableStateOf("")
     }
 
+    // Not persisted: the Room model has no description field.
     var roomDescription by remember {
         mutableStateOf("")
     }
 
     val canCreate =
-        roomName.trim().isNotEmpty()
+        roomName.trim().isNotEmpty() && !state.isLoading
 
     Column(
         modifier = Modifier
@@ -341,6 +355,20 @@ fun AddRoomScreen(
         }
 
         // ================================================================
+        // ERROR
+        // ================================================================
+
+        if (state.error != null) {
+
+            Text(
+                text = state.error ?: "",
+                modifier = Modifier.padding(horizontal = 20.dp),
+                style = ElyraTheme.typography.bodySmall,
+                color = ElyraTheme.colors.error
+            )
+        }
+
+        // ================================================================
         // CREATE BUTTON
         // ================================================================
 
@@ -366,7 +394,7 @@ fun AddRoomScreen(
                 .clickable(
                     enabled = canCreate
                 ) {
-                    onRoomCreated()
+                    roomViewModel.createRoom(roomName.trim(), floorId)
                 },
             contentAlignment = Alignment.Center
         ) {
@@ -391,7 +419,7 @@ fun AddRoomScreen(
                 }
 
                 Text(
-                    text = "Create Room",
+                    text = if (state.isLoading) "Creating…" else "Create Room",
                     style = ElyraTheme.typography.labelLarge,
                     color =
                         if (canCreate) {

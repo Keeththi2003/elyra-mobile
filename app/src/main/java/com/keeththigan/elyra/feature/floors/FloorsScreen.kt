@@ -28,6 +28,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -39,7 +40,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.keeththigan.elyra.core.designsystem.ElyraTheme
+import com.keeththigan.elyra.data.model.DeviceStatus
+import com.keeththigan.elyra.feature.devices.DeviceViewModel
 
 
 // ============================================================================
@@ -56,46 +60,59 @@ private data class ElyraFloor(
 
 
 // ============================================================================
-// SAMPLE DATA
-// ============================================================================
-
-private val sampleFloors = listOf(
-
-    ElyraFloor(
-        id = "ground",
-        name = "Ground Floor",
-        roomCount = 3,
-        deviceCount = 5,
-        activeDeviceCount = 3
-    ),
-
-    ElyraFloor(
-        id = "first",
-        name = "First Floor",
-        roomCount = 2,
-        deviceCount = 4,
-        activeDeviceCount = 1
-    )
-)
-
-
-// ============================================================================
 // FLOORS SCREEN
 // ============================================================================
 
 @Composable
 fun FloorsScreen(
+    floorViewModel: FloorViewModel,
+    roomViewModel: RoomViewModel,
+    deviceViewModel: DeviceViewModel,
     onFloorClick: (String) -> Unit,
     onAddFloor: () -> Unit,
     onDeleteFloor: (String) -> Unit = {}
 ) {
 
+    val floorState by floorViewModel.state.collectAsStateWithLifecycle()
+    val roomState by roomViewModel.state.collectAsStateWithLifecycle()
+    val deviceState by deviceViewModel.state.collectAsStateWithLifecycle()
+
+    LaunchedEffect(Unit) {
+        floorViewModel.loadFloors()
+        roomViewModel.loadRooms()
+        deviceViewModel.loadDevices()
+    }
+
+    LaunchedEffect(floorState.isDeleted) {
+        if (floorState.isDeleted) {
+            floorViewModel.consumeDeleted()
+        }
+    }
+
     var searchQuery by remember {
         mutableStateOf("")
     }
 
+    val floors =
+        floorState.floors.map { floor ->
+
+            ElyraFloor(
+                id = floor.id,
+                name = floor.name,
+                roomCount = roomState.rooms.count {
+                    it.floorId == floor.id
+                },
+                deviceCount = deviceState.devices.count {
+                    it.floorId == floor.id
+                },
+                activeDeviceCount = deviceState.devices.count {
+                    it.floorId == floor.id && it.status == DeviceStatus.ON
+                }
+            )
+        }
+
     val filteredFloors =
-        sampleFloors.filter { floor ->
+        floors.filter { floor ->
 
             searchQuery.isBlank() ||
                     floor.name.contains(
@@ -143,7 +160,7 @@ fun FloorsScreen(
                 )
 
                 Text(
-                    text = "${sampleFloors.size} floors · Manage your home",
+                    text = "${floors.size} floors · Manage your home",
                     style = ElyraTheme.typography.bodyMedium,
                     color = ElyraTheme.colors.textSecondary
                 )
@@ -216,6 +233,22 @@ fun FloorsScreen(
             modifier = Modifier.fillMaxSize(),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
+
+            if (floorState.error != null) {
+
+                item {
+
+                    Text(
+                        text = floorState.error ?: "",
+                        style = ElyraTheme.typography.bodyMedium,
+                        color = ElyraTheme.colors.error
+                    )
+
+                    Spacer(
+                        modifier = Modifier.height(12.dp)
+                    )
+                }
+            }
 
             items(
                 items = filteredFloors,

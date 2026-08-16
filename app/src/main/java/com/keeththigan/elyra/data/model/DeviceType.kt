@@ -4,7 +4,6 @@ enum class DeviceType {
     LIGHT,
     OUTLET,
     MULTI_SWITCH,
-    IRON,
-    CAMERA,
-    AC
+    SAFETY_APPLIANCE,
+    SECURITY_CAMERA
 }

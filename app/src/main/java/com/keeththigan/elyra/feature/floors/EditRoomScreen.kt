@@ -25,8 +25,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -35,20 +35,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.keeththigan.elyra.core.designsystem.ElyraTheme
-
-
-// ============================================================================
-// TEMPORARY DEVICE MODEL
-// Later this will come from the database using roomId
-// ============================================================================
-
-private data class RoomDevice(
-    val id: String,
-    val name: String,
-    val type: String,
-    val isOn: Boolean
-)
+import com.keeththigan.elyra.data.model.Device
+import com.keeththigan.elyra.data.model.DeviceStatus
+import com.keeththigan.elyra.data.model.DeviceType
+import com.keeththigan.elyra.feature.devices.DeviceViewModel
 
 
 // ============================================================================
@@ -58,51 +50,53 @@ private data class RoomDevice(
 @Composable
 fun EditRoomScreen(
     roomId: String,
+    roomViewModel: RoomViewModel,
+    deviceViewModel: DeviceViewModel,
     onBack: () -> Unit,
     onSave: () -> Unit,
     onDelete: () -> Unit
 ) {
 
-    // ------------------------------------------------------------
-    // Temporary room data
-    // Later:
-    // roomId -> ViewModel -> Repository -> Database
-    // ------------------------------------------------------------
+    val roomState by roomViewModel.state.collectAsStateWithLifecycle()
+    val deviceState by deviceViewModel.state.collectAsStateWithLifecycle()
+
+    LaunchedEffect(roomId) {
+        roomViewModel.loadRoom(roomId)
+        deviceViewModel.loadDevices()
+    }
 
     var roomName by remember {
-        mutableStateOf("Living Room")
+        mutableStateOf("")
+    }
+
+    LaunchedEffect(roomState.selectedRoom) {
+        roomState.selectedRoom?.let {
+            roomName = it.name
+        }
+    }
+
+    LaunchedEffect(roomState.isSaved) {
+        if (roomState.isSaved) {
+            onSave()
+            roomViewModel.consumeSaved()
+        }
+    }
+
+    LaunchedEffect(roomState.isDeleted) {
+        if (roomState.isDeleted) {
+            onDelete()
+            roomViewModel.consumeDeleted()
+        }
     }
 
     // ------------------------------------------------------------
     // Devices currently assigned to this room
     // ------------------------------------------------------------
 
-    val devices = remember {
-
-        mutableStateListOf(
-
-            RoomDevice(
-                id = "device_001",
-                name = "Living Room Light",
-                type = "Light",
-                isOn = true
-            ),
-
-            RoomDevice(
-                id = "device_002",
-                name = "Smart Outlet",
-                type = "Outlet",
-                isOn = false
-            ),
-
-            RoomDevice(
-                id = "device_003",
-                name = "Air Conditioner",
-                type = "AC",
-                isOn = false
-            )
-        )
-    }
+    val devices =
+        deviceState.devices.filter {
+            it.roomId == roomId
+        }
 
 
     Column(
@@ -306,7 +300,9 @@ fun EditRoomScreen(
                             RoomDeviceCard(
                                 device = device,
                                 onRemove = {
-                                    devices.remove(device)
+                                    deviceViewModel.updateDevice(
+                                        device.copy(roomId = "")
+                                    )
                                 }
                             )
                         }
@@ -325,9 +321,24 @@ fun EditRoomScreen(
                     modifier = Modifier.height(4.dp)
                 )
 
+                if (roomState.error != null) {
+
+                    Text(
+                        text = roomState.error ?: "",
+                        style = ElyraTheme.typography.bodySmall,
+                        color = ElyraTheme.colors.error
+                    )
+
+                    Spacer(
+                        modifier = Modifier.height(10.dp)
+                    )
+                }
+
                 SaveButton(
-                    enabled = roomName.isNotBlank(),
-                    onClick = onSave
+                    enabled = roomName.isNotBlank() && !roomState.isLoading,
+                    onClick = {
+                        roomViewModel.updateRoom(roomId, roomName.trim())
+                    }
                 )
             }
 
@@ -339,7 +350,9 @@ fun EditRoomScreen(
             item {
 
                 DeleteRoomButton(
-                    onClick = onDelete
+                    onClick = {
+                        roomViewModel.deleteRoom(roomId)
+                    }
                 )
 
                 Spacer(
@@ -439,9 +452,11 @@ private fun RoomNameField(
 
 @Composable
 private fun RoomDeviceCard(
-    device: RoomDevice,
+    device: Device,
     onRemove: () -> Unit
 ) {
+
+    val isOn = device.status == DeviceStatus.ON
 
     Row(
         modifier = Modifier
@@ -470,7 +485,7 @@ private fun RoomDeviceCard(
                     RoundedCornerShape(13.dp)
                 )
                 .background(
-                    if (device.isOn) {
+                    if (isOn) {
                         Color(0xFF22C55E).copy(alpha = 0.10f)
                     } else {
                         ElyraTheme.colors.surfaceSecondary
@@ -484,7 +499,7 @@ private fun RoomDeviceCard(
                 contentDescription = null,
                 modifier = Modifier.size(22.dp),
                 tint =
-                    if (device.isOn) {
+                    if (isOn) {
                         Color(0xFF22C55E)
                     } else {
                         ElyraTheme.colors.textSecondary
@@ -520,7 +535,7 @@ private fun RoomDeviceCard(
             ) {
 
                 Text(
-                    text = device.type,
+                    text = device.type.editRoomDisplayName(),
                     style = ElyraTheme.typography.bodySmall,
                     color = ElyraTheme.colors.textSecondary
                 )
@@ -536,7 +551,7 @@ private fun RoomDeviceCard(
                             androidx.compose.foundation.shape.CircleShape
                         )
                         .background(
-                            if (device.isOn) {
+                            if (isOn) {
                                 Color(0xFF22C55E)
                             } else {
                                 ElyraTheme.colors.textTertiary
@@ -550,14 +565,14 @@ private fun RoomDeviceCard(
 
                 Text(
                     text =
-                        if (device.isOn) {
+                        if (isOn) {
                             "On"
                         } else {
                             "Off"
                         },
                     style = ElyraTheme.typography.labelSmall,
                     color =
-                        if (device.isOn) {
+                        if (isOn) {
                             Color(0xFF22C55E)
                         } else {
                             ElyraTheme.colors.textSecondary
@@ -723,5 +738,31 @@ private fun DeleteRoomButton(
             style = ElyraTheme.typography.labelLarge,
             color = ElyraTheme.colors.error
         )
+    }
+}
+
+
+// ============================================================================
+// DISPLAY HELPERS
+// ============================================================================
+
+private fun DeviceType.editRoomDisplayName(): String {
+
+    return when (this) {
+
+        DeviceType.LIGHT ->
+            "Light"
+
+        DeviceType.OUTLET ->
+            "Outlet"
+
+        DeviceType.MULTI_SWITCH ->
+            "Multi Switch"
+
+        DeviceType.SAFETY_APPLIANCE ->
+            "Safety Appliance"
+
+        DeviceType.SECURITY_CAMERA ->
+            "Security Camera"
     }
 }

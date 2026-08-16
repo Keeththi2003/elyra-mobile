@@ -34,6 +34,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -45,9 +46,11 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.keeththigan.elyra.core.designsystem.ElyraTheme
-import com.keeththigan.elyra.feature.devices.Device
-import com.keeththigan.elyra.feature.devices.DeviceType
+import com.keeththigan.elyra.data.model.Device
+import com.keeththigan.elyra.data.model.DeviceType
+import com.keeththigan.elyra.feature.devices.DeviceViewModel
 
 // ============================================================================
 // TEMPORARY ROOM MODEL
@@ -65,10 +68,26 @@ private data class FloorRoom(
 
 @Composable
 fun AddFloorScreen(
+    floorViewModel: FloorViewModel,
+    deviceViewModel: DeviceViewModel,
     onBack: () -> Unit,
     onAddDevice: () -> Unit,
     onCreateFloor: () -> Unit
 ) {
+
+    val floorState by floorViewModel.state.collectAsStateWithLifecycle()
+    val deviceState by deviceViewModel.state.collectAsStateWithLifecycle()
+
+    LaunchedEffect(Unit) {
+        deviceViewModel.loadDevices()
+    }
+
+    LaunchedEffect(floorState.isSaved) {
+        if (floorState.isSaved) {
+            onCreateFloor()
+            floorViewModel.consumeSaved()
+        }
+    }
 
     var floorName by remember {
         mutableStateOf("")
@@ -82,51 +101,14 @@ fun AddFloorScreen(
         mutableStateListOf<FloorRoom>()
     }
 
-    /*
-     * Temporary device database.
-     *
-     * These represent devices that already exist in the DB.
-     *
-     * IMPORTANT:
-     * They are NOT automatically assigned to rooms.
-     */
-    val availableDevices = remember {
-
-        listOf(
-
-            Device(
-                id = "device_001",
-                name = "Living Room Light",
-                type = DeviceType.LIGHT,
-                status = com.keeththigan.elyra.feature.devices.DeviceStatus.ON
-            ),
-
-            Device(
-                id = "device_002",
-                name = "Bedroom Light",
-                type = DeviceType.LIGHT,
-                status = com.keeththigan.elyra.feature.devices.DeviceStatus.OFF
-            ),
-
-            Device(
-                id = "device_003",
-                name = "Kitchen Outlet",
-                type = DeviceType.OUTLET,
-                status = com.keeththigan.elyra.feature.devices.DeviceStatus.OFF
-            ),
-
-            Device(
-                id = "device_004",
-                name = "Bedroom Switch",
-                type = DeviceType.MULTI_SWITCH,
-                status = com.keeththigan.elyra.feature.devices.DeviceStatus.ON
-            )
-        )
-    }
+    // Devices that already exist but aren't assigned to a floor/room yet.
+    val availableDevices =
+        deviceState.devices.filter {
+            it.floorId.isBlank()
+        }
 
     val canCreate =
-        floorName.trim().isNotEmpty() &&
-                rooms.isNotEmpty()
+        floorName.trim().isNotEmpty()
 
     Column(
         modifier = Modifier
@@ -374,6 +356,19 @@ fun AddFloorScreen(
                 )
         ) {
 
+            if (floorState.error != null) {
+
+                Text(
+                    text = floorState.error ?: "",
+                    style = ElyraTheme.typography.bodySmall,
+                    color = ElyraTheme.colors.error
+                )
+
+                Spacer(
+                    modifier = Modifier.height(10.dp)
+                )
+            }
+
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -382,25 +377,34 @@ fun AddFloorScreen(
                         RoundedCornerShape(16.dp)
                     )
                     .background(
-                        if (canCreate) {
+                        if (canCreate && !floorState.isLoading) {
                             ElyraTheme.colors.primary
                         } else {
                             ElyraTheme.colors.surfaceInteractive
                         }
                     )
                     .clickable(
-                        enabled = canCreate
+                        enabled = canCreate && !floorState.isLoading
                     ) {
-                        onCreateFloor()
+                        floorViewModel.createFloorWithRooms(
+                            floorName = floorName.trim(),
+                            rooms = rooms.map { room ->
+                                room.name to room.devices.map { it.id }
+                            }
+                        )
                     },
                 contentAlignment = Alignment.Center
             ) {
 
                 Text(
-                    text = "Create Floor",
+                    text = if (floorState.isLoading) {
+                        "Creating floor…"
+                    } else {
+                        "Create Floor"
+                    },
                     style = ElyraTheme.typography.labelLarge,
                     color =
-                        if (canCreate) {
+                        if (canCreate && !floorState.isLoading) {
                             ElyraTheme.colors.onPrimary
                         } else {
                             ElyraTheme.colors.textDisabled
